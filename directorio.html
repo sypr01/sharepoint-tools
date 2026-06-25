@@ -1,0 +1,208 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Directorio de Proveedores - PLG</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; }
+
+    header {
+      background: #003366;
+      color: white;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    header h1 { font-size: 22px; font-weight: 600; }
+    header p { font-size: 13px; opacity: 0.8; }
+
+    .controles {
+      background: white;
+      padding: 16px 32px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .buscar {
+      flex: 1;
+      min-width: 220px;
+      padding: 9px 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .buscar:focus { outline: none; border-color: #003366; }
+
+    .filtros { display: flex; gap: 8px; flex-wrap: wrap; }
+    .filtro {
+      padding: 7px 14px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      background: white;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .filtro:hover { border-color: #003366; color: #003366; }
+    .filtro.activo { background: #003366; color: white; border-color: #003366; }
+
+    .contador {
+      font-size: 13px;
+      color: #666;
+      margin-left: auto;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      padding: 24px 32px;
+    }
+
+    .tarjeta {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      border-left: 4px solid #003366;
+      transition: box-shadow 0.2s;
+    }
+    .tarjeta:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+
+    .tarjeta-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .empresa { font-size: 15px; font-weight: 600; color: #003366; line-height: 1.3; }
+
+    .badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 12px;
+      white-space: nowrap;
+      margin-left: 8px;
+    }
+
+    .badge-NAVIERA        { background: #dbeafe; color: #1d4ed8; }
+    .badge-AEROLINEA      { background: #fce7f3; color: #9d174d; }
+    .badge-AGENCIA\ ADUANAL { background: #d1fae5; color: #065f46; }
+    .badge-CONSOLIDADOR   { background: #fef3c7; color: #92400e; }
+    .badge-PORTUARIA      { background: #ede9fe; color: #5b21b6; }
+    .badge-TRANSPORTE\ LOCAL { background: #ffedd5; color: #9a3412; }
+
+    .dato { font-size: 13px; color: #555; margin-bottom: 6px; display: flex; gap: 6px; align-items: flex-start; }
+    .dato svg { flex-shrink: 0; margin-top: 1px; }
+    .dato a { color: #003366; text-decoration: none; }
+    .dato a:hover { text-decoration: underline; }
+
+    .separador { border: none; border-top: 1px solid #f0f0f0; margin: 10px 0; }
+
+    .sin-resultados {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 60px;
+      color: #888;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Directorio de Proveedores</h1>
+    <p>PANAMERICAN LOGISTICS GROUP — Operaciones 2026 - Actualizado 25/06/2026 17:10</p>
+  </div>
+</header>
+
+<div class="controles">
+  <input class="buscar" type="text" placeholder="Buscar por empresa, contacto, correo..." oninput="filtrar()">
+  <div class="filtros">
+    <button class="filtro activo" data-tipo="" onclick="setFiltro(this)">Todos</button>
+    <button class="filtro" data-tipo="NAVIERA" onclick="setFiltro(this)">Naviera</button>
+    <button class="filtro" data-tipo="AEROLINEA" onclick="setFiltro(this)">Aerolínea</button>
+    <button class="filtro" data-tipo="AGENCIA ADUANAL" onclick="setFiltro(this)">Ag. Aduanal</button>
+    <button class="filtro" data-tipo="CONSOLIDADOR" onclick="setFiltro(this)">Consolidador</button>
+    <button class="filtro" data-tipo="PORTUARIA" onclick="setFiltro(this)">Portuaria</button>
+    <button class="filtro" data-tipo="TRANSPORTE LOCAL" onclick="setFiltro(this)">Transporte</button>
+  </div>
+  <span class="contador" id="contador"></span>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script>
+  let datos = [[{"empresa":"CMA CGM EL SALVADOR, S.A. DE C.V.","tipo":"NAVIERA","contacto":"ALONDRA MORA","telefono":"","correo":"slv.service@cma-cgm.com","cargo":"SERVICIO AL CLIENTE","direccion":"Calle el Mirador, Torre Quattro, Piso 7,  Local #3, World Trade Center, Colonia Escalon.","web":"https://www.cma-cgm.com/ebusiness/tracking"},{"empresa":"CMA CGM EL SALVADOR, S.A. DE C.V.","tipo":"NAVIERA","contacto":"GRETTEL VALERIO","telefono":"+506 4106-7586","correo":"slv.service@cma-cgm.com","cargo":"SERVICIO AL CLIENTE","direccion":"Calle el Mirador, Torre Quattro, Piso 7,  Local #3, World Trade Center, Colonia Escalon.","web":"https://www.cma-cgm.com/ebusiness/tracking"},{"empresa":"CMA CGM EL SALVADOR, S.A. DE C.V.","tipo":"NAVIERA","contacto":"ANA DIAZ","telefono":"+503 2254-8203  / +503 7286-1298","correo":"svr.adiaz@cma-cgm.com","cargo":"ASESOR COMERCIAL","direccion":"Calle el Mirador, Torre Quattro, Piso 7,  Local #3, World Trade Center, Colonia Escalon.","web":"https://www.cma-cgm.com/ebusiness/tracking"},{"empresa":"AMERIJET EL SALVADOR, S.A. DE C.V.","tipo":"AEROLINEA","contacto":"PAOLA MARTINEZ","telefono":"","correo":"pamartinez@amerijet.com","cargo":"SERVICIO AL CLIENTE","direccion":"77Av. Norte # 217, Col. Escalón, San Salvador, El Salvador","web":"https://amerijet.com/air-waybill-tracking/"},{"empresa":"SEALES, S.A. DE C.V.","tipo":"AGENCIA ADUANAL","contacto":"ROBERTO ALEGRIA","telefono":"+503 2261-3300","correo":"roberto@gvillatoro.com","cargo":"GERENTE COMERCIAL","direccion":"CALLE LOS CASTAÑOS Y AVENIDA LAS CAMELIAS N° 7,  COLONIA SAN FRANCISCO, SAN SALVADOR","web":"N/A"},{"empresa":"TRANSPOTES CAROLINA","tipo":"TRANSPORTE LOCAL","contacto":"ROSA EVELYN CRUZ DE PORTILLO","telefono":"+503 6177-6500","correo":"evelyncruz.transporte@gmail.com","cargo":"GERENTE GENERAL","direccion":"5 CALLE OTE POLIG. 1 PSJ. LAS FLORES, BO. CONCEPCION LOTIF. SAN BARTOLOME, # 9 SAN B PERULAPIA CUSCATLAN","web":"N/A"},{"empresa":"MSC EL SALVADOR, S.A. DE C.V.","tipo":"","contacto":"","telefono":"","correo":"","cargo":"","direccion":"","web":"https://www.msc.com/en/track-a-shipment"},{"empresa":"UNION PORTUARIA DEL PACIFICO (UPDP, S.E.M. DE C.V.)","tipo":"PORTUARIA","contacto":"","telefono":"+503 2405-3350","correo":"tarjas.contenedores@updp-sem.com","cargo":"ASISTENTES ADMINISTRATIVOS","direccion":"Zona Industrial, Edificio Administrativo Unión Portuaria del Pacífico Puerto de Acajutla, Sonsonate, El Salvador","web":"https://online.yilport.com/"},{"empresa":"AVIANCA","tipo":"AEROLINEA","contacto":"Kimberly Delgado","telefono":"+503 7658 6198","correo":"silvia.delgado@avianca.com","cargo":"SERVICIO AL CLIENTE","direccion":"","web":""},{"empresa":"AVIANCA","tipo":"AEROLINEA","contacto":"Sem Melendez","telefono":"+503 2366 7510","correo":"sem.melendez@avianca.com","cargo":"SERVICIO AL CLIENTE","direccion":"","web":""},{"empresa":"PIER 17","tipo":"CONSOLIDADOR","contacto":"Abigail Alfaro","telefono":"503 2525-0000 | Cel: +503 6987-8404","correo":"mport5@sv.pier17group.com","cargo":"Logistics Services Coordinator  i","direccion":"","web":""},{"empresa":"PIER 17","tipo":"CONSOLIDADOR","contacto":"MAYRA CABRERA","telefono":"Tel+503 2525-0018  Cel:+503 7748-2630","correo":"facturacion@sv.pier17group.com","cargo":"FACTURACION","direccion":"","web":""},{"empresa":"PIER 17","tipo":"CONSOLIDADOR","contacto":"Orlando Quintanilla","telefono":"Tel: +503 2525-0000 Cel: +503 7039-9682","correo":"import1@sv.pier17group.com","cargo":"Operations Coordinator","direccion":"","web":""},{"empresa":"PIER 17","tipo":"CONSOLIDADOR","contacto":"Yamileth Flores","telefono":"Tel. 2525-0020","correo":"recepcion@sv.pier|7group.com","cargo":"RECEPCION","direccion":"","web":""},{"empresa":"PIER 17","tipo":"CONSOLIDADOR","contacto":"Adela Ramirez","telefono":"Tel: +503 2525-0000  Cel: +503 7856-2107","correo":"import2@sv.pier17group.com","cargo":"Customer Service","direccion":"","web":""},{"empresa":"PCS CENTRAL AMERICA S.A DE C.V.","tipo":"CONSOLIDADOR","contacto":"Ana Arteaga","telefono":"Phone:        (+503) 2218-8511 / Mobile:        (+503) 7645-1873","correo":"efm@sv.pcscentralamerica.com","cargo":"Operaciones","direccion":"PCS Central America S.A. de C.V. Av. Las Magnolias, Edificio Insigne nivel 7 oficina No. 2. San Salvador, El Salvador.","web":""},{"empresa":"PCS CENTRAL AMERICA S.A DE C.V.","tipo":"CONSOLIDADOR","contacto":"Kelly Miranda","telefono":"Phone:        (+503) 2218 8500 / Mobile:        (+503) 7645-3554","correo":"efm@sv.pcscentralamerica.com","cargo":"Customer Service \u0026 Traffic","direccion":"PCS Central America S.A. de C.V. Av. Las Magnolias, Edificio Insigne nivel 7 oficina No. 2. San Salvador, El Salvador.","web":""},{"empresa":"PCS CENTRAL AMERICA S.A DE C.V.","tipo":"CONSOLIDADOR","contacto":"Daysi Durán","telefono":"Phone:        (+503) 2218-8513  / Mobile:        (+503) 7645-0674","correo":"wme@sv.pcscentralamerica.com","cargo":"Accounting Assistant","direccion":"PCS Central America S.A. de C.V. Av. Las Magnolias, Edificio Insigne nivel 7 oficina No. 2. San Salvador, El Salvador.","web":""},{"empresa":"Ecu Worldwide El Salvador.","tipo":"CONSOLIDADOR","contacto":"Nicole Hernández","telefono":"M:503 7039-4684 D:503 2556-1359 Ext. 6912","correo":"NicoleHernandez@ecuworldwide.com","cargo":"Operations Executive","direccion":"59 Ave Sur, Alam Roosevelt Edificio La Centro Americana 3107 6to nivel, N°602, San Salvador, El Salvador. Centro","web":""},{"empresa":"Ecu Worldwide El Salvador.","tipo":"CONSOLIDADOR","contacto":"Gabriela Lara","telefono":"M: +503 7748 4180 | D: +503 2556 1359 Ext. 6904","correo":"GabrielaLara@ecuworldwide.com","cargo":"Operations Manager","direccion":"59 Ave Sur, Alam Roosevelt Edificio La Centro Americana 3107 6to nivel, N°602, San Salvador, El Salvador. Centro","web":""},{"empresa":"CHARTER LINK LOGISTICS EL SALVADOR SA DE CV","tipo":"CONSOLIDADOR","contacto":"Veronica Zamora","telefono":"7632-3330","correo":"veronica.zamora@ctl-latam.com","cargo":"Operations Team Leader","direccion":"CALLE EL CARMEN Y 17 AV NORTE LOCAL 16 URB MIRAFLORES SANTA TECLA LI 1101","web":""},{"empresa":"CHARTER LINK LOGISTICS EL SALVADOR SA DE CV","tipo":"CONSOLIDADOR","contacto":"Abigail Ramirez","telefono":"","correo":"\u003ccomunicaciones@ctl-latam.com","cargo":"","direccion":"CALLE EL CARMEN Y 17 AV NORTE LOCAL 16 URB MIRAFLORES SANTA TECLA LI 1101","web":""},{"empresa":"CHARTER LINK LOGISTICS EL SALVADOR SA DE CV","tipo":"CONSOLIDADOR","contacto":"Ruth Delgado","telefono":"503 6062 9296","correo":"ruth.delgado@ctl-latam.com","cargo":"Administrative Assistant","direccion":"CALLE EL CARMEN Y 17 AV NORTE LOCAL 16 URB MIRAFLORES SANTA TECLA LI 1101","web":""}]];
+  let tipoActivo = '';
+  filtrar();
+
+  function setFiltro(btn) {
+    document.querySelectorAll('.filtro').forEach(b => b.classList.remove('activo'));
+    btn.classList.add('activo');
+    tipoActivo = btn.dataset.tipo;
+    filtrar();
+  }
+
+  function filtrar() {
+    const q = document.querySelector('.buscar').value.toLowerCase();
+    const resultado = datos.filter(p => {
+      const matchTipo = !tipoActivo || p.tipo === tipoActivo;
+      const matchQ = !q || [p.empresa, p.contacto, p.correo, p.cargo].some(v => v && v.toLowerCase().includes(q));
+      return matchTipo && matchQ;
+    });
+    renderizar(resultado);
+  }
+
+  function renderizar(lista) {
+    const grid = document.getElementById('grid');
+    document.getElementById('contador').textContent = `${lista.length} proveedor${lista.length !== 1 ? 'es' : ''}`;
+
+    if (!lista.length) {
+      grid.innerHTML = '<div class="sin-resultados">No se encontraron proveedores con ese criterio.</div>';
+      return;
+    }
+
+    grid.innerHTML = lista.map(p => `
+      <div class="tarjeta">
+        <div class="tarjeta-header">
+          <div class="empresa">${p.empresa || '—'}</div>
+          <span class="badge badge-${p.tipo}">${p.tipo || ''}</span>
+        </div>
+        <hr class="separador">
+        ${p.contacto ? `<div class="dato">
+          <svg width="14" height="14" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          ${p.contacto}${p.cargo ? ` · <em>${p.cargo}</em>` : ''}
+        </div>` : ''}
+        ${p.telefono ? `<div class="dato">
+          <svg width="14" height="14" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.8a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          ${p.telefono}
+        </div>` : ''}
+        ${p.correo ? `<div class="dato">
+          <svg width="14" height="14" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <a href="mailto:${p.correo}">${p.correo}</a>
+        </div>` : ''}
+        ${p.web ? `<div class="dato">
+          <svg width="14" height="14" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <a href="${p.web}" target="_blank">${p.web}</a>
+        </div>` : ''}
+      </div>
+    `).join('');
+  }
+</script>
+</body>
+</html>
+
