@@ -28,3 +28,7 @@ print(files)
 1. Haz fork del repositorio
 2. Crea una rama: `git checkout -b mi-mejora`
 3. Abre un Pull Request
+
+## Licencia
+
+MIT License — libre para usar, modificar y distribuir.
