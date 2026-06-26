@@ -588,7 +588,8 @@
         btn.textContent = 'Enviado ✓';
         cargarEvaluaciones(evEmpresaActual);
       } else {
-        throw new Error('Error ' + res.status);
+        const errData = await res.json().catch(() => ({}));
+        throw new Error('Error ' + res.status + ': ' + (errData.error?.message || errData.error || JSON.stringify(errData)));
       }
     } catch (e) {
       document.getElementById('ev-mensaje').innerHTML = `<div class="mensaje-err">Error al enviar: ${e.message}</div>`;
