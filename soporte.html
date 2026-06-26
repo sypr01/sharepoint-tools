@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soporte IT - PLG</title>
+  <style>
+    :root {
+      --plg-navy: #1B3A6B;
+      --plg-blue: #2F5AA8;
+      --plg-red:  #CC1F2A;
+      --plg-bg:   #F0F4F9;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--plg-bg); color: #333; min-height: 100vh; }
+
+    header {
+      background: linear-gradient(135deg, var(--plg-navy) 0%, var(--plg-blue) 100%);
+      color: white;
+      border-bottom: 4px solid var(--plg-red);
+    }
+    .header-inner {
+      display: flex; align-items: center; gap: 20px; padding: 14px 32px;
+    }
+    .header-logo-wrap {
+      background: white; border-radius: 8px; padding: 6px 12px;
+      display: flex; align-items: center; flex-shrink: 0;
+    }
+    .header-logo { height: 52px; width: auto; display: block; }
+    .header-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.25); }
+    header h1 { font-size: 20px; font-weight: 700; }
+    header p  { font-size: 12px; opacity: 0.7; margin-top: 3px; }
+
+    .page-wrap {
+      max-width: 680px; margin: 40px auto; padding: 0 16px;
+    }
+
+    .card {
+      background: white; border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(27,58,107,0.1);
+      overflow: hidden;
+    }
+    .card-header {
+      background: linear-gradient(135deg, var(--plg-navy), var(--plg-blue));
+      padding: 24px 28px; color: white;
+      border-bottom: 3px solid var(--plg-red);
+    }
+    .card-header h2 { font-size: 18px; font-weight: 700; margin: 0; }
+    .card-header p  { font-size: 13px; opacity: 0.75; margin-top: 5px; }
+    .card-body { padding: 28px; }
+
+    .campo { margin-bottom: 18px; }
+    .campo label {
+      display: block; font-size: 12px; font-weight: 700; color: #556;
+      text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px;
+    }
+    .campo input, .campo select, .campo textarea {
+      width: 100%; padding: 10px 13px; border: 1px solid #c5cedb;
+      border-radius: 7px; font-size: 14px; font-family: inherit;
+      color: #333; background: white; transition: border-color 0.2s;
+    }
+    .campo input:focus, .campo select:focus, .campo textarea:focus {
+      outline: none; border-color: var(--plg-blue);
+      box-shadow: 0 0 0 3px rgba(47,90,168,0.1);
+    }
+    .campo textarea { min-height: 100px; resize: vertical; }
+
+    .campos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
+
+    .btn-enviar {
+      width: 100%; padding: 13px; background: var(--plg-navy); color: white;
+      border: none; border-radius: 8px; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: background 0.2s; margin-top: 4px;
+    }
+    .btn-enviar:hover:not(:disabled) { background: var(--plg-blue); }
+    .btn-enviar:disabled { opacity: 0.6; cursor: default; }
+
+    .mensaje-ok {
+      background: #d1fae5; border: 1px solid #6ee7b7; color: #065f46;
+      padding: 14px 16px; border-radius: 8px; font-size: 14px;
+      margin-bottom: 16px; line-height: 1.5;
+    }
+    .mensaje-ok .ticket-num {
+      font-size: 20px; font-weight: 800; color: var(--plg-navy);
+      display: block; margin-top: 8px;
+    }
+    .mensaje-err {
+      background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b;
+      padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px;
+    }
+
+    .info-box {
+      background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px;
+      padding: 14px 16px; margin-bottom: 24px; font-size: 13px; color: #1e40af;
+      line-height: 1.5;
+    }
+    .info-box strong { display: block; margin-bottom: 4px; }
+
+    @media (max-width: 520px) {
+      .campos-grid { grid-template-columns: 1fr; }
+      .page-wrap { margin: 20px auto; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-logo-wrap">
+      <img src="log PLG.png" alt="PLG" class="header-logo">
+    </div>
+    <div class="header-divider"></div>
+    <div>
+      <h1>Soporte de TI</h1>
+      <p>PANAMERICAN LOGISTICS GROUP</p>
+    </div>
+  </div>
+</header>
+
+<div class="page-wrap">
+  <div class="card">
+    <div class="card-header">
+      <h2>Reportar un problema</h2>
+      <p>Completa el formulario y el equipo de TI atenderá tu solicitud lo antes posible.</p>
+    </div>
+    <div class="card-body">
+
+      <div class="info-box">
+        <strong>¿Necesitas ayuda urgente?</strong>
+        Comunícate directamente con soporte: <strong>soporte@plg.com.sv</strong>
+      </div>
+
+      <div id="mensaje"></div>
+
+      <div id="formulario">
+        <div class="campo">
+          <label>Título del problema *</label>
+          <input type="text" id="titulo" placeholder="Describe brevemente el problema">
+        </div>
+        <div class="campo">
+          <label>Descripción detallada *</label>
+          <textarea id="descripcion" placeholder="¿Qué ocurre? ¿Desde cuándo? ¿Qué intentaste hacer?"></textarea>
+        </div>
+        <div class="campos-grid">
+          <div class="campo">
+            <label>Categoría *</label>
+            <select id="categoria">
+              <option value="">— Seleccionar —</option>
+              <option value="Hardware">Hardware (PC, monitor, teclado...)</option>
+              <option value="Software">Software / Aplicaciones</option>
+              <option value="Red">Red / Conectividad / VPN</option>
+              <option value="Accesos">Accesos / Permisos / Cuentas</option>
+              <option value="Impresoras">Impresoras / Escáneres</option>
+              <option value="Correo">Correo / Microsoft 365</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label>Prioridad *</label>
+            <select id="prioridad">
+              <option value="Baja">Baja — No urgente</option>
+              <option value="Media" selected>Media — Normal</option>
+              <option value="Alta">Alta — Afecta mi trabajo</option>
+              <option value="Urgente">Urgente — Sistema caído</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label>Tu nombre *</label>
+            <input type="text" id="solicitante" placeholder="Nombre completo">
+          </div>
+          <div class="campo">
+            <label>Tu correo *</label>
+            <input type="email" id="email" placeholder="correo@plg.com.sv">
+          </div>
+          <div class="campo">
+            <label>Extensión / Teléfono</label>
+            <input type="text" id="extension" placeholder="Ej: Ext. 205">
+          </div>
+          <div class="campo">
+            <label>Departamento</label>
+            <input type="text" id="departamento" placeholder="Ej: Operaciones">
+          </div>
+        </div>
+
+        <button class="btn-enviar" id="btn-enviar" onclick="enviarTicket()">Enviar solicitud</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  async function enviarTicket() {
+    const titulo      = document.getElementById('titulo').value.trim();
+    const descripcion = document.getElementById('descripcion').value.trim();
+    const categoria   = document.getElementById('categoria').value;
+    const solicitante = document.getElementById('solicitante').value.trim();
+    const email       = document.getElementById('email').value.trim();
+
+    if (!titulo || !descripcion || !categoria || !solicitante || !email) {
+      mostrarMensaje('err', 'Completa todos los campos obligatorios marcados con *');
+      return;
+    }
+
+    const btn = document.getElementById('btn-enviar');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+
+    const payload = {
+      titulo, descripcion, categoria,
+      prioridad:    document.getElementById('prioridad').value,
+      solicitante, email,
+      extension:    document.getElementById('extension').value.trim(),
+      departamento: document.getElementById('departamento').value.trim()
+    };
+
+    try {
+      const res = await fetch('/api/tickets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Error ' + res.status);
+      const ticket = await res.json();
+
+      document.getElementById('formulario').style.display = 'none';
+      mostrarMensaje('ok',
+        '¡Tu solicitud fue enviada correctamente! El equipo de TI la atenderá pronto.' +
+        '<span class="ticket-num">Número de ticket: ' + ticket.id + '</span>' +
+        'Recibirás una confirmación en <strong>' + email + '</strong>.'
+      );
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = 'Enviar solicitud';
+      mostrarMensaje('err', 'No se pudo enviar el ticket. Intenta de nuevo o contacta a soporte@plg.com.sv');
+    }
+  }
+
+  function mostrarMensaje(tipo, html) {
+    const el = document.getElementById('mensaje');
+    el.innerHTML = '<div class="mensaje-' + (tipo === 'ok' ? 'ok' : 'err') + '">' + html + '</div>';
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+</script>
+
+</body>
+</html>

@@ -11,6 +11,10 @@
     {
       "route": "/tickets",
       "rewrite": "/tickets.html"
+    },
+    {
+      "route": "/soporte",
+      "rewrite": "/soporte.html"
     }
   ],
   "navigationFallback": {
