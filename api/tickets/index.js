@@ -78,8 +78,8 @@ module.exports = async function (context, req) {
 
       const ticket = entityToTicket(entity);
 
-      // Enviar correos en paralelo (si falla el correo, el ticket igual se guarda)
-      Promise.all([
+      // Enviar correos en paralelo esperando resultado
+      await Promise.all([
         notificarNuevoTicket(ticket).catch(e => context.log("Error correo IT:", e.message)),
         confirmarAlSolicitante(ticket).catch(e => context.log("Error correo solicitante:", e.message))
       ]);
