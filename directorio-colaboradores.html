@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Directorio de Colaboradores - PLG</title>
+  <style>
+    :root {
+      --plg-navy:  #1B3A6B;
+      --plg-blue:  #2F5AA8;
+      --plg-light: #5C83C1;
+      --plg-red:   #CC1F2A;
+      --plg-bg:    #F0F4F9;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--plg-bg); color: #333; }
+
+    header {
+      background: linear-gradient(135deg, var(--plg-navy) 0%, var(--plg-blue) 100%);
+      color: white;
+      border-bottom: 4px solid var(--plg-red);
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 14px 32px;
+    }
+    .header-logo-wrap {
+      background: white;
+      border-radius: 8px;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header-logo { height: 52px; width: auto; display: block; }
+    .header-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.25); }
+    header h1 { font-size: 20px; font-weight: 700; }
+    header p  { font-size: 12px; opacity: 0.7; margin-top: 3px; }
+
+    .controles {
+      background: white;
+      padding: 14px 32px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      border-bottom: 1px solid #dde3ed;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(27,58,107,0.08);
+    }
+    .buscar {
+      flex: 1;
+      min-width: 220px;
+      padding: 9px 14px;
+      border: 1px solid #c5cedb;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .buscar:focus { outline: none; border-color: var(--plg-blue); box-shadow: 0 0 0 3px rgba(47,90,168,0.1); }
+
+    .filtros { display: flex; gap: 8px; flex-wrap: wrap; }
+    .filtro {
+      padding: 6px 14px;
+      border: 1px solid #c5cedb;
+      border-radius: 20px;
+      background: white;
+      cursor: pointer;
+      font-size: 13px;
+      color: #555;
+      transition: all 0.2s;
+    }
+    .filtro:hover { border-color: var(--plg-blue); color: var(--plg-blue); }
+    .filtro.activo { background: var(--plg-navy); color: white; border-color: var(--plg-navy); }
+
+    .select-depto {
+      padding: 7px 12px;
+      border: 1px solid #c5cedb;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #555;
+      background: white;
+      cursor: pointer;
+    }
+    .select-depto:focus { outline: none; border-color: var(--plg-blue); }
+
+    .contador { font-size: 13px; color: #778; margin-left: auto; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      padding: 24px 32px;
+    }
+
+    .tarjeta {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(27,58,107,0.07);
+      border-top: 4px solid var(--plg-navy);
+      transition: box-shadow 0.2s, border-color 0.2s;
+      text-align: center;
+    }
+    .tarjeta:hover { box-shadow: 0 6px 20px rgba(27,58,107,0.13); border-top-color: var(--plg-red); }
+
+    .avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 700;
+      color: white;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .nombre { font-size: 15px; font-weight: 700; color: var(--plg-navy); margin-bottom: 4px; }
+    .cargo  { font-size: 12px; color: #666; margin-bottom: 10px; }
+
+    .badge-depto {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 12px;
+      background: #e4ecf7;
+      color: var(--plg-navy);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: .3px;
+    }
+
+    .dato {
+      font-size: 12px;
+      color: #555;
+      margin-bottom: 5px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      justify-content: center;
+      text-align: left;
+    }
+    .dato a { color: var(--plg-blue); text-decoration: none; }
+    .dato a:hover { text-decoration: underline; }
+
+    .badge-oficina {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: #f0f4f9;
+      color: #667;
+      margin-top: 8px;
+      border: 1px solid #dde3ed;
+    }
+
+    .sin-resultados {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 60px;
+      color: #888;
+      font-size: 15px;
+    }
+    .cargando {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 60px;
+      color: #888;
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 4px solid #dde3ed;
+      border-top-color: var(--plg-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-logo-wrap">
+      <img src="log PLG.png" alt="PLG" class="header-logo">
+    </div>
+    <div class="header-divider"></div>
+    <div style="flex:1;">
+      <h1>Directorio de Colaboradores</h1>
+      <p>PANAMERICAN LOGISTICS GROUP</p>
+    </div>
+  </div>
+</header>
+
+<div class="controles">
+  <input class="buscar" type="text" placeholder="Buscar por nombre, cargo, correo..." oninput="filtrar()">
+  <div class="filtros" id="filtros-oficina">
+    <button class="filtro activo" data-val="" onclick="setFiltroOficina(this)">Todas las divisiones</button>
+  </div>
+  <select class="select-depto" id="select-depto" onchange="filtrar()">
+    <option value="">Todos los departamentos</option>
+  </select>
+  <span class="contador" id="contador"></span>
+</div>
+
+<div class="grid" id="grid">
+  <div class="cargando">
+    <div class="spinner"></div>
+    <p>Cargando colaboradores...</p>
+  </div>
+</div>
+
+<script>
+  let colaboradores = [];
+  let filtroOficina = '';
+
+  const colores = ['#1B3A6B','#2F5AA8','#CC1F2A','#065f46','#92400e','#5b21b6','#9d174d','#9a3412'];
+  function colorAvatar(nombre) {
+    var sum = 0;
+    for (var i = 0; i < nombre.length; i++) sum += nombre.charCodeAt(i);
+    return colores[sum % colores.length];
+  }
+  function iniciales(nombre) {
+    return nombre.split(' ').filter(Boolean).slice(0,2).map(function(p){ return p[0]; }).join('').toUpperCase();
+  }
+
+  async function cargarColaboradores() {
+    try {
+      const res = await fetch('/api/colaboradores');
+      if (!res.ok) throw new Error('Error ' + res.status);
+      colaboradores = await res.json();
+      construirFiltros();
+      filtrar();
+    } catch (e) {
+      document.getElementById('grid').innerHTML =
+        '<div class="sin-resultados">Error al cargar colaboradores: ' + e.message + '</div>';
+    }
+  }
+
+  function construirFiltros() {
+    const oficinas = [...new Set(colaboradores.map(c => c.oficina).filter(Boolean))].sort();
+    const deptos   = [...new Set(colaboradores.map(c => c.departamento).filter(Boolean))].sort();
+
+    const filtrosDiv = document.getElementById('filtros-oficina');
+    oficinas.forEach(function(o) {
+      var btn = document.createElement('button');
+      btn.className = 'filtro';
+      btn.dataset.val = o;
+      btn.textContent = o.replace('PLG ', '').replace('DIVISION ', 'Div. ');
+      btn.onclick = function() { setFiltroOficina(this); };
+      filtrosDiv.appendChild(btn);
+    });
+
+    const sel = document.getElementById('select-depto');
+    deptos.forEach(function(d) {
+      var opt = document.createElement('option');
+      opt.value = d;
+      opt.textContent = d.replace('DEPARTAMENTO DE ', '');
+      sel.appendChild(opt);
+    });
+  }
+
+  function setFiltroOficina(btn) {
+    document.querySelectorAll('#filtros-oficina .filtro').forEach(b => b.classList.remove('activo'));
+    btn.classList.add('activo');
+    filtroOficina = btn.dataset.val;
+    filtrar();
+  }
+
+  function filtrar() {
+    const q     = document.querySelector('.buscar').value.toLowerCase();
+    const depto = document.getElementById('select-depto').value;
+
+    const resultado = colaboradores.filter(function(c) {
+      const matchOficina = !filtroOficina || c.oficina === filtroOficina;
+      const matchDepto   = !depto || c.departamento === depto;
+      const matchQ       = !q || [c.nombre, c.cargo, c.correo, c.departamento].some(
+        function(v) { return v && v.toLowerCase().includes(q); }
+      );
+      return matchOficina && matchDepto && matchQ;
+    });
+
+    renderizar(resultado);
+  }
+
+  function renderizar(lista) {
+    const grid = document.getElementById('grid');
+    document.getElementById('contador').textContent =
+      lista.length + ' colaborador' + (lista.length !== 1 ? 'es' : '');
+
+    if (!lista.length) {
+      grid.innerHTML = '<div class="sin-resultados">No se encontraron colaboradores.</div>';
+      return;
+    }
+
+    grid.innerHTML = lista.map(function(c) {
+      var avatarHtml = c.foto
+        ? '<img src="' + c.foto + '" alt="' + c.nombre + '">'
+        : iniciales(c.nombre || '?');
+      var color = colorAvatar(c.nombre || '');
+      return '<div class="tarjeta">'
+        + '<div class="avatar" style="background:' + color + ';">' + avatarHtml + '</div>'
+        + '<div class="nombre">' + (c.nombre || '—') + '</div>'
+        + '<div class="cargo">' + (c.cargo || '') + '</div>'
+        + (c.departamento ? '<div class="badge-depto">' + c.departamento.replace('DEPARTAMENTO DE ', '') + '</div>' : '')
+        + '<div style="margin-top:4px;">'
+        + (c.correo ? '<div class="dato"><svg width="13" height="13" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><a href="mailto:' + c.correo + '">' + c.correo + '</a></div>' : '')
+        + (c.telefono ? '<div class="dato"><svg width="13" height="13" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.8a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>' + c.telefono + '</div>' : '')
+        + '</div>'
+        + (c.oficina ? '<div class="badge-oficina">📍 ' + c.oficina + '</div>' : '')
+        + '</div>';
+    }).join('');
+  }
+
+  cargarColaboradores();
+</script>
+</body>
+</html>
