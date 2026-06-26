@@ -378,18 +378,23 @@
       if (!res.ok) return;
       const items = await res.json();
       if (!Array.isArray(items) || items.length === 0) return;
-      const mapaTemp = {};
+      // Construir mapa desde SharePoint
+      const mapaAPI = {};
       items.forEach(p => {
         const key = p.empresa || '—';
-        if (!mapaTemp[key]) {
-          mapaTemp[key] = { empresa: p.empresa, tipo: p.tipo, direccion: p.direccion, web: p.web, contactos: [] };
+        if (!mapaAPI[key]) {
+          mapaAPI[key] = { empresa: p.empresa, tipo: p.tipo, direccion: p.direccion, web: p.web, contactos: [] };
         }
         if (p.contacto || p.telefono || p.correo) {
-          mapaTemp[key].contactos.push({ contacto: p.contacto, cargo: p.cargo, telefono: p.telefono, correo: p.correo });
+          mapaAPI[key].contactos.push({ contacto: p.contacto, cargo: p.cargo, telefono: p.telefono, correo: p.correo });
         }
       });
+      // Merge: datos embebidos como base, SharePoint sobreescribe los que ya existen allí
+      const mapaFinal = {};
+      empresas.forEach(e => { mapaFinal[e.empresa] = e; });
+      Object.values(mapaAPI).forEach(e => { mapaFinal[e.empresa] = e; });
       empresas.length = 0;
-      Object.values(mapaTemp).forEach(e => empresas.push(e));
+      Object.values(mapaFinal).forEach(e => empresas.push(e));
       filtrar();
     } catch (e) { /* usar datos embebidos */ }
   }
@@ -555,6 +560,8 @@
         const accion = modoEdicion ? 'actualizado' : 'registrado';
         document.getElementById('r-mensaje').innerHTML = `<div class="mensaje-ok">Proveedor ${accion} correctamente. Actualizando directorio...</div>`;
         btn.textContent = 'Guardado ✓';
+        const cancelBtn = document.querySelector('#modalRegistro .btn-cancelar');
+        if (cancelBtn) { cancelBtn.textContent = 'Cerrar'; cancelBtn.style.background = '#003366'; cancelBtn.style.color = 'white'; cancelBtn.style.borderColor = '#003366'; }
         await cargarDesdeAPI();
       } else {
         throw new Error('Error ' + res.status);
