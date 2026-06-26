@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "engines": { "node": "~18" },
   "dependencies": {
-    "@azure/data-tables": "^13.2.2"
+    "@azure/data-tables": "^13.2.2",
+    "nodemailer": "^6.9.14"
   }
 }
