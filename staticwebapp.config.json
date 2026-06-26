@@ -7,6 +7,10 @@
     {
       "route": "/directorio",
       "rewrite": "/directorio.html"
+    },
+    {
+      "route": "/tickets",
+      "rewrite": "/tickets.html"
     }
   ],
   "navigationFallback": {

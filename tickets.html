@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soporte IT - PLG</title>
+  <style>
+    :root {
+      --plg-navy:  #1B3A6B;
+      --plg-blue:  #2F5AA8;
+      --plg-light: #5C83C1;
+      --plg-red:   #CC1F2A;
+      --plg-bg:    #F0F4F9;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--plg-bg); color: #333; }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, var(--plg-navy) 0%, var(--plg-blue) 100%);
+      color: white;
+      border-bottom: 4px solid var(--plg-red);
+    }
+    .header-inner {
+      display: flex; align-items: center; gap: 20px; padding: 14px 32px;
+    }
+    .header-logo-wrap {
+      background: white; border-radius: 8px; padding: 6px 12px;
+      display: flex; align-items: center; flex-shrink: 0;
+    }
+    .header-logo { height: 52px; width: auto; display: block; }
+    .header-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.25); }
+    header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.2px; }
+    header p  { font-size: 12px; opacity: 0.7; margin-top: 3px; }
+    .nav-tabs { background: var(--plg-navy); display: flex; padding: 0 32px; }
+    .nav-tab {
+      padding: 10px 22px; color: rgba(255,255,255,0.65); font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none; background: none;
+      border-bottom: 3px solid transparent; transition: all 0.2s; letter-spacing: .2px;
+      text-decoration: none; display: inline-flex; align-items: center;
+    }
+    .nav-tab:hover { color: white; }
+    .nav-tab.activo { color: white; border-bottom-color: var(--plg-red); }
+
+    /* ── Stats ── */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 16px; padding: 24px 32px 8px;
+    }
+    .stat-card {
+      background: white; border-radius: 10px; padding: 18px 20px;
+      box-shadow: 0 1px 4px rgba(27,58,107,0.07);
+      border-left: 4px solid transparent; cursor: pointer; transition: box-shadow 0.2s;
+    }
+    .stat-card:hover { box-shadow: 0 4px 16px rgba(27,58,107,0.12); }
+    .stat-card.abierto  { border-left-color: #2F5AA8; }
+    .stat-card.proceso  { border-left-color: #f59e0b; }
+    .stat-card.resuelto { border-left-color: #10b981; }
+    .stat-card.urgente  { border-left-color: #CC1F2A; }
+    .stat-num { font-size: 32px; font-weight: 800; color: var(--plg-navy); line-height: 1; }
+    .stat-label { font-size: 12px; color: #778; margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+
+    /* ── Controles ── */
+    .controles {
+      background: white; padding: 14px 32px;
+      display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+      border-bottom: 1px solid #dde3ed; position: sticky; top: 0; z-index: 10;
+      box-shadow: 0 2px 8px rgba(27,58,107,0.08);
+    }
+    .buscar {
+      flex: 1; min-width: 200px; padding: 9px 14px;
+      border: 1px solid #c5cedb; border-radius: 6px; font-size: 14px; transition: border-color 0.2s;
+    }
+    .buscar:focus { outline: none; border-color: var(--plg-blue); box-shadow: 0 0 0 3px rgba(47,90,168,0.1); }
+    .select-filtro {
+      padding: 8px 12px; border: 1px solid #c5cedb; border-radius: 6px;
+      font-size: 13px; color: #555; background: white; cursor: pointer;
+    }
+    .select-filtro:focus { outline: none; border-color: var(--plg-blue); }
+    .btn-nuevo {
+      padding: 9px 18px; background: var(--plg-navy); color: white;
+      border: none; border-radius: 6px; font-size: 13px; font-weight: 600;
+      cursor: pointer; white-space: nowrap; transition: background 0.2s;
+    }
+    .btn-nuevo:hover { background: var(--plg-blue); }
+    .contador { font-size: 13px; color: #778; white-space: nowrap; }
+
+    /* ── Tabla ── */
+    .tabla-wrap { padding: 20px 32px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(27,58,107,0.07); }
+    thead tr { background: var(--plg-navy); }
+    th { padding: 12px 14px; text-align: left; font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.85); text-transform: uppercase; letter-spacing: .5px; white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid #f0f4f9; transition: background 0.15s; cursor: pointer; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f5f8fd; }
+    td { padding: 12px 14px; font-size: 13px; color: #444; vertical-align: middle; }
+    .ticket-id { font-weight: 700; color: var(--plg-navy); font-size: 12px; white-space: nowrap; }
+    .ticket-titulo { font-weight: 600; color: #333; max-width: 280px; }
+    .ticket-titulo small { display: block; font-weight: 400; color: #888; font-size: 11px; margin-top: 2px; }
+
+    /* ── Badges ── */
+    .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; white-space: nowrap; }
+    .prioridad-Baja    { background: #d1fae5; color: #065f46; }
+    .prioridad-Media   { background: #dbeafe; color: #1d4ed8; }
+    .prioridad-Alta    { background: #fef3c7; color: #92400e; }
+    .prioridad-Urgente { background: #fee2e2; color: #991b1b; }
+    .estado-Abierto    { background: #dbeafe; color: #1d4ed8; }
+    .estado-En\ Proceso { background: #fef3c7; color: #92400e; }
+    .estado-Resuelto   { background: #d1fae5; color: #065f46; }
+    .estado-Cerrado    { background: #f0f0f0; color: #666; }
+
+    .sin-tickets { text-align: center; padding: 60px; color: #888; font-size: 15px; }
+    .cargando { text-align: center; padding: 60px; color: #888; }
+    .spinner { width: 36px; height: 36px; border: 4px solid #dde3ed; border-top-color: var(--plg-blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(10,20,50,0.55);
+      z-index: 100; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.activo { display: flex; }
+    .modal {
+      background: white; border-radius: 12px; width: 100%; max-width: 580px;
+      max-height: 92vh; overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(10,20,50,0.3);
+    }
+    .modal.wide { max-width: 720px; }
+    .modal-header {
+      background: linear-gradient(135deg, var(--plg-navy) 0%, var(--plg-blue) 100%);
+      border-radius: 12px 12px 0 0; padding: 18px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-header-left { display: flex; align-items: center; gap: 12px; }
+    .modal-header img { height: 36px; background: white; border-radius: 5px; padding: 3px 6px; }
+    .modal h2 { font-size: 17px; color: white; font-weight: 700; margin: 0; }
+    .modal-body { padding: 24px; }
+    .btn-cerrar-x { background: rgba(255,255,255,0.2); border: none; color: white; font-size: 20px; cursor: pointer; border-radius: 4px; padding: 2px 8px; line-height: 1; }
+    .btn-cerrar-x:hover { background: rgba(255,255,255,0.3); }
+
+    .campo { margin-bottom: 14px; }
+    .campo label { display: block; font-size: 13px; font-weight: 600; color: #444; margin-bottom: 5px; }
+    .campo input, .campo select, .campo textarea {
+      width: 100%; padding: 9px 12px; border: 1px solid #c5cedb; border-radius: 6px;
+      font-size: 14px; font-family: inherit; transition: border-color 0.2s;
+    }
+    .campo input:focus, .campo select:focus, .campo textarea:focus {
+      outline: none; border-color: var(--plg-blue); box-shadow: 0 0 0 3px rgba(47,90,168,0.1);
+    }
+    .campo textarea { resize: vertical; min-height: 80px; }
+    .campos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .btn-cancelar {
+      padding: 9px 18px; border: 1px solid #c5cedb; background: white;
+      border-radius: 6px; cursor: pointer; font-size: 14px; color: #555; transition: border-color 0.2s;
+    }
+    .btn-cancelar:hover { border-color: var(--plg-navy); color: var(--plg-navy); }
+    .btn-guardar {
+      padding: 9px 18px; background: var(--plg-navy); color: white;
+      border: none; border-radius: 6px; cursor: pointer; font-size: 14px;
+      font-weight: 600; transition: background 0.2s;
+    }
+    .btn-guardar:hover { background: var(--plg-blue); }
+    .btn-guardar:disabled { background: #aab; cursor: not-allowed; }
+
+    .mensaje-ok  { color: #065f46; background: #d1fae5; padding: 10px; border-radius: 6px; font-size: 13px; margin-top: 10px; }
+    .mensaje-err { color: #991b1b; background: #fee2e2; padding: 10px; border-radius: 6px; font-size: 13px; margin-top: 10px; }
+
+    /* ── Detalle de ticket ── */
+    .detalle-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .detalle-campo { background: var(--plg-bg); border-radius: 8px; padding: 12px 14px; }
+    .detalle-campo label { font-size: 11px; font-weight: 700; color: #778; text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 4px; }
+    .detalle-campo .valor { font-size: 14px; color: #333; font-weight: 500; }
+    .detalle-descripcion { background: var(--plg-bg); border-radius: 8px; padding: 14px; margin-bottom: 20px; line-height: 1.6; font-size: 14px; color: #444; }
+    .seccion-update { border-top: 1px solid #edf0f5; padding-top: 20px; margin-top: 4px; }
+    .seccion-update h3 { font-size: 14px; font-weight: 700; color: var(--plg-navy); margin-bottom: 14px; }
+    .ticket-num-header { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 2px; }
+
+    @media (max-width: 700px) {
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .tabla-wrap { padding: 16px; }
+      .header-inner { padding: 12px 16px; }
+      .controles { padding: 12px 16px; }
+      .campos-grid { grid-template-columns: 1fr; }
+      .detalle-meta { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-logo-wrap">
+      <img src="log PLG.png" alt="PLG" class="header-logo">
+    </div>
+    <div class="header-divider"></div>
+    <div style="flex:1;">
+      <h1>Soporte de TI</h1>
+      <p>PANAMERICAN LOGISTICS GROUP — Sistema de Tickets</p>
+    </div>
+  </div>
+  <nav class="nav-tabs">
+    <a href="index.html" class="nav-tab">🏠 Portal Principal</a>
+    <a href="tickets.html" class="nav-tab activo">🎫 Tickets IT</a>
+  </nav>
+</header>
+
+<!-- Stats -->
+<div class="stats-row">
+  <div class="stat-card abierto" onclick="aplicarFiltroEstado('Abierto')">
+    <div class="stat-num" id="stat-abierto">—</div>
+    <div class="stat-label">Abiertos</div>
+  </div>
+  <div class="stat-card proceso" onclick="aplicarFiltroEstado('En Proceso')">
+    <div class="stat-num" id="stat-proceso">—</div>
+    <div class="stat-label">En Proceso</div>
+  </div>
+  <div class="stat-card resuelto" onclick="aplicarFiltroEstado('Resuelto')">
+    <div class="stat-num" id="stat-resuelto">—</div>
+    <div class="stat-label">Resueltos</div>
+  </div>
+  <div class="stat-card urgente" onclick="aplicarFiltroUrgente()">
+    <div class="stat-num" id="stat-urgente">—</div>
+    <div class="stat-label">Urgentes</div>
+  </div>
+</div>
+
+<!-- Controles -->
+<div class="controles">
+  <input class="buscar" type="text" placeholder="Buscar por título, solicitante, ID..." oninput="filtrar()">
+  <select class="select-filtro" id="filtro-estado" onchange="filtrar()">
+    <option value="">Todos los estados</option>
+    <option value="Abierto">Abierto</option>
+    <option value="En Proceso">En Proceso</option>
+    <option value="Resuelto">Resuelto</option>
+    <option value="Cerrado">Cerrado</option>
+  </select>
+  <select class="select-filtro" id="filtro-prioridad" onchange="filtrar()">
+    <option value="">Todas las prioridades</option>
+    <option value="Urgente">Urgente</option>
+    <option value="Alta">Alta</option>
+    <option value="Media">Media</option>
+    <option value="Baja">Baja</option>
+  </select>
+  <select class="select-filtro" id="filtro-categoria" onchange="filtrar()">
+    <option value="">Todas las categorías</option>
+    <option value="Hardware">Hardware</option>
+    <option value="Software">Software</option>
+    <option value="Red">Red / Conectividad</option>
+    <option value="Accesos">Accesos / Permisos</option>
+    <option value="Impresoras">Impresoras</option>
+    <option value="Correo">Correo / M365</option>
+    <option value="Otro">Otro</option>
+  </select>
+  <span class="contador" id="contador"></span>
+  <button class="btn-nuevo" onclick="abrirNuevoTicket()">+ Nuevo Ticket</button>
+</div>
+
+<!-- Tabla -->
+<div class="tabla-wrap">
+  <div id="tabla-contenedor">
+    <div class="cargando">
+      <div class="spinner"></div>
+      <p>Cargando tickets...</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Nuevo Ticket -->
+<div class="modal-overlay" id="modalNuevo">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <img src="log PLG.png" alt="PLG">
+        <h2>Nuevo Ticket de Soporte</h2>
+      </div>
+      <button class="btn-cerrar-x" onclick="cerrarModal('modalNuevo')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="campo">
+        <label>Título del problema *</label>
+        <input type="text" id="n-titulo" placeholder="Describe brevemente el problema">
+      </div>
+      <div class="campo">
+        <label>Descripción detallada *</label>
+        <textarea id="n-descripcion" placeholder="Describe el problema con detalle: ¿qué ocurre, desde cuándo, pasos para reproducirlo..."></textarea>
+      </div>
+      <div class="campos-grid">
+        <div class="campo">
+          <label>Categoría *</label>
+          <select id="n-categoria">
+            <option value="">— Seleccionar —</option>
+            <option value="Hardware">Hardware (PC, monitor, teclado...)</option>
+            <option value="Software">Software / Aplicaciones</option>
+            <option value="Red">Red / Conectividad / VPN</option>
+            <option value="Accesos">Accesos / Permisos / Cuentas</option>
+            <option value="Impresoras">Impresoras / Escáneres</option>
+            <option value="Correo">Correo / Microsoft 365</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Prioridad *</label>
+          <select id="n-prioridad">
+            <option value="Baja">Baja — No urgente</option>
+            <option value="Media" selected>Media — Normal</option>
+            <option value="Alta">Alta — Afecta trabajo</option>
+            <option value="Urgente">Urgente — Sistema caído</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Tu nombre *</label>
+          <input type="text" id="n-solicitante" placeholder="Nombre completo">
+        </div>
+        <div class="campo">
+          <label>Tu correo *</label>
+          <input type="email" id="n-email" placeholder="correo@plg.com">
+        </div>
+        <div class="campo">
+          <label>Extensión / Teléfono</label>
+          <input type="text" id="n-extension" placeholder="Ej: Ext. 205">
+        </div>
+        <div class="campo">
+          <label>Departamento</label>
+          <input type="text" id="n-departamento" placeholder="Ej: Operaciones">
+        </div>
+      </div>
+      <div id="n-mensaje"></div>
+      <div class="modal-footer">
+        <button class="btn-cancelar" onclick="cerrarModal('modalNuevo')">Cancelar</button>
+        <button class="btn-guardar" id="n-btn-guardar" onclick="crearTicket()">Enviar Ticket</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Detalle de Ticket -->
+<div class="modal-overlay" id="modalDetalle">
+  <div class="modal wide">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <img src="log PLG.png" alt="PLG">
+        <div>
+          <h2 id="d-titulo">Detalle del Ticket</h2>
+          <div class="ticket-num-header" id="d-num"></div>
+        </div>
+      </div>
+      <button class="btn-cerrar-x" onclick="cerrarModal('modalDetalle')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="detalle-meta">
+        <div class="detalle-campo">
+          <label>Estado</label>
+          <div class="valor" id="d-estado-badge"></div>
+        </div>
+        <div class="detalle-campo">
+          <label>Prioridad</label>
+          <div class="valor" id="d-prioridad-badge"></div>
+        </div>
+        <div class="detalle-campo">
+          <label>Categoría</label>
+          <div class="valor" id="d-categoria"></div>
+        </div>
+        <div class="detalle-campo">
+          <label>Fecha de apertura</label>
+          <div class="valor" id="d-fecha"></div>
+        </div>
+        <div class="detalle-campo">
+          <label>Solicitante</label>
+          <div class="valor" id="d-solicitante"></div>
+        </div>
+        <div class="detalle-campo">
+          <label>Correo / Extensión</label>
+          <div class="valor" id="d-contacto"></div>
+        </div>
+        <div class="detalle-campo">
+          <label>Departamento</label>
+          <div class="valor" id="d-departamento"></div>
+        </div>
+        <div class="detalle-campo">
+          <label>Asignado a</label>
+          <div class="valor" id="d-asignado"></div>
+        </div>
+      </div>
+
+      <div class="campo" style="margin-bottom:8px;"><label>Descripción del problema</label></div>
+      <div class="detalle-descripcion" id="d-descripcion"></div>
+
+      <div id="d-notas-bloque" style="display:none; margin-bottom:16px;">
+        <div class="campo" style="margin-bottom:8px;"><label>Notas / Solución aplicada</label></div>
+        <div class="detalle-descripcion" id="d-notas"></div>
+      </div>
+
+      <!-- Panel de actualización -->
+      <div class="seccion-update">
+        <h3>🔧 Actualizar Ticket</h3>
+        <div class="campos-grid">
+          <div class="campo">
+            <label>Nuevo Estado</label>
+            <select id="u-estado">
+              <option value="Abierto">Abierto</option>
+              <option value="En Proceso">En Proceso</option>
+              <option value="Resuelto">Resuelto</option>
+              <option value="Cerrado">Cerrado</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label>Asignar a (técnico)</label>
+            <input type="text" id="u-asignado" placeholder="Nombre del técnico IT">
+          </div>
+        </div>
+        <div class="campo">
+          <label>Notas / Solución aplicada</label>
+          <textarea id="u-notas" placeholder="Describe las acciones tomadas o la solución..." style="min-height:90px;"></textarea>
+        </div>
+        <div id="u-mensaje"></div>
+        <div class="modal-footer" style="margin-top:12px;">
+          <button class="btn-cancelar" onclick="cerrarModal('modalDetalle')">Cerrar</button>
+          <button class="btn-guardar" id="u-btn-guardar" onclick="actualizarTicket()">Guardar Cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let tickets = [];
+  let ticketActualId = '';
+  let modoLocal = false; // true = sin API, usa localStorage
+
+  // ── Persistencia local (fallback) ──────────────────────────────
+  const LS_KEY = 'plg_tickets';
+  function lsCargar()  { try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch { return []; } }
+  function lsGuardar() { localStorage.setItem(LS_KEY, JSON.stringify(tickets)); }
+  function lsIdNuevo() { return 'TKT-' + Date.now() + '-' + Math.random().toString(36).substr(2,4).toUpperCase(); }
+
+  // ── Carga inicial ──────────────────────────────────────────────
+  async function cargarTickets() {
+    try {
+      const res = await fetch('/api/tickets');
+      const ct  = res.headers.get('content-type') || '';
+      if (!res.ok || !ct.includes('application/json')) throw new Error('API no disponible');
+      tickets = await res.json();
+      modoLocal = false;
+    } catch {
+      modoLocal = true;
+      tickets   = lsCargar();
+      mostrarBannerLocal();
+    }
+    actualizarStats();
+    filtrar();
+  }
+  cargarTickets();
+
+  function mostrarBannerLocal() {
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:#fff8ed;border-bottom:1px solid #fde68a;padding:8px 32px;font-size:12px;color:#92400e;display:flex;align-items:center;gap:8px;';
+    banner.innerHTML = '⚠️ <strong>Modo local activo:</strong> Los tickets se guardan en este navegador. Para activar la nube, despliega en Azure con AZURE_STORAGE_CONNECTION_STRING configurada.';
+    document.querySelector('.stats-row').before(banner);
+  }
+
+  // ── Stats ──────────────────────────────────────────────────────
+  function actualizarStats() {
+    document.getElementById('stat-abierto').textContent  = tickets.filter(t => t.estado === 'Abierto').length;
+    document.getElementById('stat-proceso').textContent  = tickets.filter(t => t.estado === 'En Proceso').length;
+    document.getElementById('stat-resuelto').textContent = tickets.filter(t => t.estado === 'Resuelto').length;
+    document.getElementById('stat-urgente').textContent  = tickets.filter(t => t.prioridad === 'Urgente' && t.estado !== 'Cerrado').length;
+  }
+
+  function aplicarFiltroEstado(estado) {
+    document.getElementById('filtro-estado').value = estado;
+    document.getElementById('filtro-prioridad').value = '';
+    filtrar();
+  }
+  function aplicarFiltroUrgente() {
+    document.getElementById('filtro-prioridad').value = 'Urgente';
+    document.getElementById('filtro-estado').value = '';
+    filtrar();
+  }
+
+  // ── Filtros ────────────────────────────────────────────────────
+  function filtrar() {
+    const q   = document.querySelector('.buscar').value.toLowerCase();
+    const est = document.getElementById('filtro-estado').value;
+    const pri = document.getElementById('filtro-prioridad').value;
+    const cat = document.getElementById('filtro-categoria').value;
+
+    const resultado = tickets.filter(t => {
+      const mQ   = !q   || [t.id, t.titulo, t.solicitante, t.departamento, t.descripcion].some(v => v && v.toLowerCase().includes(q));
+      const mEst = !est || t.estado === est;
+      const mPri = !pri || t.prioridad === pri;
+      const mCat = !cat || t.categoria === cat;
+      return mQ && mEst && mPri && mCat;
+    });
+    renderizarTabla(resultado);
+  }
+
+  // ── Render tabla ───────────────────────────────────────────────
+  function renderizarTabla(lista) {
+    const c = document.getElementById('tabla-contenedor');
+    document.getElementById('contador').textContent = lista.length + ' ticket' + (lista.length !== 1 ? 's' : '');
+
+    if (!lista.length) {
+      c.innerHTML = '<div class="sin-tickets">No se encontraron tickets con ese criterio.</div>';
+      return;
+    }
+
+    const filas = lista.map(t => {
+      const fecha = t.fechaCreacion ? new Date(t.fechaCreacion).toLocaleDateString('es-SV', {day:'2-digit',month:'short',year:'numeric'}) : '—';
+      return `<tr onclick="verDetalle('${t.id}')">
+        <td><span class="ticket-id">${t.id}</span></td>
+        <td class="ticket-titulo">${escHtml(t.titulo)}<small>${escHtml(t.categoria)}</small></td>
+        <td><span class="badge prioridad-${t.prioridad}">${t.prioridad}</span></td>
+        <td><span class="badge estado-${t.estado}">${t.estado}</span></td>
+        <td>${escHtml(t.solicitante)}</td>
+        <td>${escHtml(t.asignado) || '<span style="color:#bbb;font-size:12px;">Sin asignar</span>'}</td>
+        <td style="white-space:nowrap;">${fecha}</td>
+      </tr>`;
+    }).join('');
+
+    c.innerHTML = `<table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Título / Categoría</th><th>Prioridad</th>
+          <th>Estado</th><th>Solicitante</th><th>Asignado</th><th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody>${filas}</tbody>
+    </table>`;
+  }
+
+  // ── Modal: Nuevo Ticket ────────────────────────────────────────
+  function abrirNuevoTicket() {
+    ['n-titulo','n-descripcion','n-solicitante','n-email','n-extension','n-departamento'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('n-categoria').value = '';
+    document.getElementById('n-prioridad').value = 'Media';
+    document.getElementById('n-mensaje').innerHTML = '';
+    const btn = document.getElementById('n-btn-guardar');
+    btn.disabled = false;
+    btn.textContent = 'Enviar Ticket';
+    document.getElementById('modalNuevo').classList.add('activo');
+    setTimeout(() => document.getElementById('n-titulo').focus(), 100);
+  }
+
+  async function crearTicket() {
+    const titulo       = document.getElementById('n-titulo').value.trim();
+    const descripcion  = document.getElementById('n-descripcion').value.trim();
+    const categoria    = document.getElementById('n-categoria').value;
+    const solicitante  = document.getElementById('n-solicitante').value.trim();
+    const email        = document.getElementById('n-email').value.trim();
+
+    if (!titulo || !descripcion || !categoria || !solicitante || !email) {
+      document.getElementById('n-mensaje').innerHTML = '<div class="mensaje-err">Completa los campos obligatorios marcados con *</div>';
+      return;
+    }
+
+    const btn = document.getElementById('n-btn-guardar');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+
+    const payload = {
+      titulo, descripcion, categoria,
+      prioridad:    document.getElementById('n-prioridad').value,
+      solicitante, email,
+      extension:    document.getElementById('n-extension').value.trim(),
+      departamento: document.getElementById('n-departamento').value.trim()
+    };
+
+    try {
+      let nuevo;
+      if (modoLocal) {
+        const now = new Date().toISOString();
+        nuevo = { ...payload, id: lsIdNuevo(), estado: 'Abierto', asignado: '', notas: '', fechaCreacion: now, fechaActualizacion: now };
+      } else {
+        const res = await fetch('/api/tickets', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!res.ok) throw new Error('Error ' + res.status);
+        nuevo = await res.json();
+      }
+      tickets.unshift(nuevo);
+      if (modoLocal) lsGuardar();
+      actualizarStats();
+      filtrar();
+      document.getElementById('n-mensaje').innerHTML =
+        '<div class="mensaje-ok">✓ Ticket <strong>' + nuevo.id + '</strong> creado correctamente. El equipo de IT lo atenderá pronto.</div>';
+      btn.textContent = 'Enviado ✓';
+      const cancelBtn = document.querySelector('#modalNuevo .btn-cancelar');
+      if (cancelBtn) cancelBtn.textContent = 'Cerrar';
+    } catch (e) {
+      document.getElementById('n-mensaje').innerHTML = '<div class="mensaje-err">Error al crear ticket: ' + e.message + '</div>';
+      btn.disabled = false;
+      btn.textContent = 'Enviar Ticket';
+    }
+  }
+
+  // ── Modal: Detalle ─────────────────────────────────────────────
+  function verDetalle(id) {
+    const t = tickets.find(x => x.id === id);
+    if (!t) return;
+    ticketActualId = id;
+
+    document.getElementById('d-titulo').textContent    = t.titulo;
+    document.getElementById('d-num').textContent       = t.id;
+    document.getElementById('d-categoria').textContent = t.categoria;
+    document.getElementById('d-solicitante').textContent = t.solicitante || '—';
+    document.getElementById('d-departamento').textContent = t.departamento || '—';
+    document.getElementById('d-contacto').textContent  = [t.email, t.extension].filter(Boolean).join(' · ') || '—';
+    document.getElementById('d-descripcion').textContent = t.descripcion || '—';
+    document.getElementById('d-asignado').textContent  = t.asignado || '—';
+
+    const fechaStr = t.fechaCreacion
+      ? new Date(t.fechaCreacion).toLocaleDateString('es-SV', {day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})
+      : '—';
+    document.getElementById('d-fecha').textContent = fechaStr;
+
+    document.getElementById('d-estado-badge').innerHTML   = '<span class="badge estado-' + t.estado + '">' + t.estado + '</span>';
+    document.getElementById('d-prioridad-badge').innerHTML = '<span class="badge prioridad-' + t.prioridad + '">' + t.prioridad + '</span>';
+
+    const notasBloque = document.getElementById('d-notas-bloque');
+    if (t.notas) {
+      document.getElementById('d-notas').textContent = t.notas;
+      notasBloque.style.display = '';
+    } else {
+      notasBloque.style.display = 'none';
+    }
+
+    // Prellenar formulario de actualización
+    document.getElementById('u-estado').value   = t.estado;
+    document.getElementById('u-asignado').value = t.asignado || '';
+    document.getElementById('u-notas').value    = t.notas || '';
+    document.getElementById('u-mensaje').innerHTML = '';
+    const btn = document.getElementById('u-btn-guardar');
+    btn.disabled = false;
+    btn.textContent = 'Guardar Cambios';
+
+    document.getElementById('modalDetalle').classList.add('activo');
+  }
+
+  async function actualizarTicket() {
+    const btn = document.getElementById('u-btn-guardar');
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    const cambios = {
+      estado:   document.getElementById('u-estado').value,
+      asignado: document.getElementById('u-asignado').value.trim(),
+      notas:    document.getElementById('u-notas').value.trim()
+    };
+
+    try {
+      let actualizado;
+      if (modoLocal) {
+        const idx = tickets.findIndex(t => t.id === ticketActualId);
+        if (idx === -1) throw new Error('Ticket no encontrado');
+        actualizado = { ...tickets[idx], ...cambios, fechaActualizacion: new Date().toISOString() };
+        tickets[idx] = actualizado;
+        lsGuardar();
+      } else {
+        const res = await fetch('/api/ticket/' + ticketActualId, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cambios)
+        });
+        if (!res.ok) throw new Error('Error ' + res.status);
+        actualizado = await res.json();
+      }
+
+      // Actualizar en memoria
+      const idx = tickets.findIndex(t => t.id === ticketActualId);
+      if (idx !== -1) tickets[idx] = actualizado;
+
+      actualizarStats();
+      filtrar();
+
+      // Actualizar badges en el modal
+      document.getElementById('d-estado-badge').innerHTML   = '<span class="badge estado-' + actualizado.estado + '">' + actualizado.estado + '</span>';
+      document.getElementById('d-prioridad-badge').innerHTML = '<span class="badge prioridad-' + actualizado.prioridad + '">' + actualizado.prioridad + '</span>';
+      document.getElementById('d-asignado').textContent     = actualizado.asignado || '—';
+      if (actualizado.notas) {
+        document.getElementById('d-notas').textContent = actualizado.notas;
+        document.getElementById('d-notas-bloque').style.display = '';
+      }
+
+      document.getElementById('u-mensaje').innerHTML = '<div class="mensaje-ok">✓ Ticket actualizado correctamente.</div>';
+      btn.textContent = 'Guardado ✓';
+    } catch (e) {
+      document.getElementById('u-mensaje').innerHTML = '<div class="mensaje-err">Error: ' + e.message + '</div>';
+      btn.disabled = false;
+      btn.textContent = 'Guardar Cambios';
+    }
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────
+  function cerrarModal(id) {
+    document.getElementById(id).classList.remove('activo');
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.activo').forEach(m => m.classList.remove('activo'));
+  });
+  function escHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>
