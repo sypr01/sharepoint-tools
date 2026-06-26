@@ -11,7 +11,10 @@ function crearTransporte() {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS
     },
-    tls: { ciphers: "SSLv3" }
+    tls: {
+      rejectUnauthorized: false,
+      minVersion: "TLSv1.2"
+    }
   });
 }
 
