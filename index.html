@@ -578,7 +578,7 @@
       fechaServicio: fecha
     };
     try {
-      const res = await fetch(location.origin + '/api/evaluaciones', {
+      const res = await fetch('/api/evaluaciones', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
