@@ -58,18 +58,24 @@ module.exports = async function (context, req) {
 
     if (req.method === 'GET') {
         try {
-            var empresa = (req.query && req.query.empresa) ? req.query.empresa : '';
-            var filter = empresa ? "&$filter=fields/Empresa eq '" + empresa.replace(/'/g, "''") + "'" : '';
+            var empresa = (req.query && req.query.empresa) ? req.query.empresa.toLowerCase().trim() : '';
+            // Traer todos y filtrar en código para evitar problemas con OData de SharePoint
             var r = await request(
-                'https://graph.microsoft.com/v1.0/sites/' + SITE_ID + '/lists/' + LIST_ID + '/items?expand=fields' + filter,
+                'https://graph.microsoft.com/v1.0/sites/' + SITE_ID + '/lists/' + LIST_ID + '/items?expand=fields&$top=500',
                 { headers: authH }
             );
             if (!r.ok) return reply(context, r.status, { error: r.raw.substring(0, 500) });
             var data = JSON.parse(r.raw);
-            var ev = (data.value || []).map(function(i) {
-                return { id: i.id, empresa: i.fields.Empresa, estrellas: i.fields.Estrellas,
-                    comentario: i.fields.Comentario, evaluador: i.fields.Evaluador, fecha: i.fields.FechaServicio };
-            });
+            var ev = (data.value || [])
+                .filter(function(i) {
+                    if (!empresa) return true;
+                    var e = (i.fields.Empresa || i.fields.Title || '').toLowerCase().trim();
+                    return e === empresa;
+                })
+                .map(function(i) {
+                    return { id: i.id, empresa: i.fields.Empresa, estrellas: i.fields.Estrellas,
+                        comentario: i.fields.Comentario, evaluador: i.fields.Evaluador, fecha: i.fields.FechaServicio };
+                });
             reply(context, 200, ev);
         } catch (e) { reply(context, 500, { error: 'GET error: ' + e.message }); }
 
