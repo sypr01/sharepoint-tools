@@ -79,6 +79,18 @@ module.exports = async function (context, req) {
             reply(context, 200, ev);
         } catch (e) { reply(context, 500, { error: 'GET error: ' + e.message }); }
 
+    } else if (req.method === 'DELETE') {
+        try {
+            var itemId = req.query && req.query.id;
+            if (!itemId) return reply(context, 400, { error: 'Falta id' });
+            var rd = await request(
+                'https://graph.microsoft.com/v1.0/sites/' + SITE_ID + '/lists/' + LIST_ID + '/items/' + itemId,
+                { method: 'DELETE', headers: authH }
+            );
+            if (!rd.ok && rd.status !== 204) return reply(context, rd.status, { error: rd.raw.substring(0, 500) });
+            reply(context, 200, { deleted: itemId });
+        } catch (e) { reply(context, 500, { error: 'DELETE error: ' + e.message }); }
+
     } else if (req.method === 'POST') {
         try {
             var b = req.body || {};
