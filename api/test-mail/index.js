@@ -1,44 +1,47 @@
-const nodemailer = require("nodemailer");
+const { notificarNuevoTicket, confirmarAlSolicitante } = require("../mailer");
 
 module.exports = async function (context, req) {
   const resultado = {
     vars: {
       SMTP_USER: process.env.SMTP_USER || "NO CONFIGURADA",
-      SMTP_PASS: process.env.SMTP_PASS ? "***configurada***" : "NO CONFIGURADA",
+      SMTP_PASS: process.env.SMTP_PASS ? "***ok***" : "NO CONFIGURADA",
       IT_EMAIL:  process.env.IT_EMAIL  || "NO CONFIGURADA"
     },
-    smtp: null,
-    error: null
+    notificarIT:       null,
+    confirmarSolicit:  null,
+    errorIT:           null,
+    errorSolicitante:  null
+  };
+
+  const ticketPrueba = {
+    id:                "TKT-TEST-001",
+    titulo:            "Prueba del sistema de correos",
+    descripcion:       "Este es un ticket de prueba para verificar que los correos funcionan.",
+    categoria:         "Software",
+    prioridad:         "Media",
+    estado:            "Abierto",
+    solicitante:       "Usuario Prueba",
+    email:             process.env.SMTP_USER, // enviar al mismo correo de soporte
+    extension:         "100",
+    departamento:      "IT",
+    asignado:          "",
+    notas:             "",
+    fechaCreacion:     new Date().toISOString(),
+    fechaActualizacion: new Date().toISOString()
   };
 
   try {
-    const transporte = nodemailer.createTransport({
-      host:   "smtp.office365.com",
-      port:   587,
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      },
-      tls: { rejectUnauthorized: false },
-      connectionTimeout: 10000
-    });
-
-    await transporte.verify();
-    resultado.smtp = "Conexion exitosa";
-
-    await transporte.sendMail({
-      from:    `"Test PLG" <${process.env.SMTP_USER}>`,
-      to:      process.env.IT_EMAIL || process.env.SMTP_USER,
-      subject: "TEST - Sistema de Tickets PLG",
-      text:    "Si recibes este correo, el sistema de notificaciones funciona correctamente."
-    });
-
-    resultado.envio = "Correo enviado exitosamente";
+    await notificarNuevoTicket(ticketPrueba);
+    resultado.notificarIT = "Enviado OK";
   } catch (e) {
-    resultado.error = e.message;
-    resultado.codigo = e.code;
-    resultado.respuesta = e.response;
+    resultado.errorIT = e.message;
+  }
+
+  try {
+    await confirmarAlSolicitante(ticketPrueba);
+    resultado.confirmarSolicit = "Enviado OK";
+  } catch (e) {
+    resultado.errorSolicitante = e.message;
   }
 
   context.res = {
