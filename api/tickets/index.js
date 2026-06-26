@@ -1,4 +1,5 @@
 const { TableClient } = require("@azure/data-tables");
+const { notificarNuevoTicket, confirmarAlSolicitante } = require("../mailer");
 
 const TABLE     = "tickets";
 const PARTITION = "IT";
@@ -10,7 +11,7 @@ const CORS = {
 
 function getClient() {
   const conn = process.env.AZURE_STORAGE_CONNECTION_STRING;
-  if (!conn) throw new Error("Variable AZURE_STORAGE_CONNECTION_STRING no configurada en Application Settings.");
+  if (!conn) throw new Error("Variable AZURE_STORAGE_CONNECTION_STRING no configurada.");
   return TableClient.fromConnectionString(conn, TABLE);
 }
 
@@ -36,7 +37,7 @@ function entityToTicket(e) {
 module.exports = async function (context, req) {
   try {
     const client = getClient();
-    await client.createTable().catch(() => {}); // no-op si ya existe
+    await client.createTable().catch(() => {});
 
     if (req.method === "GET") {
       const list = [];
@@ -54,27 +55,36 @@ module.exports = async function (context, req) {
         context.res = { status: 400, headers: CORS, body: JSON.stringify({ error: "El campo 'titulo' es obligatorio." }) };
         return;
       }
-      const now = new Date().toISOString();
+      const now    = new Date().toISOString();
       const rowKey = "TKT-" + Date.now() + "-" + Math.random().toString(36).substr(2, 4).toUpperCase();
       const entity = {
         partitionKey:       PARTITION,
         rowKey,
-        titulo:             body.titulo             || "",
-        descripcion:        body.descripcion        || "",
-        categoria:          body.categoria          || "Otro",
-        prioridad:          body.prioridad          || "Media",
+        titulo:             body.titulo        || "",
+        descripcion:        body.descripcion   || "",
+        categoria:          body.categoria     || "Otro",
+        prioridad:          body.prioridad     || "Media",
         estado:             "Abierto",
-        solicitante:        body.solicitante        || "",
-        email:              body.email              || "",
-        extension:          body.extension          || "",
-        departamento:       body.departamento       || "",
+        solicitante:        body.solicitante   || "",
+        email:              body.email         || "",
+        extension:          body.extension     || "",
+        departamento:       body.departamento  || "",
         asignado:           "",
         notas:              "",
         fechaCreacion:      now,
         fechaActualizacion: now
       };
       await client.createEntity(entity);
-      context.res = { status: 201, headers: CORS, body: JSON.stringify(entityToTicket(entity)) };
+
+      const ticket = entityToTicket(entity);
+
+      // Enviar correos en paralelo (si falla el correo, el ticket igual se guarda)
+      Promise.all([
+        notificarNuevoTicket(ticket).catch(e => context.log("Error correo IT:", e.message)),
+        confirmarAlSolicitante(ticket).catch(e => context.log("Error correo solicitante:", e.message))
+      ]);
+
+      context.res = { status: 201, headers: CORS, body: JSON.stringify(ticket) };
 
     } else {
       context.res = { status: 405, headers: CORS, body: JSON.stringify({ error: "Método no permitido." }) };

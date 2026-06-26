@@ -1,4 +1,5 @@
 const { TableClient } = require("@azure/data-tables");
+const { notificarActualizacion } = require("../mailer");
 
 const TABLE     = "tickets";
 const PARTITION = "IT";
@@ -10,7 +11,7 @@ const CORS = {
 
 function getClient() {
   const conn = process.env.AZURE_STORAGE_CONNECTION_STRING;
-  if (!conn) throw new Error("Variable AZURE_STORAGE_CONNECTION_STRING no configurada en Application Settings.");
+  if (!conn) throw new Error("Variable AZURE_STORAGE_CONNECTION_STRING no configurada.");
   return TableClient.fromConnectionString(conn, TABLE);
 }
 
@@ -48,9 +49,11 @@ module.exports = async function (context, req) {
       context.res = { status: 200, headers: CORS, body: JSON.stringify(entityToTicket(entity)) };
 
     } else if (req.method === "PUT") {
-      const body = req.body || {};
+      const body     = req.body || {};
       const existing = await client.getEntity(PARTITION, id);
-      const now = new Date().toISOString();
+      const estadoAnterior = existing.estado;
+      const now      = new Date().toISOString();
+
       const updated = {
         partitionKey:       PARTITION,
         rowKey:             id,
@@ -69,7 +72,15 @@ module.exports = async function (context, req) {
         fechaActualizacion: now
       };
       await client.updateEntity(updated, "Replace");
-      context.res = { status: 200, headers: CORS, body: JSON.stringify(entityToTicket(updated)) };
+
+      const ticket = entityToTicket(updated);
+
+      // Notificar al solicitante si el estado cambió
+      if (updated.estado !== estadoAnterior || body.notas) {
+        notificarActualizacion(ticket).catch(e => context.log("Error correo actualización:", e.message));
+      }
+
+      context.res = { status: 200, headers: CORS, body: JSON.stringify(ticket) };
 
     } else {
       context.res = { status: 405, headers: CORS, body: JSON.stringify({ error: "Método no permitido." }) };
