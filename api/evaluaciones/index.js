@@ -20,38 +20,49 @@ async function getToken() {
 }
 
 module.exports = async function (context, req) {
-    const token = await getToken();
-    const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+    try {
+        const token = await getToken();
+        const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
 
-    if (req.method === "GET") {
-        const empresa = req.query.empresa || "";
-        const filter = empresa ? `&$filter=fields/Empresa eq '${encodeURIComponent(empresa)}'` : "";
-        const res = await fetch(`https://graph.microsoft.com/v1.0/sites/${SITE_ID}/lists/${LIST_ID}/items?expand=fields${filter}`, { headers });
-        const data = await res.json();
-        const evaluaciones = (data.value || []).map(i => ({
-            id: i.id,
-            empresa: i.fields.Empresa,
-            estrellas: i.fields.Estrellas,
-            comentario: i.fields.Comentario,
-            evaluador: i.fields.Evaluador,
-            fecha: i.fields.FechaServicio
-        }));
-        context.res = { body: evaluaciones, headers: { "Content-Type": "application/json" } };
+        if (req.method === "GET") {
+            const empresa = req.query.empresa || "";
+            const filter = empresa ? `&$filter=fields/Empresa eq '${empresa.replace(/'/g, "''")}'` : "";
+            const res = await fetch(`https://graph.microsoft.com/v1.0/sites/${SITE_ID}/lists/${LIST_ID}/items?expand=fields${filter}`, { headers });
+            const data = await res.json();
+            const evaluaciones = (data.value || []).map(i => ({
+                id: i.id,
+                empresa: i.fields.Empresa,
+                estrellas: i.fields.Estrellas,
+                comentario: i.fields.Comentario,
+                evaluador: i.fields.Evaluador,
+                fecha: i.fields.FechaServicio
+            }));
+            context.res = { body: evaluaciones, headers: { "Content-Type": "application/json" } };
 
-    } else if (req.method === "POST") {
-        const b = req.body;
-        const res = await fetch(`https://graph.microsoft.com/v1.0/sites/${SITE_ID}/lists/${LIST_ID}/items`, {
-            method: "POST", headers,
-            body: JSON.stringify({ fields: {
+        } else if (req.method === "POST") {
+            const b = req.body;
+            // SharePoint date columns require ISO 8601 with time zone
+            const fecha = b.fechaServicio ? b.fechaServicio + "T00:00:00Z" : null;
+            const payload = { fields: {
                 Title: b.empresa,
                 Empresa: b.empresa,
-                Estrellas: b.estrellas,
-                Comentario: b.comentario,
+                Estrellas: Number(b.estrellas),
+                Comentario: b.comentario || "",
                 Evaluador: b.evaluador,
-                FechaServicio: b.fechaServicio
-            }})
-        });
-        const data = await res.json();
-        context.res = { status: 201, body: { id: data.id }, headers: { "Content-Type": "application/json" } };
+                FechaServicio: fecha
+            }};
+            const res = await fetch(`https://graph.microsoft.com/v1.0/sites/${SITE_ID}/lists/${LIST_ID}/items`, {
+                method: "POST", headers,
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                context.res = { status: res.status, body: { error: data.error || data }, headers: { "Content-Type": "application/json" } };
+                return;
+            }
+            context.res = { status: 201, body: { id: data.id }, headers: { "Content-Type": "application/json" } };
+        }
+    } catch (e) {
+        context.res = { status: 500, body: { error: e.message }, headers: { "Content-Type": "application/json" } };
     }
 };
