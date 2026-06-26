@@ -291,10 +291,13 @@
       <img src="log PLG.png" alt="PLG" class="header-logo">
     </div>
     <div class="header-divider"></div>
-    <div>
+    <div style="flex:1;">
       <h1>Directorio de Proveedores</h1>
       <p>PANAMERICAN LOGISTICS GROUP — Operaciones 2026</p>
     </div>
+    <button onclick="abrirAdminLogin()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:6px;white-space:nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+      🔐 Admin
+    </button>
   </div>
 </header>
 
@@ -402,6 +405,43 @@
       <button class="btn-guardar" id="ev-btn-guardar" onclick="guardarEvaluacion()">Enviar Evaluación</button>
     </div>
     </div><!-- /modal-body -->
+  </div>
+</div>
+
+<!-- Modal: Admin Login -->
+<div class="modal-overlay" id="modalAdminLogin">
+  <div class="modal" style="max-width:360px;">
+    <div class="modal-header">
+      <img src="log PLG.png" alt="PLG">
+      <h2>Acceso Administrador</h2>
+    </div>
+    <div class="modal-body">
+      <div class="campo">
+        <label>Contraseña</label>
+        <input type="password" id="admin-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter') verificarAdmin()">
+      </div>
+      <div id="admin-login-msg"></div>
+      <div class="modal-footer">
+        <button class="btn-cancelar" onclick="cerrarModal('modalAdminLogin')">Cancelar</button>
+        <button class="btn-guardar" onclick="verificarAdmin()">Ingresar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Panel Admin Evaluaciones -->
+<div class="modal-overlay" id="modalAdmin">
+  <div class="modal" style="max-width:800px;">
+    <div class="modal-header" style="justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <img src="log PLG.png" alt="PLG">
+        <h2>Administración de Evaluaciones</h2>
+      </div>
+      <button onclick="cerrarModal('modalAdmin')" style="background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;cursor:pointer;border-radius:4px;padding:2px 8px;">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="admin-tabla" style="overflow-x:auto;"></div>
+    </div>
   </div>
 </div>
 
@@ -733,6 +773,89 @@
       document.getElementById('ev-mensaje').innerHTML = `<div class="mensaje-err">Error al enviar: ${e.message}</div>`;
       btn.disabled = false;
       btn.textContent = 'Enviar Evaluación';
+    }
+  }
+
+  // ── Administración de Evaluaciones ────────────────────────────
+  const ADMIN_PASS = 'Barraza1983';
+
+  function abrirAdminLogin() {
+    document.getElementById('admin-pass').value = '';
+    document.getElementById('admin-login-msg').innerHTML = '';
+    document.getElementById('modalAdminLogin').classList.add('activo');
+    setTimeout(() => document.getElementById('admin-pass').focus(), 100);
+  }
+
+  function verificarAdmin() {
+    const pass = document.getElementById('admin-pass').value;
+    if (pass === ADMIN_PASS) {
+      cerrarModal('modalAdminLogin');
+      abrirPanelAdmin();
+    } else {
+      document.getElementById('admin-login-msg').innerHTML = '<div class="mensaje-err">Contraseña incorrecta.</div>';
+    }
+  }
+
+  async function abrirPanelAdmin() {
+    document.getElementById('admin-tabla').innerHTML = '<p style="color:#888;font-size:13px;padding:20px 0;">Cargando evaluaciones...</p>';
+    document.getElementById('modalAdmin').classList.add('activo');
+    try {
+      const res = await fetch('/api/evaluaciones');
+      if (!res.ok) throw new Error('Error ' + res.status);
+      const lista = await res.json();
+      if (!lista.length) {
+        document.getElementById('admin-tabla').innerHTML = '<p style="color:#888;font-size:13px;padding:20px 0;">No hay evaluaciones registradas.</p>';
+        return;
+      }
+      const filas = lista.map(e => {
+        const stars = '★'.repeat(e.estrellas || 0) + '☆'.repeat(5 - (e.estrellas || 0));
+        const fecha = e.fecha ? e.fecha.substring(0, 10) : '—';
+        return `<tr style="border-bottom:1px solid #edf0f5;">
+          <td style="padding:10px 8px;font-size:13px;font-weight:600;color:#1B3A6B;">${e.empresa || '—'}</td>
+          <td style="padding:10px 8px;font-size:13px;">${e.evaluador || '—'}</td>
+          <td style="padding:10px 8px;color:#f59e0b;font-size:14px;">${stars}</td>
+          <td style="padding:10px 8px;font-size:12px;color:#666;">${fecha}</td>
+          <td style="padding:10px 8px;font-size:12px;color:#555;max-width:200px;">${e.comentario || ''}</td>
+          <td style="padding:10px 8px;text-align:center;">
+            <button onclick="eliminarEvaluacion('${e.id}', this)" style="background:#fee2e2;border:none;color:#991b1b;padding:5px 10px;border-radius:5px;cursor:pointer;font-size:12px;font-weight:600;" title="Eliminar">🗑️ Eliminar</button>
+          </td>
+        </tr>`;
+      }).join('');
+      document.getElementById('admin-tabla').innerHTML = `
+        <p style="font-size:13px;color:#666;margin-bottom:12px;">${lista.length} evaluación${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}</p>
+        <table style="width:100%;border-collapse:collapse;font-family:inherit;">
+          <thead>
+            <tr style="background:#f0f4f9;">
+              <th style="padding:10px 8px;text-align:left;font-size:12px;color:#555;font-weight:600;">Empresa</th>
+              <th style="padding:10px 8px;text-align:left;font-size:12px;color:#555;font-weight:600;">Evaluador</th>
+              <th style="padding:10px 8px;text-align:left;font-size:12px;color:#555;font-weight:600;">Calificación</th>
+              <th style="padding:10px 8px;text-align:left;font-size:12px;color:#555;font-weight:600;">Fecha</th>
+              <th style="padding:10px 8px;text-align:left;font-size:12px;color:#555;font-weight:600;">Comentario</th>
+              <th style="padding:10px 8px;text-align:center;font-size:12px;color:#555;font-weight:600;">Acción</th>
+            </tr>
+          </thead>
+          <tbody>${filas}</tbody>
+        </table>`;
+    } catch (e) {
+      document.getElementById('admin-tabla').innerHTML = `<div class="mensaje-err">Error al cargar: ${e.message}</div>`;
+    }
+  }
+
+  async function eliminarEvaluacion(id, btn) {
+    if (!confirm('¿Eliminar esta evaluación? Esta acción no se puede deshacer.')) return;
+    btn.disabled = true;
+    btn.textContent = '...';
+    try {
+      const res = await fetch('/api/evaluaciones?id=' + encodeURIComponent(id), { method: 'DELETE' });
+      if (res.ok) {
+        btn.closest('tr').remove();
+      } else {
+        throw new Error('Error ' + res.status);
+      }
+    } catch (e) {
+      alert('Error al eliminar: ' + e.message);
+      btn.disabled = false;
+      btn.textContent = '🗑️ Eliminar';
     }
   }
 </script>
