@@ -555,6 +555,8 @@
         const accion = modoEdicion ? 'actualizado' : 'registrado';
         document.getElementById('r-mensaje').innerHTML = `<div class="mensaje-ok">Proveedor ${accion} correctamente. Actualizando directorio...</div>`;
         btn.textContent = 'Guardado ✓';
+        const cancelBtn = document.querySelector('#modalRegistro .btn-cancelar');
+        if (cancelBtn) { cancelBtn.textContent = 'Cerrar'; cancelBtn.style.background = '#003366'; cancelBtn.style.color = 'white'; cancelBtn.style.borderColor = '#003366'; }
         await cargarDesdeAPI();
       } else {
         throw new Error('Error ' + res.status);
