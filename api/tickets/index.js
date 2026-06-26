@@ -12,7 +12,18 @@ const CORS = {
 function getClient() {
   const conn = process.env.AZURE_STORAGE_CONNECTION_STRING;
   if (!conn) throw new Error("Variable AZURE_STORAGE_CONNECTION_STRING no configurada.");
-  return TableClient.fromConnectionString(conn, TABLE);
+  // Extraer AccountName y AccountKey de la cadena de conexion
+  const accountNameMatch = conn.match(/AccountName=([^;]+)/i);
+  const accountKeyMatch  = conn.match(/AccountKey=([^;]+)/i);
+  if (!accountNameMatch || !accountKeyMatch) {
+    throw new Error("Cadena de conexion invalida. Debe contener AccountName y AccountKey.");
+  }
+  const accountName = accountNameMatch[1];
+  const accountKey  = accountKeyMatch[1];
+  const url = `https://${accountName}.table.core.windows.net`;
+  const { AzureNamedKeyCredential } = require("@azure/data-tables");
+  const credential = new AzureNamedKeyCredential(accountName, accountKey);
+  return new TableClient(url, TABLE, credential);
 }
 
 function entityToTicket(e) {
