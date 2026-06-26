@@ -271,7 +271,7 @@
 <!-- Modal: Registrar Proveedor -->
 <div class="modal-overlay" id="modalRegistro">
   <div class="modal">
-    <h2>Registrar Nuevo Proveedor</h2>
+    <h2 id="r-titulo-modal">Registrar Nuevo Proveedor</h2>
     <div class="campo">
       <label>Empresa *</label>
       <input type="text" id="r-empresa" placeholder="Nombre de la empresa">
@@ -289,22 +289,6 @@
       </select>
     </div>
     <div class="campo">
-      <label>Contacto</label>
-      <input type="text" id="r-contacto" placeholder="Nombre del contacto">
-    </div>
-    <div class="campo">
-      <label>Cargo</label>
-      <input type="text" id="r-cargo" placeholder="Cargo del contacto">
-    </div>
-    <div class="campo">
-      <label>Teléfono</label>
-      <input type="text" id="r-telefono" placeholder="+503 0000-0000">
-    </div>
-    <div class="campo">
-      <label>Correo</label>
-      <input type="email" id="r-correo" placeholder="correo@empresa.com">
-    </div>
-    <div class="campo">
       <label>Dirección</label>
       <input type="text" id="r-direccion" placeholder="Dirección física">
     </div>
@@ -312,6 +296,11 @@
       <label>Sitio Web</label>
       <input type="text" id="r-web" placeholder="https://...">
     </div>
+    <div class="campo" style="margin-bottom:4px;">
+      <label>Contactos</label>
+    </div>
+    <div id="r-contactos-lista"></div>
+    <button type="button" onclick="agregarFilaContacto()" style="font-size:13px;color:#003366;background:none;border:1px dashed #003366;border-radius:6px;padding:6px 14px;cursor:pointer;margin-bottom:12px;width:100%;">+ Agregar contacto</button>
     <div id="r-mensaje"></div>
     <div class="modal-footer">
       <button class="btn-cancelar" onclick="cerrarModal('modalRegistro')">Cancelar</button>
@@ -383,6 +372,29 @@
   let tipoActivo = '';
   filtrar();
 
+  async function cargarDesdeAPI() {
+    try {
+      const res = await fetch('/api/proveedores');
+      if (!res.ok) return;
+      const items = await res.json();
+      if (!Array.isArray(items) || items.length === 0) return;
+      const mapaTemp = {};
+      items.forEach(p => {
+        const key = p.empresa || '—';
+        if (!mapaTemp[key]) {
+          mapaTemp[key] = { empresa: p.empresa, tipo: p.tipo, direccion: p.direccion, web: p.web, contactos: [] };
+        }
+        if (p.contacto || p.telefono || p.correo) {
+          mapaTemp[key].contactos.push({ contacto: p.contacto, cargo: p.cargo, telefono: p.telefono, correo: p.correo });
+        }
+      });
+      empresas.length = 0;
+      Object.values(mapaTemp).forEach(e => empresas.push(e));
+      filtrar();
+    } catch (e) { /* usar datos embebidos */ }
+  }
+  cargarDesdeAPI();
+
   function setFiltro(btn) {
     document.querySelectorAll('.filtro').forEach(b => b.classList.remove('activo'));
     btn.classList.add('activo');
@@ -414,7 +426,10 @@
       <div class="tarjeta">
         <div class="tarjeta-header">
           <div class="empresa">${p.empresa || '—'}</div>
-          <span class="badge badge-${p.tipo}">${p.tipo || ''}</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="badge badge-${p.tipo}">${p.tipo || ''}</span>
+            <button class="btn-editar" data-empresa="${(p.empresa||'').replace(/"/g,'&quot;')}" onclick="abrirModalEdicion(this.dataset.empresa)" title="Editar empresa" style="background:none;border:none;cursor:pointer;font-size:15px;padding:2px 4px;color:#555;border-radius:4px;">✏️</button>
+          </div>
         </div>
         ${p.web ? `<div class="dato">${iconWeb}<a href="${p.web}" target="_blank">${p.web}</a></div>` : ''}
         ${p.direccion ? `<div class="dato" style="color:#888;font-size:12px;">${p.direccion}</div>` : ''}
@@ -446,14 +461,60 @@
     }
   });
 
-  // ── Registrar Proveedor ────────────────────────────────────────
+  // ── Registrar / Editar Proveedor ──────────────────────────────
+  let modoEdicion = false;
+  let empresaEditando = '';
+
   function abrirModalRegistro() {
-    ['r-empresa','r-tipo','r-contacto','r-cargo','r-telefono','r-correo','r-direccion','r-web'].forEach(id => {
+    modoEdicion = false;
+    empresaEditando = '';
+    ['r-empresa','r-tipo','r-direccion','r-web'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
+    document.getElementById('r-contactos-lista').innerHTML = '';
+    agregarFilaContacto();
     document.getElementById('r-mensaje').innerHTML = '';
     document.getElementById('r-btn-guardar').disabled = false;
+    document.getElementById('r-btn-guardar').textContent = 'Guardar';
+    document.getElementById('r-titulo-modal').textContent = 'Registrar Nuevo Proveedor';
+    document.getElementById('modalRegistro').classList.add('activo');
+  }
+
+  function agregarFilaContacto(data) {
+    const d = data || {};
+    const div = document.createElement('div');
+    div.className = 'fila-contacto';
+    div.style.cssText = 'background:#f8f9fa;border-radius:8px;padding:10px;margin-bottom:8px;position:relative;';
+    div.innerHTML = `
+      <button type="button" onclick="this.parentElement.remove()" title="Quitar" style="position:absolute;top:6px;right:8px;background:none;border:none;cursor:pointer;color:#aaa;font-size:18px;line-height:1;">×</button>
+      <input type="text" placeholder="Nombre del contacto" class="rc-contacto" value="${(d.contacto||'').replace(/"/g,'&quot;')}" style="width:100%;margin-bottom:6px;padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:13px;box-sizing:border-box;">
+      <input type="text" placeholder="Cargo" class="rc-cargo" value="${(d.cargo||'').replace(/"/g,'&quot;')}" style="width:100%;margin-bottom:6px;padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:13px;box-sizing:border-box;">
+      <input type="text" placeholder="Teléfono" class="rc-telefono" value="${(d.telefono||'').replace(/"/g,'&quot;')}" style="width:100%;margin-bottom:6px;padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:13px;box-sizing:border-box;">
+      <input type="email" placeholder="Correo" class="rc-correo" value="${(d.correo||'').replace(/"/g,'&quot;')}" style="width:100%;padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:13px;box-sizing:border-box;">
+    `;
+    document.getElementById('r-contactos-lista').appendChild(div);
+  }
+
+  function abrirModalEdicion(empresa) {
+    const p = empresas.find(e => e.empresa === empresa);
+    if (!p) return;
+    modoEdicion = true;
+    empresaEditando = empresa;
+    document.getElementById('r-empresa').value = p.empresa || '';
+    document.getElementById('r-tipo').value = p.tipo || '';
+    document.getElementById('r-direccion').value = p.direccion || '';
+    document.getElementById('r-web').value = p.web || '';
+    document.getElementById('r-contactos-lista').innerHTML = '';
+    if (p.contactos.length > 0) {
+      p.contactos.forEach(c => agregarFilaContacto(c));
+    } else {
+      agregarFilaContacto();
+    }
+    document.getElementById('r-mensaje').innerHTML = '';
+    document.getElementById('r-btn-guardar').disabled = false;
+    document.getElementById('r-btn-guardar').textContent = 'Guardar Cambios';
+    document.getElementById('r-titulo-modal').textContent = 'Editar Proveedor';
     document.getElementById('modalRegistro').classList.add('activo');
   }
 
@@ -464,35 +525,44 @@
       document.getElementById('r-mensaje').innerHTML = '<div class="mensaje-err">Empresa y Tipo de Servicio son obligatorios.</div>';
       return;
     }
+    const filas = document.querySelectorAll('#r-contactos-lista .fila-contacto');
+    const contactos = Array.from(filas).map(f => ({
+      contacto: f.querySelector('.rc-contacto').value.trim(),
+      cargo:    f.querySelector('.rc-cargo').value.trim(),
+      telefono: f.querySelector('.rc-telefono').value.trim(),
+      correo:   f.querySelector('.rc-correo').value.trim()
+    })).filter(c => c.contacto || c.telefono || c.correo);
+
     const btn = document.getElementById('r-btn-guardar');
     btn.disabled = true;
     btn.textContent = 'Guardando...';
     const body = {
       empresa,
       tipo,
-      contacto:  document.getElementById('r-contacto').value.trim(),
-      cargo:     document.getElementById('r-cargo').value.trim(),
-      telefono:  document.getElementById('r-telefono').value.trim(),
-      correo:    document.getElementById('r-correo').value.trim(),
       direccion: document.getElementById('r-direccion').value.trim(),
-      web:       document.getElementById('r-web').value.trim()
+      web:       document.getElementById('r-web').value.trim(),
+      contactos: contactos.length > 0 ? contactos : [{}]
     };
     try {
-      const res = await fetch('/api/proveedores', {
-        method: 'POST',
+      const method   = modoEdicion ? 'PUT' : 'POST';
+      const urlParam = modoEdicion ? '?empresa=' + encodeURIComponent(empresaEditando) : '';
+      const res = await fetch('/api/proveedores' + urlParam, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
       if (res.ok) {
-        document.getElementById('r-mensaje').innerHTML = '<div class="mensaje-ok">Proveedor registrado correctamente. Actualiza la página para verlo en el directorio.</div>';
+        const accion = modoEdicion ? 'actualizado' : 'registrado';
+        document.getElementById('r-mensaje').innerHTML = `<div class="mensaje-ok">Proveedor ${accion} correctamente. Actualizando directorio...</div>`;
         btn.textContent = 'Guardado ✓';
+        await cargarDesdeAPI();
       } else {
         throw new Error('Error ' + res.status);
       }
     } catch (e) {
       document.getElementById('r-mensaje').innerHTML = `<div class="mensaje-err">Error al guardar: ${e.message}</div>`;
       btn.disabled = false;
-      btn.textContent = 'Guardar';
+      btn.textContent = modoEdicion ? 'Guardar Cambios' : 'Guardar';
     }
   }
 
