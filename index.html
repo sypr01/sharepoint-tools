@@ -281,6 +281,49 @@
       color: #888;
       font-size: 15px;
     }
+
+    /* ── Reporte imprimible ── */
+    #reporte-contenido { font-family: 'Segoe UI', sans-serif; }
+    .reporte-empresa {
+      margin-bottom: 28px;
+      border: 1px solid #dde3ed;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .reporte-empresa-header {
+      background: var(--plg-navy);
+      color: white;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .reporte-empresa-nombre { font-size: 14px; font-weight: 700; }
+    .reporte-empresa-meta { font-size: 12px; opacity: 0.8; }
+    .reporte-promedio { font-size: 18px; color: #f59e0b; letter-spacing: 2px; }
+    .reporte-fila {
+      display: grid;
+      grid-template-columns: 1fr 120px 100px;
+      gap: 12px;
+      padding: 10px 16px;
+      border-bottom: 1px solid #f0f4f9;
+      font-size: 13px;
+      align-items: start;
+    }
+    .reporte-fila:last-child { border-bottom: none; }
+    .reporte-fila:nth-child(even) { background: #fafbfd; }
+    .reporte-comentario { color: #333; }
+    .reporte-evaluador { color: #555; font-size: 12px; }
+    .reporte-fecha { color: #888; font-size: 12px; text-align: right; }
+    .reporte-stars { color: #f59e0b; font-size: 13px; }
+
+    @media print {
+      body > *:not(#modal-reporte-print) { display: none !important; }
+      #modal-reporte-print { display: block !important; position: static !important;
+        background: white !important; padding: 0 !important; }
+      .no-print { display: none !important; }
+      .reporte-empresa { page-break-inside: avoid; }
+    }
   </style>
 </head>
 <body>
@@ -408,6 +451,18 @@
   </div>
 </div>
 
+<!-- Modal: Reporte Gerencia -->
+<div id="modal-reporte-print" style="display:none;position:fixed;inset:0;background:white;z-index:200;overflow-y:auto;padding:32px;">
+  <div class="no-print" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #edf0f5;">
+    <span style="font-size:14px;color:#666;">Vista previa del reporte</span>
+    <div style="display:flex;gap:10px;">
+      <button onclick="window.print()" style="background:var(--plg-navy);color:white;border:none;padding:9px 20px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600;">🖨️ Imprimir / Guardar PDF</button>
+      <button onclick="cerrarReporte()" style="background:#f0f4f9;border:1px solid #dde3ed;padding:9px 16px;border-radius:6px;cursor:pointer;font-size:14px;">✕ Cerrar</button>
+    </div>
+  </div>
+  <div id="reporte-contenido"></div>
+</div>
+
 <!-- Modal: Admin Login -->
 <div class="modal-overlay" id="modalAdminLogin">
   <div class="modal" style="max-width:360px;">
@@ -437,7 +492,10 @@
         <img src="log PLG.png" alt="PLG">
         <h2>Administración de Evaluaciones</h2>
       </div>
-      <button onclick="cerrarModal('modalAdmin')" style="background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;cursor:pointer;border-radius:4px;padding:2px 8px;">×</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button onclick="abrirReporte()" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);color:white;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">📊 Ver Reporte</button>
+        <button onclick="cerrarModal('modalAdmin')" style="background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;cursor:pointer;border-radius:4px;padding:2px 8px;">×</button>
+      </div>
     </div>
     <div class="modal-body">
       <div id="admin-tabla" style="overflow-x:auto;"></div>
@@ -839,6 +897,79 @@
     } catch (e) {
       document.getElementById('admin-tabla').innerHTML = `<div class="mensaje-err">Error al cargar: ${e.message}</div>`;
     }
+  }
+
+  async function abrirReporte() {
+    const contenido = document.getElementById('reporte-contenido');
+    document.getElementById('modal-reporte-print').style.display = 'block';
+    contenido.innerHTML = '<p style="color:#888;font-size:13px;">Generando reporte...</p>';
+    try {
+      const res = await fetch('/api/evaluaciones');
+      if (!res.ok) throw new Error('Error ' + res.status);
+      const lista = await res.json();
+      if (!lista.length) {
+        contenido.innerHTML = '<p style="color:#888;">No hay evaluaciones registradas.</p>';
+        return;
+      }
+      // Agrupar por empresa
+      const mapa = {};
+      lista.forEach(e => {
+        const k = e.empresa || '—';
+        if (!mapa[k]) mapa[k] = [];
+        mapa[k].push(e);
+      });
+      const hoy = new Date().toLocaleDateString('es-SV', { year:'numeric', month:'long', day:'numeric' });
+      let html = `
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:28px;">
+          <img src="log PLG.png" style="height:60px;background:white;border-radius:6px;padding:4px 8px;border:1px solid #dde3ed;">
+          <div>
+            <h1 style="font-size:20px;color:var(--plg-navy);font-weight:700;margin:0;">Reporte de Evaluaciones de Proveedores</h1>
+            <p style="font-size:13px;color:#666;margin:4px 0 0;">PANAMERICAN LOGISTICS GROUP &mdash; Generado el ${hoy}</p>
+            <p style="font-size:12px;color:#888;margin:2px 0 0;">${lista.length} evaluación${lista.length!==1?'es':''} · ${Object.keys(mapa).length} proveedor${Object.keys(mapa).length!==1?'es':''}</p>
+          </div>
+        </div>`;
+      Object.entries(mapa).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([empresa, evals]) => {
+        const prom = evals.reduce((s,e) => s + (e.estrellas||0), 0) / evals.length;
+        const promStr = prom.toFixed(1);
+        const starsLlenas = Math.round(prom);
+        const stars = '★'.repeat(starsLlenas) + '☆'.repeat(5-starsLlenas);
+        const filas = evals.map(e => {
+          const fecha = e.fecha ? e.fecha.substring(0,10) : '—';
+          const estrellaEv = '★'.repeat(e.estrellas||0) + '☆'.repeat(5-(e.estrellas||0));
+          return `<div class="reporte-fila">
+            <div>
+              <div class="reporte-comentario">${e.comentario || '<em style="color:#aaa">Sin comentario</em>'}</div>
+              <div class="reporte-evaluador">— ${e.evaluador || 'Anónimo'}</div>
+            </div>
+            <div class="reporte-stars">${estrellaEv}</div>
+            <div class="reporte-fecha">${fecha}</div>
+          </div>`;
+        }).join('');
+        html += `<div class="reporte-empresa">
+          <div class="reporte-empresa-header">
+            <div>
+              <div class="reporte-empresa-nombre">${empresa}</div>
+              <div class="reporte-empresa-meta">${evals.length} evaluación${evals.length!==1?'es':''}</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="reporte-promedio">${stars}</div>
+              <div style="font-size:12px;color:rgba(255,255,255,0.7);">Promedio: ${promStr} / 5</div>
+            </div>
+          </div>
+          <div style="background:#fff8ed;padding:8px 16px;font-size:11px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.5px;">
+            Comentarios
+          </div>
+          ${filas}
+        </div>`;
+      });
+      contenido.innerHTML = html;
+    } catch (e) {
+      contenido.innerHTML = `<div class="mensaje-err">Error: ${e.message}</div>`;
+    }
+  }
+
+  function cerrarReporte() {
+    document.getElementById('modal-reporte-print').style.display = 'none';
   }
 
   async function eliminarEvaluacion(id, btn) {
