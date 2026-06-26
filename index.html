@@ -586,7 +586,12 @@
       if (res.ok) {
         document.getElementById('ev-mensaje').innerHTML = '<div class="mensaje-ok">Evaluación enviada. ¡Gracias!</div>';
         btn.textContent = 'Enviado ✓';
-        cargarEvaluaciones(evEmpresaActual);
+        await cargarEvaluaciones(evEmpresaActual);
+        // Scroll al historial para ver la evaluación recién guardada
+        document.getElementById('ev-historial').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // Cambiar botón Cancelar a Cerrar
+        const cancelBtn = document.querySelector('#modalEvaluar .btn-cancelar');
+        if (cancelBtn) { cancelBtn.textContent = 'Cerrar'; cancelBtn.style.background = '#003366'; cancelBtn.style.color = 'white'; cancelBtn.style.borderColor = '#003366'; }
       } else {
         const errData = await res.json().catch(() => ({}));
         throw new Error('Error ' + res.status + ': ' + (errData.error?.message || errData.error || JSON.stringify(errData)));
