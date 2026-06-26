@@ -1,0 +1,7 @@
+{
+  "name": "sharepoint-tools-api",
+  "version": "1.0.0",
+  "description": "Azure Functions API para directorio de proveedores PLG",
+  "main": "index.js",
+  "engines": { "node": ">=18" }
+}
