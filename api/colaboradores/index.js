@@ -64,7 +64,10 @@ module.exports = async function (context, req) {
 
         var data = JSON.parse(r.raw);
         var usuarios = (data.value || [])
-            .filter(function(u) { return u.mail && u.mail.includes('@plg') && (u.officeLocation || u.companyName); })
+            .filter(function(u) {
+                var oficina = u.officeLocation || u.companyName || '';
+                return u.mail && u.mail.includes('@plg') && oficina && oficina !== 'PLG AD';
+            })
             .map(function(u) {
                 var tel = (u.businessPhones && u.businessPhones.length) ? u.businessPhones[0] : '';
                 return {
