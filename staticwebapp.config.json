@@ -23,6 +23,10 @@
     {
       "route": "/inventario",
       "rewrite": "/inventario.html"
+    },
+    {
+      "route": "/admin-usuarios",
+      "rewrite": "/admin-usuarios.html"
     }
   ],
   "navigationFallback": {

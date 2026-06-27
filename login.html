@@ -144,6 +144,8 @@
 
       if (res.ok && data.ok) {
         sessionStorage.setItem('plg_session', data.token);
+        sessionStorage.setItem('plg_nombre', data.nombre || '');
+        sessionStorage.setItem('plg_rol',    data.rol    || 'usuario');
         location.replace('/index.html');
       } else {
         msg.className = 'msg err';
