@@ -317,12 +317,18 @@
           <input type="email" id="n-email" placeholder="correo@plg.com">
         </div>
         <div class="campo">
-          <label>Extensión / Teléfono</label>
-          <input type="text" id="n-extension" placeholder="Ej: Ext. 205">
+          <label>División *</label>
+          <select id="n-departamento">
+            <option value="">— Seleccionar —</option>
+            <option value="PLG de El Salvador">PLG de El Salvador</option>
+            <option value="PLG División Aduanas">PLG División Aduanas</option>
+            <option value="PLG División Terrestre">PLG División Terrestre</option>
+            <option value="PLG Dominicana">PLG Dominicana</option>
+          </select>
         </div>
         <div class="campo">
-          <label>Departamento</label>
-          <input type="text" id="n-departamento" placeholder="Ej: Operaciones">
+          <label>Extensión / Teléfono</label>
+          <input type="text" id="n-extension" placeholder="Ej: Ext. 205">
         </div>
       </div>
       <div id="n-mensaje"></div>
@@ -374,7 +380,7 @@
           <div class="valor" id="d-contacto"></div>
         </div>
         <div class="detalle-campo">
-          <label>Departamento</label>
+          <label>División</label>
           <div class="valor" id="d-departamento"></div>
         </div>
         <div class="detalle-campo">
@@ -513,6 +519,7 @@
         <td><span class="badge prioridad-${t.prioridad}">${t.prioridad}</span></td>
         <td><span class="badge estado-${t.estado}">${t.estado}</span></td>
         <td>${escHtml(t.solicitante)}</td>
+        <td style="font-size:12px;color:#556;">${escHtml(t.departamento) || '—'}</td>
         <td>${escHtml(t.asignado) || '<span style="color:#bbb;font-size:12px;">Sin asignar</span>'}</td>
         <td style="white-space:nowrap;">${fecha}</td>
       </tr>`;
@@ -522,7 +529,7 @@
       <thead>
         <tr>
           <th>ID</th><th>Título / Categoría</th><th>Prioridad</th>
-          <th>Estado</th><th>Solicitante</th><th>Asignado</th><th>Fecha</th>
+          <th>Estado</th><th>Solicitante</th><th>División</th><th>Asignado</th><th>Fecha</th>
         </tr>
       </thead>
       <tbody>${filas}</tbody>
