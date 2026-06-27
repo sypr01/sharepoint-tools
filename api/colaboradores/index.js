@@ -12,10 +12,11 @@ function request(rawUrl, opts, body) {
             hostname: u.hostname, path: u.path,
             method: opts.method || 'GET', headers: opts.headers || {}
         }, function(res) {
-            var raw = '';
-            res.on('data', function(c) { raw += c; });
+            var chunks = [];
+            res.on('data', function(c) { chunks.push(c); });
             res.on('end', function() {
-                resolve({ status: res.statusCode, ok: res.statusCode >= 200 && res.statusCode < 300, raw: raw });
+                var buf = Buffer.concat(chunks);
+                resolve({ status: res.statusCode, ok: res.statusCode >= 200 && res.statusCode < 300, buf: buf, raw: buf.toString('utf8') });
             });
         });
         req.on('error', reject);
@@ -77,16 +78,15 @@ module.exports = async function (context, req) {
                 };
             });
 
-        // Obtener fotos en paralelo (máx 20 para no sobrecargar)
-        var conFoto = usuarios.slice(0, 20);
-        await Promise.all(conFoto.map(async function(u) {
+        // Obtener fotos en paralelo para todos los usuarios
+        await Promise.all(usuarios.map(async function(u) {
             try {
                 var fr = await request(
                     'https://graph.microsoft.com/v1.0/users/' + u.id + '/photo/$value',
                     { headers: Object.assign({}, authH, { Accept: 'image/jpeg' }) }
                 );
-                if (fr.ok) {
-                    u.foto = 'data:image/jpeg;base64,' + Buffer.from(fr.raw, 'binary').toString('base64');
+                if (fr.ok && fr.buf.length > 0) {
+                    u.foto = 'data:image/jpeg;base64,' + fr.buf.toString('base64');
                 }
             } catch(e) { /* sin foto */ }
         }));
