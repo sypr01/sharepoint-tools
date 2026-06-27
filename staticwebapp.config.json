@@ -1,6 +1,10 @@
 {
   "routes": [
     {
+      "route": "/login",
+      "rewrite": "/login.html"
+    },
+    {
       "route": "/directorio-colaboradores",
       "rewrite": "/directorio-colaboradores.html"
     },

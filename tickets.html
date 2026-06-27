@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <script>(function(){if(!sessionStorage.getItem('plg_session'))location.replace('/login.html');})()</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Soporte IT - PLG</title>
   <style>
@@ -202,6 +203,7 @@
   <nav class="nav-tabs">
     <a href="index.html" class="nav-tab">🏠 Portal Principal</a>
     <a href="tickets.html" class="nav-tab activo">🎫 Tickets IT</a>
+    <button class="nav-tab" style="margin-left:auto;color:rgba(255,255,255,.55);" onclick="sessionStorage.removeItem('plg_session');location.href='/login.html'">🔒 Cerrar sesión</button>
   </nav>
 </header>
 
