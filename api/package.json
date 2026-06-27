@@ -4,6 +4,9 @@
   "engines": { "node": "~18" },
   "dependencies": {
     "@azure/data-tables": "^13.2.2",
-    "nodemailer": "^6.9.14"
+    "nodemailer": "^6.9.14",
+    "pg": "^8.13.3",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2"
   }
 }

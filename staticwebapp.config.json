@@ -1,6 +1,10 @@
 {
   "routes": [
     {
+      "route": "/login",
+      "rewrite": "/login.html"
+    },
+    {
       "route": "/directorio-colaboradores",
       "rewrite": "/directorio-colaboradores.html"
     },
@@ -19,6 +23,10 @@
     {
       "route": "/inventario",
       "rewrite": "/inventario.html"
+    },
+    {
+      "route": "/admin-usuarios",
+      "rewrite": "/admin-usuarios.html"
     }
   ],
   "navigationFallback": {

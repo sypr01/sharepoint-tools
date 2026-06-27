@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <script>(function(){
+    var s = sessionStorage.getItem('plg_session');
+    var r = sessionStorage.getItem('plg_rol');
+    if (!s) { location.replace('/login.html'); return; }
+    if (r !== 'admin') { location.replace('/index.html'); }
+  })()</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Usuarios - PLG</title>
+  <style>
+    :root { --navy:#1B3A6B; --blue:#2F5AA8; --red:#CC1F2A; --bg:#F0F4F9; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Segoe UI',sans-serif; background:var(--bg); color:#333; }
+
+    header { background:linear-gradient(135deg,var(--navy),var(--blue)); color:white; border-bottom:4px solid var(--red); }
+    .header-inner { display:flex; align-items:center; gap:20px; padding:14px 32px; }
+    .logo-wrap { background:white; border-radius:8px; padding:6px 12px; }
+    .logo-wrap img { height:52px; display:block; }
+    .header-divider { width:1px; height:40px; background:rgba(255,255,255,.25); }
+    header h1 { font-size:20px; font-weight:700; }
+    header p  { font-size:12px; opacity:.7; margin-top:3px; }
+    .nav-tabs { background:var(--navy); display:flex; align-items:center; padding:0 32px; }
+    .nav-tab { padding:10px 22px; color:rgba(255,255,255,.65); font-size:13px; font-weight:600; cursor:pointer; border:none; background:none; border-bottom:3px solid transparent; transition:all .2s; text-decoration:none; display:inline-flex; align-items:center; }
+    .nav-tab:hover { color:white; }
+    .nav-tab.activo { color:white; border-bottom-color:var(--red); }
+    .nav-user { margin-left:auto; color:rgba(255,255,255,.55); font-size:12px; padding:0 12px; display:flex; align-items:center; gap:6px; }
+    .btn-logout { padding:7px 14px; background:rgba(255,255,255,.1); color:rgba(255,255,255,.8); border:1px solid rgba(255,255,255,.2); border-radius:5px; font-size:12px; font-weight:600; cursor:pointer; }
+    .btn-logout:hover { background:rgba(255,255,255,.2); }
+
+    .contenido { max-width:900px; margin:32px auto; padding:0 24px; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; }
+    .page-title { font-size:18px; font-weight:700; color:var(--navy); }
+    .page-sub   { font-size:12px; color:#888; margin-top:3px; }
+    .btn-nuevo { padding:9px 18px; background:var(--navy); color:white; border:none; border-radius:7px; font-size:13px; font-weight:700; cursor:pointer; }
+    .btn-nuevo:hover { background:var(--blue); }
+
+    .tabla-wrap { background:white; border-radius:10px; box-shadow:0 1px 4px rgba(27,58,107,.08); overflow:hidden; }
+    table { width:100%; border-collapse:collapse; }
+    th { background:var(--navy); color:white; padding:11px 16px; text-align:left; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; }
+    td { padding:12px 16px; font-size:13px; border-bottom:1px solid #eef1f6; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:#f8fafc; }
+
+    .badge { display:inline-block; padding:2px 10px; border-radius:10px; font-size:11px; font-weight:700; }
+    .badge-admin { background:#dbeafe; color:#1e40af; }
+    .badge-usuario { background:#f1f5f9; color:#475569; }
+    .badge-activo { background:#d1fae5; color:#065f46; }
+    .badge-inactivo { background:#fee2e2; color:#991b1b; }
+
+    .acciones { display:flex; gap:6px; }
+    .btn-sm { padding:5px 11px; border-radius:5px; font-size:12px; font-weight:600; cursor:pointer; border:none; }
+    .btn-edit { background:#e4ecf7; color:var(--navy); }
+    .btn-edit:hover { background:#c7d9f0; }
+    .btn-pass { background:#fef9c3; color:#854d0e; }
+    .btn-pass:hover { background:#fde68a; }
+    .btn-toggle { background:#f0fdf4; color:#166534; }
+    .btn-toggle:hover { background:#dcfce7; }
+    .btn-toggle.inactivo { background:#fef2f2; color:#991b1b; }
+    .btn-toggle.inactivo:hover { background:#fee2e2; }
+    .btn-del { background:#fee2e2; color:#991b1b; }
+    .btn-del:hover { background:#fecaca; }
+
+    .cargando { text-align:center; padding:40px; color:#888; }
+    .spinner { width:32px; height:32px; border:4px solid #dde3ed; border-top-color:var(--blue); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 10px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* Modales */
+    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:100; align-items:center; justify-content:center; padding:20px; }
+    .overlay.activo { display:flex; }
+    .modal { background:white; border-radius:12px; width:100%; max-width:440px; }
+    .modal-header { background:linear-gradient(135deg,var(--navy),var(--blue)); padding:18px 22px; display:flex; justify-content:space-between; align-items:center; border-radius:12px 12px 0 0; border-bottom:3px solid var(--red); }
+    .modal-header h2 { font-size:15px; color:white; font-weight:700; margin:0; }
+    .btn-x { background:none; border:none; color:rgba(255,255,255,.7); font-size:22px; cursor:pointer; }
+    .btn-x:hover { color:white; }
+    .modal-body { padding:22px; }
+    .campo { margin-bottom:14px; }
+    .campo label { display:block; font-size:11px; font-weight:700; color:#556; text-transform:uppercase; letter-spacing:.4px; margin-bottom:5px; }
+    .campo input, .campo select { width:100%; padding:9px 12px; border:1.5px solid #d1d9e6; border-radius:7px; font-size:13px; font-family:inherit; }
+    .campo input:focus, .campo select:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(47,90,168,.1); }
+    .hint { font-size:11px; color:#888; margin-top:4px; }
+    .modal-footer { display:flex; gap:8px; justify-content:flex-end; padding:0 22px 18px; }
+    .btn-cancel { padding:8px 16px; border:1px solid #c5cedb; border-radius:6px; background:white; font-size:13px; cursor:pointer; }
+    .btn-save { padding:8px 18px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:13px; font-weight:700; cursor:pointer; }
+    .btn-save:hover { background:var(--blue); }
+    .msg { padding:10px 13px; border-radius:7px; font-size:12px; margin-bottom:12px; }
+    .msg.ok  { background:#d1fae5; color:#065f46; border:1px solid #6ee7b7; }
+    .msg.err { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
+
+    .alerta-top { padding:12px 24px; background:#1e40af; color:white; font-size:12px; font-weight:600; display:none; }
+    .alerta-top.visible { display:block; }
+  </style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="logo-wrap"><img src="log PLG.png" alt="PLG"></div>
+    <div class="header-divider"></div>
+    <div><h1>Gestión de Usuarios</h1><p>PANAMERICAN LOGISTICS GROUP — Panel de Administración</p></div>
+  </div>
+  <nav class="nav-tabs">
+    <a href="index.html" class="nav-tab">🏠 Portal</a>
+    <a href="admin-usuarios.html" class="nav-tab activo">👤 Usuarios del Sistema</a>
+    <span class="nav-user" id="nav-nombre"></span>
+    <button class="btn-logout" onclick="cerrarSesion()">🔒 Cerrar sesión</button>
+  </nav>
+</header>
+
+<div id="alerta-top" class="alerta-top"></div>
+
+<div class="contenido">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Usuarios del Portal</div>
+      <div class="page-sub">Administra quién puede acceder al sistema</div>
+    </div>
+    <button class="btn-nuevo" onclick="abrirForm()">+ Nuevo Usuario</button>
+  </div>
+  <div class="tabla-wrap">
+    <div class="cargando" id="cargando"><div class="spinner"></div><p>Cargando...</p></div>
+    <table id="tabla" style="display:none">
+      <thead><tr>
+        <th>Nombre</th><th>Usuario</th><th>Rol</th><th>Estado</th><th>Último acceso</th><th>Acciones</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal nuevo/editar -->
+<div class="overlay" id="overlayForm">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="form-titulo">Nuevo Usuario</h2>
+      <button class="btn-x" onclick="cerrarForm()">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="form-msg"></div>
+      <div class="campo"><label>Nombre completo *</label><input id="f-nombre" type="text" placeholder="Ej: María García"></div>
+      <div class="campo">
+        <label>Nombre de usuario *</label>
+        <input id="f-usuario" type="text" placeholder="Ej: mgarcia" autocomplete="off">
+        <div class="hint">Solo letras, números y puntos. Se convierte a minúsculas.</div>
+      </div>
+      <div class="campo" id="campo-pass">
+        <label>Contraseña *</label>
+        <input id="f-pass" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+      </div>
+      <div class="campo">
+        <label>Rol</label>
+        <select id="f-rol">
+          <option value="usuario">Usuario</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="cerrarForm()">Cancelar</button>
+      <button class="btn-save" id="btn-save" onclick="guardar()">Crear Usuario</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal cambiar contraseña -->
+<div class="overlay" id="overlayPass">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Cambiar Contraseña</h2>
+      <button class="btn-x" onclick="document.getElementById('overlayPass').classList.remove('activo')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="pass-msg"></div>
+      <div class="campo"><label>Nueva contraseña *</label><input id="f-nueva-pass" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div>
+      <div class="campo"><label>Confirmar contraseña *</label><input id="f-conf-pass" type="password" placeholder="Repite la contraseña" autocomplete="new-password"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="document.getElementById('overlayPass').classList.remove('activo')">Cancelar</button>
+      <button class="btn-save" onclick="cambiarPass()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const token = sessionStorage.getItem('plg_session');
+  document.getElementById('nav-nombre').textContent = '👤 ' + (sessionStorage.getItem('plg_nombre') || '');
+
+  function cerrarSesion() {
+    sessionStorage.clear();
+    location.href = '/login.html';
+  }
+
+  function mostrarAlerta(txt, tipo) {
+    var el = document.getElementById('alerta-top');
+    el.textContent = txt;
+    el.style.background = tipo === 'ok' ? '#065f46' : '#991b1b';
+    el.classList.add('visible');
+    setTimeout(function(){ el.classList.remove('visible'); }, 3500);
+  }
+
+  let usuarios = [];
+  let editId   = null;
+  let passId   = null;
+
+  async function cargar() {
+    try {
+      var res  = await fetch('/api/gestion-usuarios', { headers: { Authorization: 'Bearer ' + token } });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error');
+      usuarios = data;
+      renderizar();
+    } catch(e) {
+      document.getElementById('cargando').innerHTML = '<p style="color:#991b1b">Error: ' + e.message + '</p>';
+    }
+  }
+
+  function formatFecha(f) {
+    if (!f) return '<span style="color:#bbb">—</span>';
+    var d = new Date(f);
+    return d.toLocaleDateString('es-SV', { day:'2-digit', month:'short', year:'numeric' }) + ' ' +
+           d.toLocaleTimeString('es-SV', { hour:'2-digit', minute:'2-digit' });
+  }
+
+  function renderizar() {
+    document.getElementById('cargando').style.display = 'none';
+    document.getElementById('tabla').style.display    = '';
+    var tbody = document.getElementById('tbody');
+    tbody.innerHTML = usuarios.map(function(u) {
+      var rolBadge    = u.rol === 'admin'
+        ? '<span class="badge badge-admin">Admin</span>'
+        : '<span class="badge badge-usuario">Usuario</span>';
+      var estadoBadge = u.activo
+        ? '<span class="badge badge-activo">Activo</span>'
+        : '<span class="badge badge-inactivo">Inactivo</span>';
+      var toggleTxt   = u.activo ? 'Desactivar' : 'Activar';
+      var toggleCls   = u.activo ? 'btn-sm btn-toggle' : 'btn-sm btn-toggle inactivo';
+      return '<tr>' +
+        '<td><strong>' + esc(u.nombre) + '</strong></td>' +
+        '<td style="font-family:monospace">' + esc(u.usuario) + '</td>' +
+        '<td>' + rolBadge + '</td>' +
+        '<td>' + estadoBadge + '</td>' +
+        '<td style="font-size:12px;color:#666">' + formatFecha(u.ultimo_acceso) + '</td>' +
+        '<td><div class="acciones">' +
+          '<button class="btn-sm btn-edit" onclick="abrirEditar(\'' + u.id + '\')">Editar</button>' +
+          '<button class="btn-sm btn-pass" onclick="abrirPass(\'' + u.id + '\')">Contraseña</button>' +
+          '<button class="' + toggleCls + '" onclick="toggleActivo(\'' + u.id + '\',' + u.activo + ')">' + toggleTxt + '</button>' +
+          '<button class="btn-sm btn-del" onclick="eliminar(\'' + u.id + '\',\'' + esc(u.nombre) + '\')">Eliminar</button>' +
+        '</div></td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+  function abrirForm() {
+    editId = null;
+    document.getElementById('form-titulo').textContent = 'Nuevo Usuario';
+    document.getElementById('btn-save').textContent = 'Crear Usuario';
+    document.getElementById('campo-pass').style.display = '';
+    document.getElementById('f-nombre').value  = '';
+    document.getElementById('f-usuario').value = '';
+    document.getElementById('f-pass').value    = '';
+    document.getElementById('f-rol').value     = 'usuario';
+    document.getElementById('f-usuario').disabled = false;
+    document.getElementById('form-msg').innerHTML = '';
+    document.getElementById('overlayForm').classList.add('activo');
+  }
+
+  function abrirEditar(id) {
+    var u = usuarios.find(function(x){ return x.id === id; });
+    if (!u) return;
+    editId = id;
+    document.getElementById('form-titulo').textContent = 'Editar Usuario';
+    document.getElementById('btn-save').textContent = 'Guardar Cambios';
+    document.getElementById('campo-pass').style.display = 'none';
+    document.getElementById('f-nombre').value  = u.nombre;
+    document.getElementById('f-usuario').value = u.usuario;
+    document.getElementById('f-rol').value     = u.rol;
+    document.getElementById('f-usuario').disabled = true;
+    document.getElementById('form-msg').innerHTML = '';
+    document.getElementById('overlayForm').classList.add('activo');
+  }
+
+  function cerrarForm() { document.getElementById('overlayForm').classList.remove('activo'); }
+
+  async function guardar() {
+    var nombre = document.getElementById('f-nombre').value.trim();
+    var usuario = document.getElementById('f-usuario').value.trim().toLowerCase();
+    var pass   = document.getElementById('f-pass').value;
+    var rol    = document.getElementById('f-rol').value;
+    var msg    = document.getElementById('form-msg');
+    msg.innerHTML = '';
+
+    if (!nombre || !usuario) { msg.innerHTML = '<div class="msg err">Nombre y usuario son obligatorios.</div>'; return; }
+    if (!editId && pass.length < 6) { msg.innerHTML = '<div class="msg err">La contraseña debe tener al menos 6 caracteres.</div>'; return; }
+
+    var btn = document.getElementById('btn-save');
+    btn.disabled = true;
+
+    try {
+      var res, data;
+      if (editId) {
+        res  = await fetch('/api/gestion-usuarios?id=' + editId, {
+          method: 'PUT',
+          headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + token },
+          body: JSON.stringify({ nombre: nombre, rol: rol })
+        });
+      } else {
+        res  = await fetch('/api/gestion-usuarios', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + token },
+          body: JSON.stringify({ nombre: nombre, usuario: usuario, contrasena: pass, rol: rol })
+        });
+      }
+      data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error');
+
+      cerrarForm();
+      mostrarAlerta(editId ? 'Usuario actualizado.' : 'Usuario creado correctamente.', 'ok');
+      await cargar();
+    } catch(e) {
+      msg.innerHTML = '<div class="msg err">' + e.message + '</div>';
+    }
+    btn.disabled = false;
+  }
+
+  function abrirPass(id) {
+    passId = id;
+    document.getElementById('f-nueva-pass').value = '';
+    document.getElementById('f-conf-pass').value  = '';
+    document.getElementById('pass-msg').innerHTML = '';
+    document.getElementById('overlayPass').classList.add('activo');
+  }
+
+  async function cambiarPass() {
+    var nueva = document.getElementById('f-nueva-pass').value;
+    var conf  = document.getElementById('f-conf-pass').value;
+    var msg   = document.getElementById('pass-msg');
+    msg.innerHTML = '';
+    if (nueva.length < 6) { msg.innerHTML = '<div class="msg err">Mínimo 6 caracteres.</div>'; return; }
+    if (nueva !== conf)   { msg.innerHTML = '<div class="msg err">Las contraseñas no coinciden.</div>'; return; }
+
+    try {
+      var res = await fetch('/api/gestion-usuarios?id=' + passId, {
+        method: 'PUT',
+        headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ contrasena: nueva })
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error');
+      document.getElementById('overlayPass').classList.remove('activo');
+      mostrarAlerta('Contraseña actualizada.', 'ok');
+    } catch(e) {
+      msg.innerHTML = '<div class="msg err">' + e.message + '</div>';
+    }
+  }
+
+  async function toggleActivo(id, actual) {
+    try {
+      var res  = await fetch('/api/gestion-usuarios?id=' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ activo: !actual })
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error');
+      mostrarAlerta(actual ? 'Usuario desactivado.' : 'Usuario activado.', 'ok');
+      await cargar();
+    } catch(e) {
+      mostrarAlerta(e.message, 'err');
+    }
+  }
+
+  async function eliminar(id, nombre) {
+    if (!confirm('¿Eliminar al usuario "' + nombre + '"? Esta acción no se puede deshacer.')) return;
+    try {
+      var res  = await fetch('/api/gestion-usuarios?id=' + id, {
+        method: 'DELETE',
+        headers: { Authorization: 'Bearer ' + token }
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error');
+      mostrarAlerta('Usuario eliminado.', 'ok');
+      await cargar();
+    } catch(e) {
+      mostrarAlerta(e.message, 'err');
+    }
+  }
+
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ cerrarForm(); document.getElementById('overlayPass').classList.remove('activo'); } });
+
+  cargar();
+</script>
+</body>
+</html>

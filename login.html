@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión - PLG</title>
+  <style>
+    :root { --navy:#1B3A6B; --blue:#2F5AA8; --red:#CC1F2A; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      font-family:'Segoe UI',sans-serif;
+      background:linear-gradient(135deg, var(--navy) 0%, var(--blue) 60%, #1a4a8a 100%);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .card {
+      background:white;
+      border-radius:16px;
+      box-shadow:0 24px 60px rgba(0,0,0,.35);
+      width:100%;
+      max-width:400px;
+      overflow:hidden;
+    }
+    .card-header {
+      background:linear-gradient(135deg, var(--navy), var(--blue));
+      padding:32px 32px 28px;
+      text-align:center;
+      border-bottom:4px solid var(--red);
+    }
+    .logo-wrap {
+      background:white;
+      border-radius:10px;
+      padding:10px 20px;
+      display:inline-flex;
+      align-items:center;
+      margin-bottom:18px;
+    }
+    .logo-wrap img { height:54px; width:auto; display:block; }
+    .card-header h1 { color:white; font-size:18px; font-weight:700; letter-spacing:-.2px; }
+    .card-header p  { color:rgba(255,255,255,.65); font-size:12px; margin-top:5px; }
+    .card-body { padding:32px; }
+    .campo { margin-bottom:18px; }
+    .campo label { display:block; font-size:11px; font-weight:700; color:#556; text-transform:uppercase; letter-spacing:.5px; margin-bottom:7px; }
+    .campo input {
+      width:100%;
+      padding:11px 14px;
+      border:1.5px solid #d1d9e6;
+      border-radius:8px;
+      font-size:14px;
+      font-family:inherit;
+      transition:border-color .2s, box-shadow .2s;
+      color:#333;
+    }
+    .campo input:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(47,90,168,.12); }
+    .btn-login {
+      width:100%;
+      padding:13px;
+      background:var(--navy);
+      color:white;
+      border:none;
+      border-radius:8px;
+      font-size:15px;
+      font-weight:700;
+      cursor:pointer;
+      letter-spacing:.2px;
+      transition:background .2s;
+      margin-top:6px;
+    }
+    .btn-login:hover:not(:disabled) { background:var(--blue); }
+    .btn-login:disabled { opacity:.6; cursor:not-allowed; }
+    .msg {
+      padding:11px 14px;
+      border-radius:8px;
+      font-size:13px;
+      margin-bottom:16px;
+      display:none;
+    }
+    .msg.err { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; display:block; }
+    .footer-txt { text-align:center; font-size:11px; color:#aaa; margin-top:22px; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="card-header">
+    <div class="logo-wrap">
+      <img src="log PLG.png" alt="PLG">
+    </div>
+    <h1>Portal Interno PLG</h1>
+    <p>PANAMERICAN LOGISTICS GROUP</p>
+  </div>
+  <div class="card-body">
+    <div class="msg" id="msg"></div>
+    <div class="campo">
+      <label>Usuario</label>
+      <input id="usuario" type="text" placeholder="Ingresa tu usuario" autocomplete="username">
+    </div>
+    <div class="campo">
+      <label>Contraseña</label>
+      <input id="contrasena" type="password" placeholder="Ingresa tu contraseña" autocomplete="current-password">
+    </div>
+    <button class="btn-login" id="btn" onclick="iniciarSesion()">Iniciar Sesión</button>
+    <p class="footer-txt">Acceso restringido — solo personal autorizado PLG</p>
+  </div>
+</div>
+
+<script>
+  // Si ya tiene sesión activa, redirigir al portal
+  if (sessionStorage.getItem('plg_session')) {
+    location.replace('/index.html');
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') iniciarSesion();
+  });
+
+  async function iniciarSesion() {
+    var usuario    = document.getElementById('usuario').value.trim();
+    var contrasena = document.getElementById('contrasena').value;
+    var msg        = document.getElementById('msg');
+    var btn        = document.getElementById('btn');
+
+    msg.className = 'msg';
+    msg.textContent = '';
+
+    if (!usuario || !contrasena) {
+      msg.className = 'msg err';
+      msg.textContent = 'Por favor ingresa usuario y contraseña.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Verificando...';
+
+    try {
+      var res  = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuario: usuario, contrasena: contrasena })
+      });
+      var data = await res.json();
+
+      if (res.ok && data.ok) {
+        sessionStorage.setItem('plg_session', data.token);
+        sessionStorage.setItem('plg_nombre', data.nombre || '');
+        sessionStorage.setItem('plg_rol',    data.rol    || 'usuario');
+        location.replace('/index.html');
+      } else {
+        msg.className = 'msg err';
+        msg.textContent = data.error || 'Credenciales incorrectas. Intenta de nuevo.';
+        btn.disabled = false;
+        btn.textContent = 'Iniciar Sesión';
+      }
+    } catch (e) {
+      msg.className = 'msg err';
+      msg.textContent = 'Error de conexión. Intenta de nuevo.';
+      btn.disabled = false;
+      btn.textContent = 'Iniciar Sesión';
+    }
+  }
+</script>
+</body>
+</html>
