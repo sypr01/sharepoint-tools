@@ -21,98 +21,104 @@
     .nav-tab:hover { color:white; }
     .nav-tab.activo { color:white; border-bottom-color:var(--red); }
 
-    .stats-row { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; padding:20px 32px 8px; }
-    .stat-card { background:white; border-radius:10px; padding:16px 18px; box-shadow:0 1px 4px rgba(27,58,107,.07); border-left:4px solid transparent; cursor:pointer; transition:box-shadow .2s; }
-    .stat-card:hover { box-shadow:0 4px 16px rgba(27,58,107,.12); }
-    .stat-card.laptops  { border-left-color:#2F5AA8; }
-    .stat-card.monitores { border-left-color:#10b981; }
-    .stat-card.celulares { border-left-color:#f59e0b; }
-    .stat-card.disponibles { border-left-color:#6366f1; }
-    .stat-card.baja     { border-left-color:#CC1F2A; }
-    .stat-num { font-size:28px; font-weight:800; color:var(--navy); line-height:1; }
-    .stat-label { font-size:11px; color:#778; margin-top:4px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
-
-    .controles { background:white; padding:12px 32px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; border-bottom:1px solid #dde3ed; position:sticky; top:0; z-index:10; box-shadow:0 2px 8px rgba(27,58,107,.08); }
-    .buscar { flex:1; min-width:200px; padding:9px 14px; border:1px solid #c5cedb; border-radius:6px; font-size:14px; }
+    .controles { background:white; padding:14px 32px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; border-bottom:1px solid #dde3ed; position:sticky; top:0; z-index:10; box-shadow:0 2px 8px rgba(27,58,107,.08); }
+    .buscar { flex:1; min-width:220px; padding:9px 14px; border:1px solid #c5cedb; border-radius:6px; font-size:14px; }
     .buscar:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(47,90,168,.1); }
     .sel { padding:8px 10px; border:1px solid #c5cedb; border-radius:6px; font-size:13px; color:#555; background:white; cursor:pointer; }
-    .sel:focus { outline:none; border-color:var(--blue); }
-    .btn-nuevo { padding:9px 18px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
+    .btn-nuevo { padding:9px 18px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; }
     .btn-nuevo:hover { background:var(--blue); }
-    .contador { font-size:13px; color:#778; white-space:nowrap; }
+    .contador { font-size:13px; color:#778; }
 
-    .tabla-wrap { padding:16px 32px; overflow-x:auto; }
-    table { width:100%; border-collapse:collapse; background:white; border-radius:10px; overflow:hidden; box-shadow:0 1px 4px rgba(27,58,107,.07); }
-    thead tr { background:var(--navy); }
-    th { padding:11px 13px; text-align:left; font-size:11px; font-weight:700; color:rgba(255,255,255,.85); text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; }
-    tbody tr { border-bottom:1px solid #f0f4f9; transition:background .15s; cursor:pointer; }
-    tbody tr:last-child { border-bottom:none; }
-    tbody tr:hover { background:#f5f8fd; }
-    td { padding:10px 13px; font-size:13px; color:#444; vertical-align:middle; }
-    .item-id { font-weight:700; color:var(--navy); font-size:11px; }
-    .item-info { font-weight:600; color:#333; }
-    .item-info small { display:block; font-weight:400; color:#888; font-size:11px; margin-top:1px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; padding:24px 32px; }
 
-    .badge { display:inline-block; padding:3px 9px; border-radius:12px; font-size:11px; font-weight:700; white-space:nowrap; }
-    .tipo-Laptop    { background:#dbeafe; color:#1e40af; }
-    .tipo-Monitor   { background:#d1fae5; color:#065f46; }
-    .tipo-Celular   { background:#fef3c7; color:#92400e; }
-    .tipo-Tablet    { background:#ede9fe; color:#5b21b6; }
-    .tipo-Teclado   { background:#fce7f3; color:#9d174d; }
-    .tipo-Mouse     { background:#fee2e2; color:#991b1b; }
-    .tipo-Disco     { background:#e0f2fe; color:#0369a1; }
-    .tipo-default   { background:#f1f5f9; color:#475569; }
-    .estado-Bueno       { background:#d1fae5; color:#065f46; }
-    .estado-Disponible  { background:#ede9fe; color:#5b21b6; }
-    .estado-Reparacion  { background:#fef3c7; color:#92400e; }
-    .estado-Baja        { background:#fee2e2; color:#991b1b; }
-    .estado-default     { background:#f1f5f9; color:#475569; }
+    .tarjeta { background:white; border-radius:10px; box-shadow:0 1px 4px rgba(27,58,107,.07); border-top:4px solid var(--navy); cursor:pointer; transition:box-shadow .2s,border-color .2s; overflow:hidden; }
+    .tarjeta:hover { box-shadow:0 6px 20px rgba(27,58,107,.14); border-top-color:var(--red); }
+    .tarjeta-header { padding:16px 18px 10px; display:flex; align-items:center; gap:12px; }
+    .avatar { width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:white; flex-shrink:0; }
+    .user-info { flex:1; min-width:0; }
+    .user-nombre { font-size:14px; font-weight:700; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .user-puesto { font-size:11px; color:#888; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .tarjeta-body { padding:0 18px 14px; }
+    .badge-div { display:inline-block; font-size:10px; font-weight:700; padding:2px 9px; border-radius:10px; background:#e4ecf7; color:var(--navy); margin-bottom:8px; }
+    .equipo-chips { display:flex; flex-wrap:wrap; gap:5px; }
+    .chip { display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:3px 8px; border-radius:6px; background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; }
+    .chip.ok { background:#d1fae5; color:#065f46; border-color:#6ee7b7; }
+    .chip.mail { background:#dbeafe; color:#1e40af; border-color:#bfdbfe; }
 
-    .sin-resultados { text-align:center; padding:50px; color:#888; font-size:15px; }
-    .cargando { text-align:center; padding:50px; color:#888; }
-    .spinner { width:32px; height:32px; border:4px solid #dde3ed; border-top-color:var(--blue); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 10px; }
+    .sin-datos { grid-column:1/-1; text-align:center; padding:60px; color:#888; font-size:15px; }
+    .cargando { grid-column:1/-1; text-align:center; padding:60px; color:#888; }
+    .spinner { width:36px; height:36px; border:4px solid #dde3ed; border-top-color:var(--blue); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 12px; }
     @keyframes spin { to { transform:rotate(360deg); } }
 
-    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:100; align-items:center; justify-content:center; padding:20px; }
-    .modal-overlay.activo { display:flex; }
-    .modal { background:white; border-radius:12px; width:100%; max-width:620px; max-height:90vh; overflow-y:auto; }
-    .modal-header { background:linear-gradient(135deg,var(--navy),var(--blue)); padding:18px 24px; display:flex; align-items:center; justify-content:space-between; border-bottom:3px solid var(--red); border-radius:12px 12px 0 0; }
-    .modal-header h2 { font-size:16px; color:white; font-weight:700; margin:0; }
-    .btn-x { background:none; border:none; color:rgba(255,255,255,.7); font-size:22px; cursor:pointer; line-height:1; padding:0; }
+    /* Modal */
+    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:100; align-items:flex-start; justify-content:center; padding:20px; overflow-y:auto; }
+    .overlay.activo { display:flex; }
+    .modal { background:white; border-radius:12px; width:100%; max-width:680px; margin:auto; }
+    .modal-header { background:linear-gradient(135deg,var(--navy),var(--blue)); padding:20px 24px; display:flex; align-items:center; gap:14px; border-radius:12px 12px 0 0; border-bottom:3px solid var(--red); }
+    .modal-avatar { width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:700; color:white; border:3px solid rgba(255,255,255,.4); flex-shrink:0; }
+    .modal-header-info { flex:1; }
+    .modal-header-info h2 { font-size:17px; color:white; font-weight:700; margin:0; }
+    .modal-header-info p  { font-size:12px; color:rgba(255,255,255,.75); margin-top:3px; }
+    .btn-x { background:none; border:none; color:rgba(255,255,255,.7); font-size:24px; cursor:pointer; line-height:1; padding:0 4px; }
     .btn-x:hover { color:white; }
-    .modal-body { padding:22px; }
-    .campo { margin-bottom:16px; }
-    .campo label { display:block; font-size:11px; font-weight:700; color:#556; text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px; }
-    .campo input, .campo select, .campo textarea { width:100%; padding:9px 12px; border:1px solid #c5cedb; border-radius:7px; font-size:14px; font-family:inherit; }
-    .campo input:focus, .campo select:focus, .campo textarea:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(47,90,168,.1); }
-    .campo textarea { min-height:70px; resize:vertical; }
-    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:0 16px; }
-    .modal-footer { display:flex; gap:10px; justify-content:flex-end; margin-top:16px; }
+    .modal-body { padding:24px; }
+
+    .seccion { margin-bottom:22px; }
+    .seccion-titulo { font-size:12px; font-weight:700; color:#556; text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px; padding-bottom:6px; border-bottom:1px solid #edf0f5; display:flex; align-items:center; gap:6px; }
+    .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .info-item { background:#f8fafc; border-radius:7px; padding:10px 12px; }
+    .info-item label { font-size:10px; font-weight:700; color:#778; text-transform:uppercase; letter-spacing:.4px; display:block; margin-bottom:3px; }
+    .info-item .valor { font-size:13px; color:#333; word-break:break-all; }
+    .info-item .valor.mono { font-family:monospace; font-size:12px; }
+    .pass-wrap { display:flex; align-items:center; gap:6px; }
+    .pass-val { font-family:monospace; font-size:12px; color:#333; flex:1; word-break:break-all; }
+    .btn-eye { background:none; border:none; cursor:pointer; color:#aaa; font-size:14px; padding:0; flex-shrink:0; }
+    .btn-eye:hover { color:var(--blue); }
+    .no-dato { color:#bbb; font-size:12px; font-style:italic; }
+
+    .equipo-card { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px; display:flex; align-items:flex-start; gap:12px; }
+    .equipo-icon { font-size:24px; flex-shrink:0; width:36px; text-align:center; }
+    .equipo-datos { flex:1; min-width:0; }
+    .equipo-modelo { font-size:13px; font-weight:600; color:#333; }
+    .equipo-serie  { font-size:11px; color:#888; margin-top:2px; font-family:monospace; }
+    .equipos-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+    .modal-footer { display:flex; gap:10px; justify-content:flex-end; padding:0 24px 20px; }
+    .btn-edit { padding:8px 18px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; }
+    .btn-edit:hover { background:var(--blue); }
+    .btn-close { padding:8px 16px; border:1px solid #c5cedb; border-radius:6px; background:white; font-size:13px; cursor:pointer; }
+
+    /* Modal Form */
+    .overlay-form { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:200; align-items:flex-start; justify-content:center; padding:20px; overflow-y:auto; }
+    .overlay-form.activo { display:flex; }
+    .modal-form { background:white; border-radius:12px; width:100%; max-width:640px; margin:auto; }
+    .form-header { background:linear-gradient(135deg,var(--navy),var(--blue)); padding:18px 24px; display:flex; justify-content:space-between; align-items:center; border-radius:12px 12px 0 0; border-bottom:3px solid var(--red); }
+    .form-header h2 { font-size:16px; color:white; font-weight:700; margin:0; }
+    .form-body { padding:22px; }
+    .form-section { font-size:11px; font-weight:700; color:#556; text-transform:uppercase; letter-spacing:.5px; margin:16px 0 10px; padding-bottom:4px; border-bottom:1px solid #edf0f5; }
+    .campo { margin-bottom:13px; }
+    .campo label { display:block; font-size:11px; font-weight:700; color:#556; text-transform:uppercase; letter-spacing:.4px; margin-bottom:5px; }
+    .campo input, .campo select { width:100%; padding:8px 11px; border:1px solid #c5cedb; border-radius:6px; font-size:13px; font-family:inherit; }
+    .campo input:focus, .campo select:focus { outline:none; border-color:var(--blue); }
+    .g2 { display:grid; grid-template-columns:1fr 1fr; gap:0 14px; }
+    .form-footer { display:flex; gap:10px; justify-content:flex-end; margin-top:16px; }
+    .btn-del { padding:8px 14px; background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; margin-right:auto; }
     .btn-cancel { padding:8px 16px; border:1px solid #c5cedb; border-radius:6px; background:white; font-size:13px; cursor:pointer; }
-    .btn-cancel:hover { background:#f8f9fa; }
     .btn-save { padding:8px 18px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; }
     .btn-save:hover { background:var(--blue); }
-    .btn-save:disabled { opacity:.6; cursor:default; }
-    .btn-delete { padding:8px 14px; background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; margin-right:auto; }
-    .btn-delete:hover { background:#fecaca; }
-    .msg-ok  { background:#d1fae5; border:1px solid #6ee7b7; color:#065f46; padding:10px 14px; border-radius:7px; font-size:13px; margin-bottom:12px; }
-    .msg-err { background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:10px 14px; border-radius:7px; font-size:13px; margin-bottom:12px; }
+    .msg { padding:10px 13px; border-radius:7px; font-size:12px; margin-bottom:12px; }
+    .msg.ok  { background:#d1fae5; color:#065f46; border:1px solid #6ee7b7; }
+    .msg.err { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
 
-    @media (max-width:640px) { .stats-row { grid-template-columns:repeat(2,1fr); } .grid-2 { grid-template-columns:1fr; } }
+    @media(max-width:600px){ .info-grid,.equipos-grid,.g2{ grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
-
 <header>
   <div class="header-inner">
-    <div class="header-logo-wrap">
-      <img src="log PLG.png" alt="PLG" class="header-logo">
-    </div>
+    <div class="header-logo-wrap"><img src="log PLG.png" alt="PLG" class="header-logo"></div>
     <div class="header-divider"></div>
-    <div>
-      <h1>Inventario Informático</h1>
-      <p>PANAMERICAN LOGISTICS GROUP</p>
-    </div>
+    <div><h1>Inventario Informático</h1><p>PANAMERICAN LOGISTICS GROUP</p></div>
   </div>
   <nav class="nav-tabs">
     <a href="index.html" class="nav-tab">🏠 Portal Principal</a>
@@ -121,139 +127,178 @@
   </nav>
 </header>
 
-<div class="stats-row">
-  <div class="stat-card laptops" onclick="filtrarTipo('Laptop')">
-    <div class="stat-num" id="s-laptops">—</div>
-    <div class="stat-label">Laptops</div>
-  </div>
-  <div class="stat-card monitores" onclick="filtrarTipo('Monitor')">
-    <div class="stat-num" id="s-monitores">—</div>
-    <div class="stat-label">Monitores</div>
-  </div>
-  <div class="stat-card celulares" onclick="filtrarTipo('Celular')">
-    <div class="stat-num" id="s-celulares">—</div>
-    <div class="stat-label">Celulares</div>
-  </div>
-  <div class="stat-card disponibles" onclick="filtrarEstado('Disponible')">
-    <div class="stat-num" id="s-disponibles">—</div>
-    <div class="stat-label">Disponibles</div>
-  </div>
-  <div class="stat-card baja" onclick="filtrarEstado('Baja')">
-    <div class="stat-num" id="s-baja">—</div>
-    <div class="stat-label">Dados de Baja</div>
-  </div>
-</div>
-
 <div class="controles">
-  <input class="buscar" type="text" placeholder="Buscar por serial, marca, modelo, usuario..." oninput="filtrar()">
-  <select class="sel" id="f-tipo" onchange="filtrar()">
-    <option value="">Todos los tipos</option>
-    <option value="Laptop">Laptop</option>
-    <option value="Monitor">Monitor</option>
-    <option value="Celular">Celular</option>
-    <option value="Tablet">Tablet</option>
-    <option value="Teclado">Teclado</option>
-    <option value="Mouse">Mouse</option>
-    <option value="Disco">Disco</option>
-    <option value="Otro">Otro</option>
-  </select>
-  <select class="sel" id="f-division" onchange="filtrar()">
+  <input class="buscar" type="text" placeholder="Buscar por nombre, correo, serial, equipo..." oninput="filtrar()">
+  <select class="sel" id="f-div" onchange="filtrar()">
     <option value="">Todas las divisiones</option>
-    <option value="PLG DE EL SALVADOR">PLG DE EL SALVADOR</option>
     <option value="PLG DIVISION ADUANAS">PLG DIVISION ADUANAS</option>
+    <option value="PLG DE EL SALVADOR">PLG DE EL SALVADOR</option>
     <option value="PLG DIVISION TERRESTRE">PLG DIVISION TERRESTRE</option>
     <option value="PLG DOMINICANA">PLG DOMINICANA</option>
     <option value="PLG GROUP">PLG GROUP</option>
   </select>
-  <select class="sel" id="f-estado" onchange="filtrar()">
-    <option value="">Todos los estados</option>
-    <option value="Bueno">Bueno</option>
-    <option value="Disponible">Disponible</option>
-    <option value="Reparacion">En Reparación</option>
-    <option value="Baja">Dado de Baja</option>
-  </select>
   <span class="contador" id="contador"></span>
-  <button class="btn-nuevo" onclick="abrirNuevo()">+ Agregar Equipo</button>
+  <button class="btn-nuevo" onclick="abrirForm(null)">+ Agregar Usuario</button>
 </div>
 
-<div class="tabla-wrap">
-  <div id="contenedor">
-    <div class="cargando"><div class="spinner"></div><p>Cargando inventario...</p></div>
+<div class="grid" id="grid">
+  <div class="cargando"><div class="spinner"></div><p>Cargando usuarios...</p></div>
+</div>
+
+<!-- Modal Detalle -->
+<div class="overlay" id="overlayDetalle">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-avatar" id="d-avatar"></div>
+      <div class="modal-header-info">
+        <h2 id="d-nombre"></h2>
+        <p id="d-puesto-div"></p>
+      </div>
+      <button class="btn-x" onclick="cerrarDetalle()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="seccion">
+        <div class="seccion-titulo">👤 Información General</div>
+        <div class="info-grid">
+          <div class="info-item"><label>Área / Departamento</label><div class="valor" id="d-area"></div></div>
+          <div class="info-item"><label>Teléfono / Ext.</label><div class="valor" id="d-tel"></div></div>
+          <div class="info-item"><label>Hostname</label><div class="valor mono" id="d-host"></div></div>
+          <div class="info-item"><label>AnyDesk ID</label><div class="valor mono" id="d-anydesk"></div></div>
+        </div>
+      </div>
+
+      <div class="seccion">
+        <div class="seccion-titulo">📧 Cuentas</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Microsoft / Office 365</label>
+            <div class="valor" id="d-ms-email"></div>
+            <div class="pass-wrap" style="margin-top:5px;">
+              <span class="pass-val" id="d-ms-pass"></span>
+              <button class="btn-eye" onclick="togglePass('d-ms-pass','d-ms-raw')">👁</button>
+            </div>
+            <span id="d-ms-raw" style="display:none"></span>
+          </div>
+          <div class="info-item">
+            <label>Gmail</label>
+            <div class="valor" id="d-gm-email"></div>
+            <div class="pass-wrap" style="margin-top:5px;">
+              <span class="pass-val" id="d-gm-pass"></span>
+              <button class="btn-eye" onclick="togglePass('d-gm-pass','d-gm-raw')">👁</button>
+            </div>
+            <span id="d-gm-raw" style="display:none"></span>
+          </div>
+          <div class="info-item">
+            <label>Magaya</label>
+            <div class="valor" id="d-mag-user"></div>
+            <div class="pass-wrap" style="margin-top:5px;">
+              <span class="pass-val" id="d-mag-pass"></span>
+              <button class="btn-eye" onclick="togglePass('d-mag-pass','d-mag-raw')">👁</button>
+            </div>
+            <span id="d-mag-raw" style="display:none"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="seccion">
+        <div class="seccion-titulo">💻 Equipos Asignados</div>
+        <div class="equipos-grid">
+          <div class="equipo-card" id="eq-laptop">
+            <div class="equipo-icon">💻</div>
+            <div class="equipo-datos">
+              <div class="equipo-modelo" id="d-laptop-mod"></div>
+              <div class="equipo-serie" id="d-laptop-ser"></div>
+            </div>
+          </div>
+          <div class="equipo-card" id="eq-monitor">
+            <div class="equipo-icon">🖥</div>
+            <div class="equipo-datos">
+              <div class="equipo-modelo" id="d-mon-mod"></div>
+              <div class="equipo-serie" id="d-mon-ser"></div>
+            </div>
+          </div>
+          <div class="equipo-card" id="eq-celular">
+            <div class="equipo-icon">📱</div>
+            <div class="equipo-datos">
+              <div class="equipo-modelo" id="d-cel-mod"></div>
+              <div class="equipo-serie" id="d-cel-ser"></div>
+            </div>
+          </div>
+          <div class="equipo-card" id="eq-tablet">
+            <div class="equipo-icon">📲</div>
+            <div class="equipo-datos">
+              <div class="equipo-modelo" id="d-tab-mod"></div>
+              <div class="equipo-serie" id="d-tab-ser"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn-close" onclick="cerrarDetalle()">Cerrar</button>
+      <button class="btn-edit" onclick="editarActual()">✏️ Editar</button>
+    </div>
   </div>
 </div>
 
-<!-- Modal Nuevo / Editar -->
-<div class="modal-overlay" id="modalForm">
-  <div class="modal">
-    <div class="modal-header">
-      <h2 id="modal-titulo">Agregar Equipo</h2>
-      <button class="btn-x" onclick="cerrar()">×</button>
+<!-- Modal Formulario -->
+<div class="overlay-form" id="overlayForm">
+  <div class="modal-form">
+    <div class="form-header">
+      <h2 id="form-titulo">Agregar Usuario</h2>
+      <button class="btn-x" onclick="cerrarForm()">×</button>
     </div>
-    <div class="modal-body">
+    <div class="form-body">
       <div id="form-msg"></div>
-      <div class="grid-2">
-        <div class="campo">
-          <label>Tipo *</label>
-          <select id="f-ftipo">
+
+      <div class="form-section">👤 Información Personal</div>
+      <div class="g2">
+        <div class="campo"><label>Nombre completo *</label><input id="f-nombre" type="text" placeholder="Nombre completo"></div>
+        <div class="campo"><label>División</label>
+          <select id="f-div">
             <option value="">— Seleccionar —</option>
-            <option value="Laptop">Laptop</option>
-            <option value="Monitor">Monitor</option>
-            <option value="Celular">Celular</option>
-            <option value="Tablet">Tablet</option>
-            <option value="Teclado">Teclado</option>
-            <option value="Mouse">Mouse</option>
-            <option value="Disco">Disco</option>
-            <option value="Otro">Otro</option>
-          </select>
-        </div>
-        <div class="campo">
-          <label>División</label>
-          <select id="f-fdivision">
-            <option value="">— Seleccionar —</option>
-            <option value="PLG DE EL SALVADOR">PLG DE EL SALVADOR</option>
             <option value="PLG DIVISION ADUANAS">PLG DIVISION ADUANAS</option>
+            <option value="PLG DE EL SALVADOR">PLG DE EL SALVADOR</option>
             <option value="PLG DIVISION TERRESTRE">PLG DIVISION TERRESTRE</option>
             <option value="PLG DOMINICANA">PLG DOMINICANA</option>
             <option value="PLG GROUP">PLG GROUP</option>
           </select>
         </div>
-        <div class="campo">
-          <label>Marca</label>
-          <input type="text" id="f-fmarca" placeholder="Ej: Lenovo, Dell, Samsung">
-        </div>
-        <div class="campo">
-          <label>Modelo</label>
-          <input type="text" id="f-fmodelo" placeholder="Ej: ThinkPad E16 Gen 2">
-        </div>
-        <div class="campo">
-          <label>Serial / IMEI *</label>
-          <input type="text" id="f-fserial" placeholder="Número de serie o IMEI">
-        </div>
-        <div class="campo">
-          <label>Estado</label>
-          <select id="f-festado">
-            <option value="Bueno">Bueno</option>
-            <option value="Disponible">Disponible</option>
-            <option value="Reparacion">En Reparación</option>
-            <option value="Baja">Dado de Baja</option>
-          </select>
-        </div>
-        <div class="campo">
-          <label>Usuario Anterior</label>
-          <input type="text" id="f-fanterior" placeholder="Nombre del usuario anterior">
-        </div>
-        <div class="campo">
-          <label>Usuario Actual</label>
-          <input type="text" id="f-factual" placeholder="Nombre del usuario actual">
-        </div>
+        <div class="campo"><label>Área / Departamento</label><input id="f-area" type="text" placeholder="Ej: Departamento Comercial"></div>
+        <div class="campo"><label>Puesto</label><input id="f-puesto" type="text" placeholder="Ej: Gerente de Ventas"></div>
+        <div class="campo"><label>Teléfono</label><input id="f-tel" type="text" placeholder="+503 0000 0000"></div>
+        <div class="campo"><label>Extensión</label><input id="f-ext" type="text" placeholder="Ej: 110"></div>
+        <div class="campo"><label>Hostname</label><input id="f-host" type="text" placeholder="Ej: SV-CO002"></div>
+        <div class="campo"><label>AnyDesk ID</label><input id="f-anydesk" type="text" placeholder="Ej: 1173414536"></div>
       </div>
-      <div class="campo">
-        <label>Notas / Observaciones</label>
-        <textarea id="f-fnotas" placeholder="Detalles adicionales, componentes, mantenimientos..."></textarea>
+
+      <div class="form-section">📧 Cuentas</div>
+      <div class="g2">
+        <div class="campo"><label>Correo Microsoft</label><input id="f-ms-email" type="text" placeholder="correo@plg.com.sv"></div>
+        <div class="campo"><label>Contraseña Microsoft</label><input id="f-ms-pass" type="text" placeholder="Contraseña"></div>
+        <div class="campo"><label>Correo Gmail</label><input id="f-gm-email" type="text" placeholder="correo@gmail.com"></div>
+        <div class="campo"><label>Contraseña Gmail</label><input id="f-gm-pass" type="text" placeholder="Contraseña"></div>
+        <div class="campo"><label>Usuario Magaya</label><input id="f-mag-user" type="text" placeholder="Usuario Magaya"></div>
+        <div class="campo"><label>Contraseña Magaya</label><input id="f-mag-pass" type="text" placeholder="Contraseña"></div>
       </div>
-      <div class="modal-footer">
-        <button class="btn-delete" id="btn-delete" onclick="eliminar()" style="display:none">🗑 Eliminar</button>
-        <button class="btn-cancel" onclick="cerrar()">Cancelar</button>
+
+      <div class="form-section">💻 Equipos Asignados</div>
+      <div class="g2">
+        <div class="campo"><label>Laptop / Equipo</label><input id="f-lap-mod" type="text" placeholder="Ej: Lenovo E16 Gen 2"></div>
+        <div class="campo"><label>Serie Laptop</label><input id="f-lap-ser" type="text" placeholder="Número de serie"></div>
+        <div class="campo"><label>Monitor</label><input id="f-mon-mod" type="text" placeholder="Ej: Samsung F24T350"></div>
+        <div class="campo"><label>Serie Monitor</label><input id="f-mon-ser" type="text" placeholder="Número de serie"></div>
+        <div class="campo"><label>Celular</label><input id="f-cel-mod" type="text" placeholder="Ej: iPhone 17 Pro Max"></div>
+        <div class="campo"><label>IMEI Celular</label><input id="f-cel-ser" type="text" placeholder="IMEI"></div>
+        <div class="campo"><label>Tablet</label><input id="f-tab-mod" type="text" placeholder="Modelo de tablet"></div>
+        <div class="campo"><label>IMEI Tablet</label><input id="f-tab-ser" type="text" placeholder="IMEI"></div>
+      </div>
+
+      <div class="form-footer">
+        <button class="btn-del" id="btn-del" onclick="eliminar()" style="display:none">🗑 Eliminar</button>
+        <button class="btn-cancel" onclick="cerrarForm()">Cancelar</button>
         <button class="btn-save" id="btn-save" onclick="guardar()">Guardar</button>
       </div>
     </div>
@@ -261,188 +306,240 @@
 </div>
 
 <script>
-  let items = [], editId = null;
-
-  function badgeTipo(t) {
-    var cls = 'tipo-' + (t || 'default');
-    var clases = ['Laptop','Monitor','Celular','Tablet','Teclado','Mouse','Disco'];
-    if (!clases.includes(t)) cls = 'tipo-default';
-    return '<span class="badge ' + cls + '">' + (t || '—') + '</span>';
-  }
-  function badgeEstado(e) {
-    var mapa = { 'Bueno':'estado-Bueno','Disponible':'estado-Disponible','Reparacion':'estado-Reparacion','Baja':'estado-Baja' };
-    var cls = mapa[e] || 'estado-default';
-    return '<span class="badge ' + cls + '">' + (e || '—') + '</span>';
-  }
+  const COLORES = ['#1B3A6B','#2F5AA8','#CC1F2A','#065f46','#92400e','#5b21b6','#9d174d','#9a3412'];
+  function colorAvatar(n) { var s=0; for(var i=0;i<n.length;i++) s+=n.charCodeAt(i); return COLORES[s%COLORES.length]; }
+  function iniciales(n) { return (n||'').split(' ').filter(Boolean).slice(0,2).map(p=>p[0]).join('').toUpperCase(); }
   function esc(s) { var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+  function vacio(v) { return !v || v.trim()==='' || v.trim().toUpperCase()==='NO POSEE' || v.trim()==='*'; }
+
+  let usuarios = [], detalleId = null;
 
   async function cargar() {
     try {
-      const res = await fetch('/api/inventario');
-      if (!res.ok) throw new Error('Error ' + res.status);
-      items = await res.json();
-      actualizarStats();
+      const res = await fetch('/api/usuarios');
+      if (!res.ok) throw new Error('Error '+res.status);
+      usuarios = await res.json();
       filtrar();
-    } catch (e) {
-      document.getElementById('contenedor').innerHTML = '<div class="sin-resultados">Error al cargar inventario: ' + e.message + '</div>';
+    } catch(e) {
+      document.getElementById('grid').innerHTML = '<div class="sin-datos">Error al cargar: '+e.message+'</div>';
     }
   }
 
-  function actualizarStats() {
-    document.getElementById('s-laptops').textContent   = items.filter(i => i.tipo === 'Laptop').length;
-    document.getElementById('s-monitores').textContent = items.filter(i => i.tipo === 'Monitor').length;
-    document.getElementById('s-celulares').textContent = items.filter(i => i.tipo === 'Celular').length;
-    document.getElementById('s-disponibles').textContent = items.filter(i => i.estado === 'Disponible').length;
-    document.getElementById('s-baja').textContent      = items.filter(i => i.estado === 'Baja').length;
-  }
-
-  function filtrarTipo(t) { document.getElementById('f-tipo').value = t; document.getElementById('f-estado').value = ''; filtrar(); }
-  function filtrarEstado(e) { document.getElementById('f-estado').value = e; document.getElementById('f-tipo').value = ''; filtrar(); }
-
   function filtrar() {
     const q   = document.querySelector('.buscar').value.toLowerCase();
-    const tip = document.getElementById('f-tipo').value;
-    const div = document.getElementById('f-division').value;
-    const est = document.getElementById('f-estado').value;
-
-    const res = items.filter(i => {
-      const mQ   = !q   || [i.serial, i.marca, i.modelo, i.usuarioActual, i.usuarioAnterior, i.notas, i.id].some(v => v && v.toLowerCase().includes(q));
-      const mTip = !tip || i.tipo === tip;
-      const mDiv = !div || i.division === div;
-      const mEst = !est || i.estado === est;
-      return mQ && mTip && mDiv && mEst;
+    const div = document.getElementById('f-div').value;
+    const res = usuarios.filter(u => {
+      const mD = !div || u.division === div;
+      const mQ = !q  || [u.nombre,u.microsoftEmail,u.gmailEmail,u.puesto,u.area,u.laptopSerie,u.celularImei,u.hostname].some(v=>v&&v.toLowerCase().includes(q));
+      return mD && mQ;
     });
     renderizar(res);
   }
 
   function renderizar(lista) {
-    document.getElementById('contador').textContent = lista.length + ' equipo' + (lista.length !== 1 ? 's' : '');
-    if (!lista.length) {
-      document.getElementById('contenedor').innerHTML = '<div class="sin-resultados">No se encontraron equipos con ese criterio.</div>';
-      return;
+    document.getElementById('contador').textContent = lista.length + ' usuario' + (lista.length!==1?'s':'');
+    if (!lista.length) { document.getElementById('grid').innerHTML='<div class="sin-datos">No se encontraron usuarios.</div>'; return; }
+
+    document.getElementById('grid').innerHTML = lista.map(u => {
+      const col  = colorAvatar(u.nombre||'?');
+      const ini  = iniciales(u.nombre||'?');
+      const divCorto = (u.division||'').replace('PLG ','').replace('DIVISION ','DIV. ');
+      const chips = [
+        u.laptopModelo  ? `<span class="chip ok">💻 ${esc(u.laptopModelo.split(' ').slice(0,3).join(' '))}</span>` : '',
+        u.celularModelo ? `<span class="chip ok">📱 ${esc(u.celularModelo.split(' ').slice(0,3).join(' '))}</span>` : '',
+        u.microsoftEmail? `<span class="chip mail">✉️ Office 365</span>` : '',
+        u.gmailEmail    ? `<span class="chip mail">✉️ Gmail</span>` : '',
+      ].filter(Boolean).join('');
+      return `<div class="tarjeta" onclick="verDetalle('${u.id}')">
+        <div class="tarjeta-header">
+          <div class="avatar" style="background:${col}">${ini}</div>
+          <div class="user-info">
+            <div class="user-nombre">${esc(u.nombre)}</div>
+            <div class="user-puesto">${esc(u.puesto||u.area||'')}</div>
+          </div>
+        </div>
+        <div class="tarjeta-body">
+          ${divCorto ? `<span class="badge-div">${esc(divCorto)}</span>` : ''}
+          <div class="equipo-chips">${chips}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function verDetalle(id) {
+    const u = usuarios.find(x=>x.id===id);
+    if (!u) return;
+    detalleId = id;
+    const col = colorAvatar(u.nombre||'?');
+    document.getElementById('d-avatar').style.background = col;
+    document.getElementById('d-avatar').textContent = iniciales(u.nombre||'?');
+    document.getElementById('d-nombre').textContent = u.nombre||'—';
+    document.getElementById('d-puesto-div').textContent = [u.puesto, u.division].filter(Boolean).join(' · ');
+    document.getElementById('d-area').textContent    = u.area     || '—';
+    document.getElementById('d-tel').textContent     = [u.telefono, u.extension ? 'Ext. '+u.extension : ''].filter(Boolean).join(' / ') || '—';
+    document.getElementById('d-host').textContent    = u.hostname || '—';
+    document.getElementById('d-anydesk').textContent = u.anydesk  || '—';
+
+    // Cuentas
+    setPass('d-ms',  u.microsoftEmail, u.microsoftPass);
+    setPass('d-gm',  u.gmailEmail,     u.gmailPass);
+    setMag(u.magayaUser, u.magayaPass);
+
+    // Equipos
+    setEquipo('eq-laptop',  'd-laptop', u.laptopModelo,  u.laptopSerie,  'Sin laptop asignada');
+    setEquipo('eq-monitor', 'd-mon',    u.monitorModelo, u.monitorSerie, 'Sin monitor asignado');
+    setEquipo('eq-celular', 'd-cel',    u.celularModelo, u.celularImei,  'Sin celular asignado');
+    setEquipo('eq-tablet',  'd-tab',    u.tabletModelo,  u.tabletImei,   'Sin tablet asignada');
+
+    document.getElementById('overlayDetalle').classList.add('activo');
+  }
+
+  function setPass(pre, email, pass) {
+    document.getElementById(pre+'-email').textContent = email || '—';
+    if (pass) {
+      document.getElementById(pre+'-raw').textContent = pass;
+      document.getElementById(pre+'-pass').textContent = '••••••••';
+    } else {
+      document.getElementById(pre+'-pass').textContent = '—';
+      document.getElementById(pre+'-raw').textContent = '';
     }
-    const filas = lista.map(i => `<tr onclick="abrirEditar('${i.id}')">
-      <td><span class="item-id">${esc(i.id).replace('INV-','')}</span></td>
-      <td>${badgeTipo(i.tipo)}</td>
-      <td class="item-info">${esc(i.marca)} ${esc(i.modelo)}<small>${esc(i.serial)}</small></td>
-      <td>${badgeEstado(i.estado)}</td>
-      <td style="font-size:12px;">${esc(i.division) || '—'}</td>
-      <td style="font-size:12px;">${esc(i.usuarioActual) || '<span style="color:#bbb;">Sin asignar</span>'}</td>
-      <td style="font-size:11px;color:#888;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(i.notas)}</td>
-    </tr>`).join('');
-
-    document.getElementById('contenedor').innerHTML = `<table>
-      <thead><tr>
-        <th>ID</th><th>Tipo</th><th>Equipo / Serial</th><th>Estado</th><th>División</th><th>Usuario Actual</th><th>Notas</th>
-      </tr></thead>
-      <tbody>${filas}</tbody>
-    </table>`;
   }
 
-  function limpiarForm() {
-    ['f-ftipo','f-fdivision','f-fmarca','f-fmodelo','f-fserial','f-fanterior','f-factual','f-fnotas'].forEach(id => {
-      document.getElementById(id).value = '';
-    });
-    document.getElementById('f-festado').value = 'Bueno';
+  function setMag(user, pass) {
+    document.getElementById('d-mag-user').textContent = user || '—';
+    if (pass) {
+      document.getElementById('d-mag-raw').textContent = pass;
+      document.getElementById('d-mag-pass').textContent = '••••••••';
+    } else {
+      document.getElementById('d-mag-pass').textContent = '—';
+      document.getElementById('d-mag-raw').textContent = '';
+    }
+  }
+
+  function setEquipo(cardId, pre, modelo, serie, sinTexto) {
+    const card = document.getElementById(cardId);
+    if (!vacio(modelo) || !vacio(serie)) {
+      document.getElementById(pre+'-mod').textContent = modelo || '—';
+      document.getElementById(pre+'-ser').textContent = serie  || '—';
+      card.style.opacity = '1';
+    } else {
+      document.getElementById(pre+'-mod').textContent = sinTexto;
+      document.getElementById(pre+'-ser').textContent = '';
+      card.style.opacity = '0.4';
+    }
+  }
+
+  function togglePass(passId, rawId) {
+    const el  = document.getElementById(passId);
+    const raw = document.getElementById(rawId).textContent;
+    if (!raw) return;
+    el.textContent = el.textContent === '••••••••' ? raw : '••••••••';
+  }
+
+  function cerrarDetalle() { document.getElementById('overlayDetalle').classList.remove('activo'); }
+  function editarActual()  { cerrarDetalle(); abrirForm(detalleId); }
+
+  const CAMPOS = ['nombre','div','area','puesto','tel','ext','host','anydesk','ms-email','ms-pass','gm-email','gm-pass','mag-user','mag-pass','lap-mod','lap-ser','mon-mod','mon-ser','cel-mod','cel-ser','tab-mod','tab-ser'];
+
+  function abrirForm(id) {
+    const u = id ? usuarios.find(x=>x.id===id) : null;
+    document.getElementById('form-titulo').textContent = u ? 'Editar Usuario' : 'Agregar Usuario';
+    document.getElementById('btn-del').style.display   = u ? '' : 'none';
+    document.getElementById('btn-save').textContent    = u ? 'Guardar Cambios' : 'Agregar';
     document.getElementById('form-msg').innerHTML = '';
+
+    document.getElementById('f-nombre').value   = u ? u.nombre          : '';
+    document.getElementById('f-div').value      = u ? u.division        : '';
+    document.getElementById('f-area').value     = u ? u.area            : '';
+    document.getElementById('f-puesto').value   = u ? u.puesto          : '';
+    document.getElementById('f-tel').value      = u ? u.telefono        : '';
+    document.getElementById('f-ext').value      = u ? u.extension       : '';
+    document.getElementById('f-host').value     = u ? u.hostname        : '';
+    document.getElementById('f-anydesk').value  = u ? u.anydesk         : '';
+    document.getElementById('f-ms-email').value = u ? u.microsoftEmail  : '';
+    document.getElementById('f-ms-pass').value  = u ? u.microsoftPass   : '';
+    document.getElementById('f-gm-email').value = u ? u.gmailEmail      : '';
+    document.getElementById('f-gm-pass').value  = u ? u.gmailPass       : '';
+    document.getElementById('f-mag-user').value = u ? u.magayaUser      : '';
+    document.getElementById('f-mag-pass').value = u ? u.magayaPass      : '';
+    document.getElementById('f-lap-mod').value  = u ? u.laptopModelo    : '';
+    document.getElementById('f-lap-ser').value  = u ? u.laptopSerie     : '';
+    document.getElementById('f-mon-mod').value  = u ? u.monitorModelo   : '';
+    document.getElementById('f-mon-ser').value  = u ? u.monitorSerie    : '';
+    document.getElementById('f-cel-mod').value  = u ? u.celularModelo   : '';
+    document.getElementById('f-cel-ser').value  = u ? u.celularImei     : '';
+    document.getElementById('f-tab-mod').value  = u ? u.tabletModelo    : '';
+    document.getElementById('f-tab-ser').value  = u ? u.tabletImei      : '';
+
+    document.getElementById('overlayForm').classList.add('activo');
+    window._editId = id || null;
   }
 
-  function abrirNuevo() {
-    editId = null;
-    limpiarForm();
-    document.getElementById('modal-titulo').textContent = 'Agregar Equipo';
-    document.getElementById('btn-delete').style.display = 'none';
-    document.getElementById('btn-save').textContent = 'Agregar';
-    document.getElementById('modalForm').classList.add('activo');
-  }
-
-  function abrirEditar(id) {
-    const i = items.find(x => x.id === id);
-    if (!i) return;
-    editId = id;
-    document.getElementById('modal-titulo').textContent = 'Editar Equipo';
-    document.getElementById('f-ftipo').value    = i.tipo || '';
-    document.getElementById('f-fdivision').value = i.division || '';
-    document.getElementById('f-fmarca').value   = i.marca || '';
-    document.getElementById('f-fmodelo').value  = i.modelo || '';
-    document.getElementById('f-fserial').value  = i.serial || '';
-    document.getElementById('f-festado').value  = i.estado || 'Bueno';
-    document.getElementById('f-fanterior').value = i.usuarioAnterior || '';
-    document.getElementById('f-factual').value  = i.usuarioActual || '';
-    document.getElementById('f-fnotas').value   = i.notas || '';
-    document.getElementById('form-msg').innerHTML = '';
-    document.getElementById('btn-delete').style.display = '';
-    document.getElementById('btn-save').textContent = 'Guardar Cambios';
-    document.getElementById('modalForm').classList.add('activo');
-  }
-
-  function cerrar() { document.getElementById('modalForm').classList.remove('activo'); }
+  function cerrarForm() { document.getElementById('overlayForm').classList.remove('activo'); }
 
   async function guardar() {
-    const tipo   = document.getElementById('f-ftipo').value;
-    const serial = document.getElementById('f-fserial').value.trim();
-    if (!tipo || !serial) { mostrarMsg('err','Los campos Tipo y Serial son obligatorios.'); return; }
-
+    const nombre = document.getElementById('f-nombre').value.trim();
+    if (!nombre) { mostrarMsg('err','El nombre es obligatorio.'); return; }
     const btn = document.getElementById('btn-save');
     btn.disabled = true;
-
     const payload = {
-      tipo, serial,
-      marca:           document.getElementById('f-fmarca').value.trim(),
-      modelo:          document.getElementById('f-fmodelo').value.trim(),
-      estado:          document.getElementById('f-festado').value,
-      division:        document.getElementById('f-fdivision').value,
-      usuarioAnterior: document.getElementById('f-fanterior').value.trim(),
-      usuarioActual:   document.getElementById('f-factual').value.trim(),
-      notas:           document.getElementById('f-fnotas').value.trim()
+      nombre,
+      division:       document.getElementById('f-div').value,
+      area:           document.getElementById('f-area').value.trim(),
+      puesto:         document.getElementById('f-puesto').value.trim(),
+      telefono:       document.getElementById('f-tel').value.trim(),
+      extension:      document.getElementById('f-ext').value.trim(),
+      hostname:       document.getElementById('f-host').value.trim(),
+      anydesk:        document.getElementById('f-anydesk').value.trim(),
+      microsoftEmail: document.getElementById('f-ms-email').value.trim(),
+      microsoftPass:  document.getElementById('f-ms-pass').value.trim(),
+      gmailEmail:     document.getElementById('f-gm-email').value.trim(),
+      gmailPass:      document.getElementById('f-gm-pass').value.trim(),
+      magayaUser:     document.getElementById('f-mag-user').value.trim(),
+      magayaPass:     document.getElementById('f-mag-pass').value.trim(),
+      laptopModelo:   document.getElementById('f-lap-mod').value.trim(),
+      laptopSerie:    document.getElementById('f-lap-ser').value.trim(),
+      monitorModelo:  document.getElementById('f-mon-mod').value.trim(),
+      monitorSerie:   document.getElementById('f-mon-ser').value.trim(),
+      celularModelo:  document.getElementById('f-cel-mod').value.trim(),
+      celularImei:    document.getElementById('f-cel-ser').value.trim(),
+      tabletModelo:   document.getElementById('f-tab-mod').value.trim(),
+      tabletImei:     document.getElementById('f-tab-ser').value.trim()
     };
-
     try {
-      let res;
-      if (editId) {
-        payload.id = editId;
-        res = await fetch('/api/inventario?id=' + encodeURIComponent(editId), { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+      let res, item;
+      if (window._editId) {
+        payload.id = window._editId;
+        res  = await fetch('/api/usuarios?id='+encodeURIComponent(window._editId), { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+        item = await res.json();
+        const idx = usuarios.findIndex(x=>x.id===window._editId);
+        if (idx!==-1) usuarios[idx] = { ...usuarios[idx], ...payload };
       } else {
-        res = await fetch('/api/inventario', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+        res  = await fetch('/api/usuarios', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+        item = await res.json();
+        usuarios.unshift(item);
       }
-      if (!res.ok) throw new Error('Error ' + res.status);
-      const item = await res.json();
-      if (editId) {
-        const idx = items.findIndex(x => x.id === editId);
-        if (idx !== -1) items[idx] = item;
-      } else {
-        items.unshift(item);
-      }
-      actualizarStats();
+      if (!res.ok) throw new Error(item.error||'Error');
       filtrar();
-      cerrar();
+      cerrarForm();
     } catch(e) {
-      mostrarMsg('err', 'Error al guardar: ' + e.message);
-      btn.disabled = false;
+      mostrarMsg('err','Error al guardar: '+e.message);
     }
     btn.disabled = false;
   }
 
   async function eliminar() {
-    if (!editId || !confirm('¿Eliminar este equipo del inventario?')) return;
+    if (!window._editId || !confirm('¿Eliminar este usuario del inventario?')) return;
     try {
-      const res = await fetch('/api/inventario?id=' + encodeURIComponent(editId), { method:'DELETE' });
-      if (!res.ok) throw new Error('Error ' + res.status);
-      items = items.filter(x => x.id !== editId);
-      actualizarStats();
-      filtrar();
-      cerrar();
-    } catch(e) {
-      mostrarMsg('err', 'Error al eliminar: ' + e.message);
-    }
+      await fetch('/api/usuarios?id='+encodeURIComponent(window._editId), { method:'DELETE' });
+      usuarios = usuarios.filter(x=>x.id!==window._editId);
+      filtrar(); cerrarForm();
+    } catch(e) { mostrarMsg('err','Error: '+e.message); }
   }
 
-  function mostrarMsg(tipo, txt) {
-    document.getElementById('form-msg').innerHTML = '<div class="msg-' + tipo + '">' + txt + '</div>';
-  }
+  function mostrarMsg(t,txt) { document.getElementById('form-msg').innerHTML='<div class="msg '+t+'">'+txt+'</div>'; }
 
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(); });
-
+  document.addEventListener('keydown', e => { if(e.key==='Escape'){ cerrarDetalle(); cerrarForm(); } });
   cargar();
 </script>
 </body>
