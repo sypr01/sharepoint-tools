@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario IT - PLG</title>
+  <style>
+    :root { --navy:#1B3A6B; --blue:#2F5AA8; --red:#CC1F2A; --bg:#F0F4F9; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Segoe UI',sans-serif; background:var(--bg); color:#333; }
+
+    header { background:linear-gradient(135deg,var(--navy),var(--blue)); color:white; border-bottom:4px solid var(--red); }
+    .header-inner { display:flex; align-items:center; gap:20px; padding:14px 32px; }
+    .header-logo-wrap { background:white; border-radius:8px; padding:6px 12px; display:flex; align-items:center; }
+    .header-logo { height:52px; width:auto; display:block; }
+    .header-divider { width:1px; height:40px; background:rgba(255,255,255,0.25); }
+    header h1 { font-size:20px; font-weight:700; }
+    header p  { font-size:12px; opacity:.7; margin-top:3px; }
+    .nav-tabs { background:var(--navy); display:flex; padding:0 32px; }
+    .nav-tab { padding:10px 22px; color:rgba(255,255,255,.65); font-size:13px; font-weight:600; cursor:pointer; border:none; background:none; border-bottom:3px solid transparent; transition:all .2s; text-decoration:none; display:inline-flex; align-items:center; }
+    .nav-tab:hover { color:white; }
+    .nav-tab.activo { color:white; border-bottom-color:var(--red); }
+
+    .stats-row { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; padding:20px 32px 8px; }
+    .stat-card { background:white; border-radius:10px; padding:16px 18px; box-shadow:0 1px 4px rgba(27,58,107,.07); border-left:4px solid transparent; cursor:pointer; transition:box-shadow .2s; }
+    .stat-card:hover { box-shadow:0 4px 16px rgba(27,58,107,.12); }
+    .stat-card.laptops  { border-left-color:#2F5AA8; }
+    .stat-card.monitores { border-left-color:#10b981; }
+    .stat-card.celulares { border-left-color:#f59e0b; }
+    .stat-card.disponibles { border-left-color:#6366f1; }
+    .stat-card.baja     { border-left-color:#CC1F2A; }
+    .stat-num { font-size:28px; font-weight:800; color:var(--navy); line-height:1; }
+    .stat-label { font-size:11px; color:#778; margin-top:4px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+
+    .controles { background:white; padding:12px 32px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; border-bottom:1px solid #dde3ed; position:sticky; top:0; z-index:10; box-shadow:0 2px 8px rgba(27,58,107,.08); }
+    .buscar { flex:1; min-width:200px; padding:9px 14px; border:1px solid #c5cedb; border-radius:6px; font-size:14px; }
+    .buscar:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(47,90,168,.1); }
+    .sel { padding:8px 10px; border:1px solid #c5cedb; border-radius:6px; font-size:13px; color:#555; background:white; cursor:pointer; }
+    .sel:focus { outline:none; border-color:var(--blue); }
+    .btn-nuevo { padding:9px 18px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
+    .btn-nuevo:hover { background:var(--blue); }
+    .contador { font-size:13px; color:#778; white-space:nowrap; }
+
+    .tabla-wrap { padding:16px 32px; overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; background:white; border-radius:10px; overflow:hidden; box-shadow:0 1px 4px rgba(27,58,107,.07); }
+    thead tr { background:var(--navy); }
+    th { padding:11px 13px; text-align:left; font-size:11px; font-weight:700; color:rgba(255,255,255,.85); text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; }
+    tbody tr { border-bottom:1px solid #f0f4f9; transition:background .15s; cursor:pointer; }
+    tbody tr:last-child { border-bottom:none; }
+    tbody tr:hover { background:#f5f8fd; }
+    td { padding:10px 13px; font-size:13px; color:#444; vertical-align:middle; }
+    .item-id { font-weight:700; color:var(--navy); font-size:11px; }
+    .item-info { font-weight:600; color:#333; }
+    .item-info small { display:block; font-weight:400; color:#888; font-size:11px; margin-top:1px; }
+
+    .badge { display:inline-block; padding:3px 9px; border-radius:12px; font-size:11px; font-weight:700; white-space:nowrap; }
+    .tipo-Laptop    { background:#dbeafe; color:#1e40af; }
+    .tipo-Monitor   { background:#d1fae5; color:#065f46; }
+    .tipo-Celular   { background:#fef3c7; color:#92400e; }
+    .tipo-Tablet    { background:#ede9fe; color:#5b21b6; }
+    .tipo-Teclado   { background:#fce7f3; color:#9d174d; }
+    .tipo-Mouse     { background:#fee2e2; color:#991b1b; }
+    .tipo-Disco     { background:#e0f2fe; color:#0369a1; }
+    .tipo-default   { background:#f1f5f9; color:#475569; }
+    .estado-Bueno       { background:#d1fae5; color:#065f46; }
+    .estado-Disponible  { background:#ede9fe; color:#5b21b6; }
+    .estado-Reparacion  { background:#fef3c7; color:#92400e; }
+    .estado-Baja        { background:#fee2e2; color:#991b1b; }
+    .estado-default     { background:#f1f5f9; color:#475569; }
+
+    .sin-resultados { text-align:center; padding:50px; color:#888; font-size:15px; }
+    .cargando { text-align:center; padding:50px; color:#888; }
+    .spinner { width:32px; height:32px; border:4px solid #dde3ed; border-top-color:var(--blue); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 10px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:100; align-items:center; justify-content:center; padding:20px; }
+    .modal-overlay.activo { display:flex; }
+    .modal { background:white; border-radius:12px; width:100%; max-width:620px; max-height:90vh; overflow-y:auto; }
+    .modal-header { background:linear-gradient(135deg,var(--navy),var(--blue)); padding:18px 24px; display:flex; align-items:center; justify-content:space-between; border-bottom:3px solid var(--red); border-radius:12px 12px 0 0; }
+    .modal-header h2 { font-size:16px; color:white; font-weight:700; margin:0; }
+    .btn-x { background:none; border:none; color:rgba(255,255,255,.7); font-size:22px; cursor:pointer; line-height:1; padding:0; }
+    .btn-x:hover { color:white; }
+    .modal-body { padding:22px; }
+    .campo { margin-bottom:16px; }
+    .campo label { display:block; font-size:11px; font-weight:700; color:#556; text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px; }
+    .campo input, .campo select, .campo textarea { width:100%; padding:9px 12px; border:1px solid #c5cedb; border-radius:7px; font-size:14px; font-family:inherit; }
+    .campo input:focus, .campo select:focus, .campo textarea:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(47,90,168,.1); }
+    .campo textarea { min-height:70px; resize:vertical; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:0 16px; }
+    .modal-footer { display:flex; gap:10px; justify-content:flex-end; margin-top:16px; }
+    .btn-cancel { padding:8px 16px; border:1px solid #c5cedb; border-radius:6px; background:white; font-size:13px; cursor:pointer; }
+    .btn-cancel:hover { background:#f8f9fa; }
+    .btn-save { padding:8px 18px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; }
+    .btn-save:hover { background:var(--blue); }
+    .btn-save:disabled { opacity:.6; cursor:default; }
+    .btn-delete { padding:8px 14px; background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; margin-right:auto; }
+    .btn-delete:hover { background:#fecaca; }
+    .msg-ok  { background:#d1fae5; border:1px solid #6ee7b7; color:#065f46; padding:10px 14px; border-radius:7px; font-size:13px; margin-bottom:12px; }
+    .msg-err { background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:10px 14px; border-radius:7px; font-size:13px; margin-bottom:12px; }
+
+    @media (max-width:640px) { .stats-row { grid-template-columns:repeat(2,1fr); } .grid-2 { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-logo-wrap">
+      <img src="log PLG.png" alt="PLG" class="header-logo">
+    </div>
+    <div class="header-divider"></div>
+    <div>
+      <h1>Inventario Informático</h1>
+      <p>PANAMERICAN LOGISTICS GROUP</p>
+    </div>
+  </div>
+  <nav class="nav-tabs">
+    <a href="index.html" class="nav-tab">🏠 Portal Principal</a>
+    <a href="inventario.html" class="nav-tab activo">💻 Inventario IT</a>
+    <a href="tickets.html" class="nav-tab">🎫 Tickets IT</a>
+  </nav>
+</header>
+
+<div class="stats-row">
+  <div class="stat-card laptops" onclick="filtrarTipo('Laptop')">
+    <div class="stat-num" id="s-laptops">—</div>
+    <div class="stat-label">Laptops</div>
+  </div>
+  <div class="stat-card monitores" onclick="filtrarTipo('Monitor')">
+    <div class="stat-num" id="s-monitores">—</div>
+    <div class="stat-label">Monitores</div>
+  </div>
+  <div class="stat-card celulares" onclick="filtrarTipo('Celular')">
+    <div class="stat-num" id="s-celulares">—</div>
+    <div class="stat-label">Celulares</div>
+  </div>
+  <div class="stat-card disponibles" onclick="filtrarEstado('Disponible')">
+    <div class="stat-num" id="s-disponibles">—</div>
+    <div class="stat-label">Disponibles</div>
+  </div>
+  <div class="stat-card baja" onclick="filtrarEstado('Baja')">
+    <div class="stat-num" id="s-baja">—</div>
+    <div class="stat-label">Dados de Baja</div>
+  </div>
+</div>
+
+<div class="controles">
+  <input class="buscar" type="text" placeholder="Buscar por serial, marca, modelo, usuario..." oninput="filtrar()">
+  <select class="sel" id="f-tipo" onchange="filtrar()">
+    <option value="">Todos los tipos</option>
+    <option value="Laptop">Laptop</option>
+    <option value="Monitor">Monitor</option>
+    <option value="Celular">Celular</option>
+    <option value="Tablet">Tablet</option>
+    <option value="Teclado">Teclado</option>
+    <option value="Mouse">Mouse</option>
+    <option value="Disco">Disco</option>
+    <option value="Otro">Otro</option>
+  </select>
+  <select class="sel" id="f-division" onchange="filtrar()">
+    <option value="">Todas las divisiones</option>
+    <option value="PLG DE EL SALVADOR">PLG DE EL SALVADOR</option>
+    <option value="PLG DIVISION ADUANAS">PLG DIVISION ADUANAS</option>
+    <option value="PLG DIVISION TERRESTRE">PLG DIVISION TERRESTRE</option>
+    <option value="PLG DOMINICANA">PLG DOMINICANA</option>
+    <option value="PLG GROUP">PLG GROUP</option>
+  </select>
+  <select class="sel" id="f-estado" onchange="filtrar()">
+    <option value="">Todos los estados</option>
+    <option value="Bueno">Bueno</option>
+    <option value="Disponible">Disponible</option>
+    <option value="Reparacion">En Reparación</option>
+    <option value="Baja">Dado de Baja</option>
+  </select>
+  <span class="contador" id="contador"></span>
+  <button class="btn-nuevo" onclick="abrirNuevo()">+ Agregar Equipo</button>
+</div>
+
+<div class="tabla-wrap">
+  <div id="contenedor">
+    <div class="cargando"><div class="spinner"></div><p>Cargando inventario...</p></div>
+  </div>
+</div>
+
+<!-- Modal Nuevo / Editar -->
+<div class="modal-overlay" id="modalForm">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-titulo">Agregar Equipo</h2>
+      <button class="btn-x" onclick="cerrar()">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="form-msg"></div>
+      <div class="grid-2">
+        <div class="campo">
+          <label>Tipo *</label>
+          <select id="f-ftipo">
+            <option value="">— Seleccionar —</option>
+            <option value="Laptop">Laptop</option>
+            <option value="Monitor">Monitor</option>
+            <option value="Celular">Celular</option>
+            <option value="Tablet">Tablet</option>
+            <option value="Teclado">Teclado</option>
+            <option value="Mouse">Mouse</option>
+            <option value="Disco">Disco</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>División</label>
+          <select id="f-fdivision">
+            <option value="">— Seleccionar —</option>
+            <option value="PLG DE EL SALVADOR">PLG DE EL SALVADOR</option>
+            <option value="PLG DIVISION ADUANAS">PLG DIVISION ADUANAS</option>
+            <option value="PLG DIVISION TERRESTRE">PLG DIVISION TERRESTRE</option>
+            <option value="PLG DOMINICANA">PLG DOMINICANA</option>
+            <option value="PLG GROUP">PLG GROUP</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Marca</label>
+          <input type="text" id="f-fmarca" placeholder="Ej: Lenovo, Dell, Samsung">
+        </div>
+        <div class="campo">
+          <label>Modelo</label>
+          <input type="text" id="f-fmodelo" placeholder="Ej: ThinkPad E16 Gen 2">
+        </div>
+        <div class="campo">
+          <label>Serial / IMEI *</label>
+          <input type="text" id="f-fserial" placeholder="Número de serie o IMEI">
+        </div>
+        <div class="campo">
+          <label>Estado</label>
+          <select id="f-festado">
+            <option value="Bueno">Bueno</option>
+            <option value="Disponible">Disponible</option>
+            <option value="Reparacion">En Reparación</option>
+            <option value="Baja">Dado de Baja</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Usuario Anterior</label>
+          <input type="text" id="f-fanterior" placeholder="Nombre del usuario anterior">
+        </div>
+        <div class="campo">
+          <label>Usuario Actual</label>
+          <input type="text" id="f-factual" placeholder="Nombre del usuario actual">
+        </div>
+      </div>
+      <div class="campo">
+        <label>Notas / Observaciones</label>
+        <textarea id="f-fnotas" placeholder="Detalles adicionales, componentes, mantenimientos..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-delete" id="btn-delete" onclick="eliminar()" style="display:none">🗑 Eliminar</button>
+        <button class="btn-cancel" onclick="cerrar()">Cancelar</button>
+        <button class="btn-save" id="btn-save" onclick="guardar()">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let items = [], editId = null;
+
+  function badgeTipo(t) {
+    var cls = 'tipo-' + (t || 'default');
+    var clases = ['Laptop','Monitor','Celular','Tablet','Teclado','Mouse','Disco'];
+    if (!clases.includes(t)) cls = 'tipo-default';
+    return '<span class="badge ' + cls + '">' + (t || '—') + '</span>';
+  }
+  function badgeEstado(e) {
+    var mapa = { 'Bueno':'estado-Bueno','Disponible':'estado-Disponible','Reparacion':'estado-Reparacion','Baja':'estado-Baja' };
+    var cls = mapa[e] || 'estado-default';
+    return '<span class="badge ' + cls + '">' + (e || '—') + '</span>';
+  }
+  function esc(s) { var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+
+  async function cargar() {
+    try {
+      const res = await fetch('/api/inventario');
+      if (!res.ok) throw new Error('Error ' + res.status);
+      items = await res.json();
+      actualizarStats();
+      filtrar();
+    } catch (e) {
+      document.getElementById('contenedor').innerHTML = '<div class="sin-resultados">Error al cargar inventario: ' + e.message + '</div>';
+    }
+  }
+
+  function actualizarStats() {
+    document.getElementById('s-laptops').textContent   = items.filter(i => i.tipo === 'Laptop').length;
+    document.getElementById('s-monitores').textContent = items.filter(i => i.tipo === 'Monitor').length;
+    document.getElementById('s-celulares').textContent = items.filter(i => i.tipo === 'Celular').length;
+    document.getElementById('s-disponibles').textContent = items.filter(i => i.estado === 'Disponible').length;
+    document.getElementById('s-baja').textContent      = items.filter(i => i.estado === 'Baja').length;
+  }
+
+  function filtrarTipo(t) { document.getElementById('f-tipo').value = t; document.getElementById('f-estado').value = ''; filtrar(); }
+  function filtrarEstado(e) { document.getElementById('f-estado').value = e; document.getElementById('f-tipo').value = ''; filtrar(); }
+
+  function filtrar() {
+    const q   = document.querySelector('.buscar').value.toLowerCase();
+    const tip = document.getElementById('f-tipo').value;
+    const div = document.getElementById('f-division').value;
+    const est = document.getElementById('f-estado').value;
+
+    const res = items.filter(i => {
+      const mQ   = !q   || [i.serial, i.marca, i.modelo, i.usuarioActual, i.usuarioAnterior, i.notas, i.id].some(v => v && v.toLowerCase().includes(q));
+      const mTip = !tip || i.tipo === tip;
+      const mDiv = !div || i.division === div;
+      const mEst = !est || i.estado === est;
+      return mQ && mTip && mDiv && mEst;
+    });
+    renderizar(res);
+  }
+
+  function renderizar(lista) {
+    document.getElementById('contador').textContent = lista.length + ' equipo' + (lista.length !== 1 ? 's' : '');
+    if (!lista.length) {
+      document.getElementById('contenedor').innerHTML = '<div class="sin-resultados">No se encontraron equipos con ese criterio.</div>';
+      return;
+    }
+    const filas = lista.map(i => `<tr onclick="abrirEditar('${i.id}')">
+      <td><span class="item-id">${esc(i.id).replace('INV-','')}</span></td>
+      <td>${badgeTipo(i.tipo)}</td>
+      <td class="item-info">${esc(i.marca)} ${esc(i.modelo)}<small>${esc(i.serial)}</small></td>
+      <td>${badgeEstado(i.estado)}</td>
+      <td style="font-size:12px;">${esc(i.division) || '—'}</td>
+      <td style="font-size:12px;">${esc(i.usuarioActual) || '<span style="color:#bbb;">Sin asignar</span>'}</td>
+      <td style="font-size:11px;color:#888;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(i.notas)}</td>
+    </tr>`).join('');
+
+    document.getElementById('contenedor').innerHTML = `<table>
+      <thead><tr>
+        <th>ID</th><th>Tipo</th><th>Equipo / Serial</th><th>Estado</th><th>División</th><th>Usuario Actual</th><th>Notas</th>
+      </tr></thead>
+      <tbody>${filas}</tbody>
+    </table>`;
+  }
+
+  function limpiarForm() {
+    ['f-ftipo','f-fdivision','f-fmarca','f-fmodelo','f-fserial','f-fanterior','f-factual','f-fnotas'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('f-festado').value = 'Bueno';
+    document.getElementById('form-msg').innerHTML = '';
+  }
+
+  function abrirNuevo() {
+    editId = null;
+    limpiarForm();
+    document.getElementById('modal-titulo').textContent = 'Agregar Equipo';
+    document.getElementById('btn-delete').style.display = 'none';
+    document.getElementById('btn-save').textContent = 'Agregar';
+    document.getElementById('modalForm').classList.add('activo');
+  }
+
+  function abrirEditar(id) {
+    const i = items.find(x => x.id === id);
+    if (!i) return;
+    editId = id;
+    document.getElementById('modal-titulo').textContent = 'Editar Equipo';
+    document.getElementById('f-ftipo').value    = i.tipo || '';
+    document.getElementById('f-fdivision').value = i.division || '';
+    document.getElementById('f-fmarca').value   = i.marca || '';
+    document.getElementById('f-fmodelo').value  = i.modelo || '';
+    document.getElementById('f-fserial').value  = i.serial || '';
+    document.getElementById('f-festado').value  = i.estado || 'Bueno';
+    document.getElementById('f-fanterior').value = i.usuarioAnterior || '';
+    document.getElementById('f-factual').value  = i.usuarioActual || '';
+    document.getElementById('f-fnotas').value   = i.notas || '';
+    document.getElementById('form-msg').innerHTML = '';
+    document.getElementById('btn-delete').style.display = '';
+    document.getElementById('btn-save').textContent = 'Guardar Cambios';
+    document.getElementById('modalForm').classList.add('activo');
+  }
+
+  function cerrar() { document.getElementById('modalForm').classList.remove('activo'); }
+
+  async function guardar() {
+    const tipo   = document.getElementById('f-ftipo').value;
+    const serial = document.getElementById('f-fserial').value.trim();
+    if (!tipo || !serial) { mostrarMsg('err','Los campos Tipo y Serial son obligatorios.'); return; }
+
+    const btn = document.getElementById('btn-save');
+    btn.disabled = true;
+
+    const payload = {
+      tipo, serial,
+      marca:           document.getElementById('f-fmarca').value.trim(),
+      modelo:          document.getElementById('f-fmodelo').value.trim(),
+      estado:          document.getElementById('f-festado').value,
+      division:        document.getElementById('f-fdivision').value,
+      usuarioAnterior: document.getElementById('f-fanterior').value.trim(),
+      usuarioActual:   document.getElementById('f-factual').value.trim(),
+      notas:           document.getElementById('f-fnotas').value.trim()
+    };
+
+    try {
+      let res;
+      if (editId) {
+        payload.id = editId;
+        res = await fetch('/api/inventario?id=' + encodeURIComponent(editId), { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+      } else {
+        res = await fetch('/api/inventario', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+      }
+      if (!res.ok) throw new Error('Error ' + res.status);
+      const item = await res.json();
+      if (editId) {
+        const idx = items.findIndex(x => x.id === editId);
+        if (idx !== -1) items[idx] = item;
+      } else {
+        items.unshift(item);
+      }
+      actualizarStats();
+      filtrar();
+      cerrar();
+    } catch(e) {
+      mostrarMsg('err', 'Error al guardar: ' + e.message);
+      btn.disabled = false;
+    }
+    btn.disabled = false;
+  }
+
+  async function eliminar() {
+    if (!editId || !confirm('¿Eliminar este equipo del inventario?')) return;
+    try {
+      const res = await fetch('/api/inventario?id=' + encodeURIComponent(editId), { method:'DELETE' });
+      if (!res.ok) throw new Error('Error ' + res.status);
+      items = items.filter(x => x.id !== editId);
+      actualizarStats();
+      filtrar();
+      cerrar();
+    } catch(e) {
+      mostrarMsg('err', 'Error al eliminar: ' + e.message);
+    }
+  }
+
+  function mostrarMsg(tipo, txt) {
+    document.getElementById('form-msg').innerHTML = '<div class="msg-' + tipo + '">' + txt + '</div>';
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(); });
+
+  cargar();
+</script>
+</body>
+</html>
