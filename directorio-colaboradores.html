@@ -256,7 +256,7 @@
       var btn = document.createElement('button');
       btn.className = 'filtro';
       btn.dataset.val = o;
-      btn.textContent = o.replace('PLG ', '').replace('DIVISION ', 'Div. ');
+      btn.textContent = o;
       btn.onclick = function() { setFiltroOficina(this); };
       filtrosDiv.appendChild(btn);
     });
