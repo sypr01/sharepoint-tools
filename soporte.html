@@ -165,6 +165,16 @@
             </select>
           </div>
           <div class="campo">
+            <label>División *</label>
+            <select id="division">
+              <option value="">— Seleccionar —</option>
+              <option value="PLG de El Salvador">PLG de El Salvador</option>
+              <option value="PLG División Aduanas">PLG División Aduanas</option>
+              <option value="PLG División Terrestre">PLG División Terrestre</option>
+              <option value="PLG Dominicana">PLG Dominicana</option>
+            </select>
+          </div>
+          <div class="campo">
             <label>Tu nombre *</label>
             <input type="text" id="solicitante" placeholder="Nombre completo">
           </div>
@@ -186,10 +196,11 @@
     const titulo      = document.getElementById('titulo').value.trim();
     const descripcion = document.getElementById('descripcion').value.trim();
     const categoria   = document.getElementById('categoria').value;
+    const division    = document.getElementById('division').value;
     const solicitante = document.getElementById('solicitante').value.trim();
     const email       = document.getElementById('email').value.trim();
 
-    if (!titulo || !descripcion || !categoria || !solicitante || !email) {
+    if (!titulo || !descripcion || !categoria || !division || !solicitante || !email) {
       mostrarMensaje('err', 'Completa todos los campos obligatorios marcados con *');
       return;
     }
@@ -201,6 +212,7 @@
     const payload = {
       titulo, descripcion, categoria,
       prioridad:    document.getElementById('prioridad').value,
+      departamento: division,
       solicitante, email
     };
 
