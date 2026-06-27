@@ -66,7 +66,8 @@ module.exports = async function (context, req) {
         var usuarios = (data.value || [])
             .filter(function(u) {
                 var oficina = u.officeLocation || u.companyName || '';
-                return u.mail && u.mail.includes('@plg') && oficina && oficina !== 'PLG AD';
+                var permitidas = ['PLG DE EL SALVADOR','PLG DIVISION ADUANAS','PLG DIVISION TERRESTRE','PLG DOMINICANA','PLG GROUP'];
+                return u.mail && u.mail.includes('@plg') && permitidas.indexOf(oficina.toUpperCase()) !== -1;
             })
             .map(function(u) {
                 var tel = (u.businessPhones && u.businessPhones.length) ? u.businessPhones[0] : '';
