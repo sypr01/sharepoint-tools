@@ -707,11 +707,11 @@ async function iniciarBusquedaDir() {
   var hint=document.getElementById('dir-hint');
   if (hint) hint.textContent='⏳ cargando...';
   try {
-    var res=await fetch('/api/colaboradores');
+    var res=await fetch('/api/colaboradores?nofoto=1');
     var data=await res.json();
     _colabs=Array.isArray(data) ? data : [];
     _colasCargados=true;
-    if (hint) hint.textContent=_colabs.length ? '✓ '+_colabs.length+' colaboradores' : '⚠️ sin datos';
+    if (hint) hint.textContent=_colabs.length ? '✓ '+_colabs.length+' disponibles' : '⚠️ sin datos';
   } catch(e) {
     _colabs=[];
     if (hint) hint.textContent='⚠️ error al cargar';
@@ -722,6 +722,11 @@ function buscarDir() {
   var q=document.getElementById('dir-search').value.trim().toLowerCase();
   var lista=document.getElementById('dir-lista');
   if (q.length<2) { lista.style.display='none'; return; }
+  if (!_colasCargados) {
+    lista.innerHTML='<div class="dir-item" style="color:#778;cursor:default;justify-content:center">⏳ Cargando directorio PLG...</div>';
+    lista.style.display='';
+    return;
+  }
   if (!Array.isArray(_colabs)||!_colabs.length) { lista.style.display='none'; return; }
   _dirResultados=_colabs.filter(function(c){return c.nombre&&c.nombre.toLowerCase().includes(q);}).slice(0,8);
   if (!_dirResultados.length) { lista.style.display='none'; return; }
