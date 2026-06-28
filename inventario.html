@@ -380,24 +380,6 @@
         </div>
       </div>
 
-      <!-- Manual -->
-      <div class="dir-box">
-        <div class="dir-box-label">✏️ Ingresar manualmente</div>
-        <div class="g2">
-          <div class="campo"><label>Tipo</label>
-            <select id="eq-man-tipo">
-              <option>Laptop</option><option>Monitor</option><option>Celular</option>
-              <option>Teclado</option><option>Mouse</option><option>Tablet</option>
-              <option>Impresora</option><option>Otro</option>
-            </select>
-          </div>
-          <div class="campo"><label>Modelo / Marca</label><input id="eq-man-mod" type="text" placeholder="Ej: Lenovo ThinkPad E16"></div>
-          <div class="campo"><label>Serie / IMEI</label><input id="eq-man-ser" type="text" placeholder="Opcional"></div>
-          <div class="campo" style="display:flex;align-items:flex-end">
-            <button type="button" onclick="agregarEqManual()" class="btn-save" style="width:100%">+ Agregar</button>
-          </div>
-        </div>
-      </div>
 
       <div class="form-footer">
         <button class="btn-del-form" id="btn-del" onclick="eliminarUsuario()" style="display:none">🗑 Eliminar</button>
@@ -643,8 +625,6 @@ function abrirForm(id) {
   } else {
     _equiposForm=[];
   }
-  document.getElementById('eq-man-mod').value='';
-  document.getElementById('eq-man-ser').value='';
   document.getElementById('eq-inv-sel').value='';
   renderEqFormLista();
 
@@ -835,16 +815,6 @@ function agregarEqDeInv() {
   renderEqFormLista();
 }
 
-function agregarEqManual() {
-  var tipo=document.getElementById('eq-man-tipo').value;
-  var mod=document.getElementById('eq-man-mod').value.trim();
-  var ser=document.getElementById('eq-man-ser').value.trim();
-  if (!mod) { alert('Ingrese el modelo o marca del equipo.'); return; }
-  _equiposForm.push({tipo:tipo, modelo:mod, serie:ser, invId:''});
-  document.getElementById('eq-man-mod').value='';
-  document.getElementById('eq-man-ser').value='';
-  renderEqFormLista();
-}
 
 function quitarEq(i) {
   _equiposForm.splice(i,1);
