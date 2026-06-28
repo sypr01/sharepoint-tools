@@ -148,6 +148,10 @@
     .dir-sel-nombre { font-weight:700; }
     .dir-sel-clear { background:none; border:none; color:#065f46; cursor:pointer; font-size:16px; line-height:1; }
 
+    /* Equipment picker in form */
+    .eq-picker-box { background:#f8fafc; border:1px solid #dde3ed; border-radius:8px; padding:11px 12px 4px; margin-bottom:14px; position:relative; }
+    .eq-picker-label { font-size:11px; font-weight:700; color:#556; text-transform:uppercase; letter-spacing:.4px; margin-bottom:7px; display:flex; align-items:center; gap:5px; }
+
     .sin-datos { grid-column:1/-1; text-align:center; padding:60px; color:#888; font-size:14px; }
     .cargando  { grid-column:1/-1; text-align:center; padding:60px; color:#888; }
     .spinner { width:36px; height:36px; border:4px solid #dde3ed; border-top-color:var(--blue); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 12px; }
@@ -364,15 +368,49 @@
       </div>
 
       <div class="form-section">💻 Equipos Asignados</div>
-      <div class="g2">
-        <div class="campo"><label>Laptop / Equipo</label><input id="f-lap-mod" type="text" placeholder="Ej: Lenovo E16 Gen 2"></div>
-        <div class="campo"><label>Serie Laptop</label><input id="f-lap-ser" type="text" placeholder="Número de serie"></div>
-        <div class="campo"><label>Monitor</label><input id="f-mon-mod" type="text" placeholder="Ej: Samsung F24T350"></div>
-        <div class="campo"><label>Serie Monitor</label><input id="f-mon-ser" type="text" placeholder="Número de serie"></div>
-        <div class="campo"><label>Celular</label><input id="f-cel-mod" type="text" placeholder="Ej: iPhone 17 Pro Max"></div>
-        <div class="campo"><label>IMEI Celular</label><input id="f-cel-ser" type="text" placeholder="IMEI"></div>
-        <div class="campo"><label>Tablet</label><input id="f-tab-mod" type="text" placeholder="Modelo de tablet"></div>
-        <div class="campo"><label>IMEI Tablet</label><input id="f-tab-ser" type="text" placeholder="IMEI"></div>
+
+      <!-- Laptop picker -->
+      <div class="eq-picker-box">
+        <div class="eq-picker-label">💻 Laptop</div>
+        <input class="dir-input" id="eq-lap-search" type="text" placeholder="Buscar laptop en inventario..." oninput="buscarEqForm(this,'Laptop','eq-lap-lista','f-lap-mod','f-lap-ser','eq-lap-search')" autocomplete="off">
+        <div class="dir-lista" id="eq-lap-lista"></div>
+        <div class="g2" style="margin-top:8px">
+          <div class="campo"><label>Modelo</label><input id="f-lap-mod" type="text" placeholder="Ej: Lenovo E16 Gen 2"></div>
+          <div class="campo"><label>Serie</label><input id="f-lap-ser" type="text" placeholder="Número de serie"></div>
+        </div>
+      </div>
+
+      <!-- Monitor picker -->
+      <div class="eq-picker-box">
+        <div class="eq-picker-label">🖥️ Monitor</div>
+        <input class="dir-input" id="eq-mon-search" type="text" placeholder="Buscar monitor en inventario..." oninput="buscarEqForm(this,'Monitor','eq-mon-lista','f-mon-mod','f-mon-ser','eq-mon-search')" autocomplete="off">
+        <div class="dir-lista" id="eq-mon-lista"></div>
+        <div class="g2" style="margin-top:8px">
+          <div class="campo"><label>Modelo</label><input id="f-mon-mod" type="text" placeholder="Ej: Samsung F24T350"></div>
+          <div class="campo"><label>Serie</label><input id="f-mon-ser" type="text" placeholder="Número de serie"></div>
+        </div>
+      </div>
+
+      <!-- Celular picker -->
+      <div class="eq-picker-box">
+        <div class="eq-picker-label">📱 Celular</div>
+        <input class="dir-input" id="eq-cel-search" type="text" placeholder="Buscar celular en inventario..." oninput="buscarEqForm(this,'Celular','eq-cel-lista','f-cel-mod','f-cel-ser','eq-cel-search')" autocomplete="off">
+        <div class="dir-lista" id="eq-cel-lista"></div>
+        <div class="g2" style="margin-top:8px">
+          <div class="campo"><label>Modelo</label><input id="f-cel-mod" type="text" placeholder="Ej: iPhone 17 Pro Max"></div>
+          <div class="campo"><label>IMEI</label><input id="f-cel-ser" type="text" placeholder="IMEI"></div>
+        </div>
+      </div>
+
+      <!-- Tablet picker -->
+      <div class="eq-picker-box">
+        <div class="eq-picker-label">📲 Tablet</div>
+        <input class="dir-input" id="eq-tab-search" type="text" placeholder="Buscar tablet en inventario..." oninput="buscarEqForm(this,'Tablet','eq-tab-lista','f-tab-mod','f-tab-ser','eq-tab-search')" autocomplete="off">
+        <div class="dir-lista" id="eq-tab-lista"></div>
+        <div class="g2" style="margin-top:8px">
+          <div class="campo"><label>Modelo</label><input id="f-tab-mod" type="text" placeholder="Modelo de tablet"></div>
+          <div class="campo"><label>IMEI</label><input id="f-tab-ser" type="text" placeholder="IMEI"></div>
+        </div>
       </div>
 
       <div class="form-footer">
@@ -589,7 +627,14 @@ function abrirForm(id) {
   document.getElementById('f-tab-mod').value  = u?u.tabletModelo:'';
   document.getElementById('f-tab-ser').value  = u?u.tabletImei:'';
 
-  if (!u) iniciarBusquedaDir();
+  // reset equipment pickers
+  ['lap','mon','cel','tab'].forEach(function(k){
+    var si=document.getElementById('eq-'+k+'-search');
+    var li=document.getElementById('eq-'+k+'-lista');
+    if(si) si.value='';
+    if(li) li.style.display='none';
+  });
+
   document.getElementById('overlayForm').classList.add('activo');
 }
 function cerrarForm() { document.getElementById('overlayForm').classList.remove('activo'); }
@@ -717,12 +762,24 @@ function limpiarDirSel() {
 /* ══════════════════════════
    EQUIPOS
    ══════════════════════════ */
-var equipos=[], equiposCargados=false, _eqEditId=null;
+var equipos=[], equiposCargados=false, _eqEditId=null, _equiposDatos=false;
 
-async function cargarEquipos() {
+async function cargarEquiposData() {
+  if (_equiposDatos) return;
   try {
     var res=await fetch('/api/inventario');
     equipos=await res.json();
+    _equiposDatos=true;
+  } catch(e) { /* will retry when tab opens */ }
+}
+
+async function cargarEquipos() {
+  try {
+    if (!_equiposDatos) {
+      var res=await fetch('/api/inventario');
+      equipos=await res.json();
+      _equiposDatos=true;
+    }
     equiposCargados=true;
     document.getElementById('eq-cargando').style.display='none';
     document.getElementById('tabla-eq').style.display='';
@@ -730,6 +787,36 @@ async function cargarEquipos() {
   } catch(e) {
     document.getElementById('eq-cargando').textContent='Error al cargar: '+e.message;
   }
+}
+
+function buscarEqForm(input, tipo, listaId, modId, serId, searchId) {
+  var q=input.value.trim().toLowerCase();
+  var lista=document.getElementById(listaId);
+  if (q.length<1) { lista.style.display='none'; return; }
+  var res=equipos.filter(function(e){
+    return e.tipo===tipo && [e.marca,e.modelo,e.serial].some(function(v){return v&&v.toLowerCase().includes(q);});
+  }).slice(0,7);
+  if (!res.length) { lista.style.display='none'; return; }
+  lista.innerHTML=res.map(function(e){
+    var icon=TIPO_ICON[e.tipo]||'🔧';
+    var ecls=ESTADO_CLS[e.estado]||'beq-bueno';
+    return '<div class="dir-item" onclick="selEqForm(\''+e.id+'\',\''+modId+'\',\''+serId+'\',\''+listaId+'\',\''+searchId+'\')">'+
+      '<span style="font-size:18px;width:32px;text-align:center;display:inline-block;flex-shrink:0">'+icon+'</span>'+
+      '<div><div class="dir-item-nombre">'+esc((e.marca||'')+' '+(e.modelo||''))+'</div>'+
+      '<div class="dir-item-info">Serie: '+esc(e.serial||'')+
+      ' &nbsp;<span class="beq '+ecls+'" style="font-size:10px">'+esc(e.estado||'')+'</span>'+
+      (e.usuarioActual?' &nbsp;· '+esc(e.usuarioActual):'')+'</div></div></div>';
+  }).join('');
+  lista.style.display='';
+}
+
+function selEqForm(eqId, modId, serId, listaId, searchId) {
+  var eq=equipos.find(function(e){return e.id===eqId;});
+  if (!eq) return;
+  document.getElementById(modId).value=((eq.marca||'')+' '+(eq.modelo||'')).trim();
+  document.getElementById(serId).value=eq.serial||'';
+  document.getElementById(listaId).style.display='none';
+  document.getElementById(searchId).value='';
 }
 
 function filtrarEquipos() {
@@ -846,8 +933,15 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'){cerrarDetal
 document.addEventListener('click',function(e){
   var lista=document.getElementById('dir-lista');
   if (!lista.contains(e.target)&&e.target.id!=='dir-search') lista.style.display='none';
+  ['eq-lap-lista','eq-mon-lista','eq-cel-lista','eq-tab-lista'].forEach(function(id){
+    var l=document.getElementById(id);
+    var s=document.getElementById(id.replace('-lista','-search'));
+    if(l&&!l.contains(e.target)&&e.target!==s) l.style.display='none';
+  });
 });
 cargarUsuarios();
+iniciarBusquedaDir();
+cargarEquiposData();
 </script>
 </body>
 </html>
