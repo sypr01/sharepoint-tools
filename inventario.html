@@ -729,7 +729,11 @@ function buscarDir() {
   }
   if (!Array.isArray(_colabs)||!_colabs.length) { lista.style.display='none'; return; }
   _dirResultados=_colabs.filter(function(c){return c.nombre&&c.nombre.toLowerCase().includes(q);}).slice(0,8);
-  if (!_dirResultados.length) { lista.style.display='none'; return; }
+  if (!_dirResultados.length) {
+    lista.innerHTML='<div class="dir-item" style="color:#778;cursor:default">'+'Sin resultados para "'+esc(q)+'" — puedes ingresar los datos manualmente.</div>';
+    lista.style.display='';
+    return;
+  }
   lista.innerHTML=_dirResultados.map(function(c,i){
     var col=colorAvatar(c.nombre);
     return '<div class="dir-item" onclick="seleccionarColaborador('+i+')">'+

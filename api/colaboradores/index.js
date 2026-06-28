@@ -67,7 +67,7 @@ module.exports = async function (context, req) {
             .filter(function(u) {
                 var oficina = u.officeLocation || u.companyName || '';
                 var permitidas = ['PLG DE EL SALVADOR','PLG DIVISION ADUANAS','PLG DIVISION TERRESTRE','PLG DOMINICANA','PLG GROUP'];
-                return u.mail && u.mail.includes('@plg') && permitidas.indexOf(oficina.toUpperCase()) !== -1;
+                return u.mail && permitidas.indexOf(oficina.toUpperCase()) !== -1;
             })
             .map(function(u) {
                 var tel = (u.businessPhones && u.businessPhones.length) ? u.businessPhones[0] : '';
