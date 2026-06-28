@@ -191,6 +191,11 @@
     location.href = '/login.html';
   }
 
+  function checkAuth(res) {
+    if (res.status === 401) { sessionStorage.clear(); location.replace('/login.html'); return false; }
+    return true;
+  }
+
   function mostrarAlerta(txt, tipo) {
     var el = document.getElementById('alerta-top');
     el.textContent = txt;
@@ -206,6 +211,7 @@
   async function cargar() {
     try {
       var res  = await fetch('/api/gestion-usuarios', { headers: { Authorization: 'Bearer ' + token } });
+      if (!checkAuth(res)) return;
       var data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error');
       usuarios = data;
@@ -313,6 +319,7 @@
           body: JSON.stringify({ nombre: nombre, usuario: usuario, contrasena: pass, rol: rol })
         });
       }
+      if (!checkAuth(res)) return;
       data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error');
 
@@ -347,6 +354,7 @@
         headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + token },
         body: JSON.stringify({ contrasena: nueva })
       });
+      if (!checkAuth(res)) return;
       var data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error');
       document.getElementById('overlayPass').classList.remove('activo');
@@ -363,6 +371,7 @@
         headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + token },
         body: JSON.stringify({ activo: !actual })
       });
+      if (!checkAuth(res)) return;
       var data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error');
       mostrarAlerta(actual ? 'Usuario desactivado.' : 'Usuario activado.', 'ok');
@@ -379,6 +388,7 @@
         method: 'DELETE',
         headers: { Authorization: 'Bearer ' + token }
       });
+      if (!checkAuth(res)) return;
       var data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error');
       mostrarAlerta('Usuario eliminado.', 'ok');
