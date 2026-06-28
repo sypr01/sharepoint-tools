@@ -685,6 +685,22 @@ async function guardar() {
       usuarios.unshift(item);
     }
     if (!res.ok) throw new Error((item||{}).error||'Error');
+    // actualizar usuarioActual en inventario para cada equipo asignado del inventario
+    var invUpdates=_equiposForm.filter(function(e){return e.invId;});
+    await Promise.all(invUpdates.map(function(e){
+      var eq=equipos.find(function(x){return x.id===e.invId;});
+      if (!eq) return Promise.resolve();
+      var upd=Object.assign({},eq,{usuarioActual:nombre});
+      return fetch('/api/inventario?id='+encodeURIComponent(e.invId),{
+        method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(upd)
+      }).then(function(){
+        // actualizar cache local
+        var i=equipos.findIndex(function(x){return x.id===e.invId;});
+        if(i!==-1) equipos[i]=upd;
+      });
+    }));
     filtrarUsuarios();
     cerrarForm();
   } catch(e) { mostrarMsg('err','Error al guardar: '+e.message); }
