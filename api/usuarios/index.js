@@ -35,6 +35,7 @@ function toUser(e) {
     gmailPass:       e.gmailPass       || "",
     magayaUser:      e.magayaUser      || "",
     magayaPass:      e.magayaPass      || "",
+    equipos:         (function(){ try { return e.equipos ? JSON.parse(e.equipos) : []; } catch(x){ return []; } })(),
     laptopModelo:    e.laptopModelo    || "",
     laptopSerie:     e.laptopSerie     || "",
     monitorModelo:   e.monitorModelo   || "",
@@ -66,7 +67,9 @@ module.exports = async function (context, req) {
       }
       const now    = new Date().toISOString();
       const rowKey = "USR-" + Date.now() + "-" + Math.random().toString(36).substr(2, 4).toUpperCase();
-      const entity = { partitionKey: PARTITION, rowKey, ...b, fechaActualizacion: now };
+      const entity = { partitionKey: PARTITION, rowKey, ...b,
+        equipos: Array.isArray(b.equipos) ? JSON.stringify(b.equipos) : (b.equipos || ''),
+        fechaActualizacion: now };
       await client.createEntity(entity);
       context.res = { status: 201, headers: CORS, body: JSON.stringify(toUser(entity)) };
 
@@ -78,7 +81,9 @@ module.exports = async function (context, req) {
       }
       const b   = req.body || {};
       const now = new Date().toISOString();
-      const entity = { partitionKey: PARTITION, rowKey: id, ...b, id: undefined, fechaActualizacion: now };
+      const entity = { partitionKey: PARTITION, rowKey: id, ...b, id: undefined,
+        equipos: Array.isArray(b.equipos) ? JSON.stringify(b.equipos) : (b.equipos || ''),
+        fechaActualizacion: now };
       delete entity.id;
       await client.updateEntity(entity, "Merge");
       context.res = { status: 200, headers: CORS, body: JSON.stringify(toUser({ rowKey: id, ...b, fechaActualizacion: now })) };

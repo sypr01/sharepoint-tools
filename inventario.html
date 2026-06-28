@@ -54,6 +54,9 @@
     .chip { display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:3px 8px; border-radius:6px; background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; }
     .chip.ok   { background:#d1fae5; color:#065f46; border-color:#6ee7b7; }
     .chip.mail { background:#dbeafe; color:#1e40af; border-color:#bfdbfe; }
+    .eq-chip { display:inline-flex; align-items:center; gap:5px; font-size:12px; padding:5px 10px; border-radius:6px; background:#e4ecf7; color:var(--navy); border:1px solid #c5cedb; }
+    .eq-chip-del { background:none; border:none; cursor:pointer; color:#999; font-size:14px; line-height:1; padding:0 0 0 3px; }
+    .eq-chip-del:hover { color:var(--red); }
 
     /* Equipment table (tab Equipos) */
     .tabla-eq-wrap { margin:20px 32px; background:white; border-radius:10px; box-shadow:0 1px 4px rgba(27,58,107,.07); overflow:hidden; }
@@ -298,12 +301,7 @@
       </div>
       <div class="seccion">
         <div class="seccion-titulo">💻 Equipos Asignados</div>
-        <div class="equipos-grid">
-          <div class="equipo-card" id="eq-laptop"><div class="equipo-icon">💻</div><div class="equipo-datos"><div class="equipo-modelo" id="d-laptop-mod"></div><div class="equipo-serie" id="d-laptop-ser"></div></div></div>
-          <div class="equipo-card" id="eq-monitor"><div class="equipo-icon">🖥</div><div class="equipo-datos"><div class="equipo-modelo" id="d-mon-mod"></div><div class="equipo-serie" id="d-mon-ser"></div></div></div>
-          <div class="equipo-card" id="eq-celular"><div class="equipo-icon">📱</div><div class="equipo-datos"><div class="equipo-modelo" id="d-cel-mod"></div><div class="equipo-serie" id="d-cel-ser"></div></div></div>
-          <div class="equipo-card" id="eq-tablet"><div class="equipo-icon">📲</div><div class="equipo-datos"><div class="equipo-modelo" id="d-tab-mod"></div><div class="equipo-serie" id="d-tab-ser"></div></div></div>
-        </div>
+        <div id="eq-detalle-lista" style="display:flex;flex-direction:column;gap:8px"></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -323,16 +321,13 @@
     <div class="form-body">
       <div id="form-msg"></div>
 
-      <!-- Buscador de directorio (solo en modo agregar) -->
+      <!-- Selector de colaborador -->
       <div id="dir-wrap">
         <div class="dir-box">
-          <div class="dir-box-label">🔍 Buscar en Directorio PLG (opcional) <span id="dir-hint" style="font-weight:400;color:#aaa;font-size:10px"></span></div>
-          <input class="dir-input" id="dir-search" type="text" placeholder="Escribe el nombre del colaborador..." oninput="buscarDir()" autocomplete="off">
-          <div class="dir-lista" id="dir-lista"></div>
-          <div class="dir-sel" id="dir-sel" style="display:none">
-            <span>✅ Pre-llenado desde directorio: <span class="dir-sel-nombre" id="dir-sel-nombre"></span></span>
-            <button class="dir-sel-clear" onclick="limpiarDirSel()" title="Quitar">×</button>
-          </div>
+          <div class="dir-box-label">👤 Seleccionar Colaborador del Directorio PLG <span id="dir-hint" style="font-weight:400;color:#aaa;font-size:10px"></span></div>
+          <select id="f-colab-sel" style="width:100%;padding:8px 11px;border:1.5px solid #c5cedb;border-radius:6px;font-size:13px;font-family:inherit;background:white;color:#333" onchange="seleccionarColab()">
+            <option value="">⏳ Cargando directorio...</option>
+          </select>
         </div>
       </div>
 
@@ -369,47 +364,36 @@
 
       <div class="form-section">💻 Equipos Asignados</div>
 
-      <!-- Laptop picker -->
-      <div class="eq-picker-box">
-        <div class="eq-picker-label">💻 Laptop</div>
-        <input class="dir-input" id="eq-lap-search" type="text" placeholder="Buscar laptop en inventario..." oninput="buscarEqForm(this,'Laptop','eq-lap-lista','f-lap-mod','f-lap-ser','eq-lap-search')" autocomplete="off">
-        <div class="dir-lista" id="eq-lap-lista"></div>
-        <div class="g2" style="margin-top:8px">
-          <div class="campo"><label>Modelo</label><input id="f-lap-mod" type="text" placeholder="Ej: Lenovo E16 Gen 2"></div>
-          <div class="campo"><label>Serie</label><input id="f-lap-ser" type="text" placeholder="Número de serie"></div>
+      <!-- Lista dinámica -->
+      <div id="eq-form-lista" style="display:flex;flex-wrap:wrap;gap:6px;min-height:34px;margin-bottom:10px;padding:4px 0"></div>
+
+      <!-- Desde inventario -->
+      <div class="dir-box" style="margin-bottom:10px">
+        <div class="dir-box-label">📦 Agregar del inventario</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="eq-inv-sel" style="flex:1;padding:8px 11px;border:1.5px solid #c5cedb;border-radius:6px;font-size:13px;font-family:inherit;background:white">
+            <option value="">⏳ Cargando inventario...</option>
+          </select>
+          <button type="button" onclick="agregarEqDeInv()" class="btn-save" style="white-space:nowrap;padding:8px 14px">+ Agregar</button>
         </div>
       </div>
 
-      <!-- Monitor picker -->
-      <div class="eq-picker-box">
-        <div class="eq-picker-label">🖥️ Monitor</div>
-        <input class="dir-input" id="eq-mon-search" type="text" placeholder="Buscar monitor en inventario..." oninput="buscarEqForm(this,'Monitor','eq-mon-lista','f-mon-mod','f-mon-ser','eq-mon-search')" autocomplete="off">
-        <div class="dir-lista" id="eq-mon-lista"></div>
-        <div class="g2" style="margin-top:8px">
-          <div class="campo"><label>Modelo</label><input id="f-mon-mod" type="text" placeholder="Ej: Samsung F24T350"></div>
-          <div class="campo"><label>Serie</label><input id="f-mon-ser" type="text" placeholder="Número de serie"></div>
-        </div>
-      </div>
-
-      <!-- Celular picker -->
-      <div class="eq-picker-box">
-        <div class="eq-picker-label">📱 Celular</div>
-        <input class="dir-input" id="eq-cel-search" type="text" placeholder="Buscar celular en inventario..." oninput="buscarEqForm(this,'Celular','eq-cel-lista','f-cel-mod','f-cel-ser','eq-cel-search')" autocomplete="off">
-        <div class="dir-lista" id="eq-cel-lista"></div>
-        <div class="g2" style="margin-top:8px">
-          <div class="campo"><label>Modelo</label><input id="f-cel-mod" type="text" placeholder="Ej: iPhone 17 Pro Max"></div>
-          <div class="campo"><label>IMEI</label><input id="f-cel-ser" type="text" placeholder="IMEI"></div>
-        </div>
-      </div>
-
-      <!-- Tablet picker -->
-      <div class="eq-picker-box">
-        <div class="eq-picker-label">📲 Tablet</div>
-        <input class="dir-input" id="eq-tab-search" type="text" placeholder="Buscar tablet en inventario..." oninput="buscarEqForm(this,'Tablet','eq-tab-lista','f-tab-mod','f-tab-ser','eq-tab-search')" autocomplete="off">
-        <div class="dir-lista" id="eq-tab-lista"></div>
-        <div class="g2" style="margin-top:8px">
-          <div class="campo"><label>Modelo</label><input id="f-tab-mod" type="text" placeholder="Modelo de tablet"></div>
-          <div class="campo"><label>IMEI</label><input id="f-tab-ser" type="text" placeholder="IMEI"></div>
+      <!-- Manual -->
+      <div class="dir-box">
+        <div class="dir-box-label">✏️ Ingresar manualmente</div>
+        <div class="g2">
+          <div class="campo"><label>Tipo</label>
+            <select id="eq-man-tipo">
+              <option>Laptop</option><option>Monitor</option><option>Celular</option>
+              <option>Teclado</option><option>Mouse</option><option>Tablet</option>
+              <option>Impresora</option><option>Otro</option>
+            </select>
+          </div>
+          <div class="campo"><label>Modelo / Marca</label><input id="eq-man-mod" type="text" placeholder="Ej: Lenovo ThinkPad E16"></div>
+          <div class="campo"><label>Serie / IMEI</label><input id="eq-man-ser" type="text" placeholder="Opcional"></div>
+          <div class="campo" style="display:flex;align-items:flex-end">
+            <button type="button" onclick="agregarEqManual()" class="btn-save" style="width:100%">+ Agregar</button>
+          </div>
         </div>
       </div>
 
@@ -513,7 +497,8 @@ function filtrarUsuarios() {
   var div = document.getElementById('u-div').value;
   var res = usuarios.filter(function(u){
     var mD = !div || u.division===div;
-    var mQ = !q  || [u.nombre,u.microsoftEmail,u.gmailEmail,u.puesto,u.area,u.laptopSerie,u.celularImei,u.hostname].some(function(v){return v&&v.toLowerCase().includes(q);});
+    var eqTxt=(u.equipos||[]).map(function(e){return (e.tipo||'')+' '+(e.modelo||'')+' '+(e.serie||'');}).join(' ');
+    var mQ = !q  || [u.nombre,u.microsoftEmail,u.gmailEmail,u.puesto,u.area,u.hostname,eqTxt].some(function(v){return v&&v.toLowerCase().includes(q);});
     return mD && mQ;
   });
   renderizarUsuarios(res);
@@ -525,12 +510,19 @@ function renderizarUsuarios(lista) {
   document.getElementById('grid').innerHTML = lista.map(function(u){
     var col=colorAvatar(u.nombre||'?'), ini=iniciales(u.nombre||'?');
     var divCorto=(u.division||'').replace('PLG ','').replace('DIVISION ','DIV. ');
-    var chips=[
-      u.laptopModelo  ? '<span class="chip ok">💻 '+esc(u.laptopModelo.split(' ').slice(0,3).join(' '))+'</span>' : '',
-      u.celularModelo ? '<span class="chip ok">📱 '+esc(u.celularModelo.split(' ').slice(0,3).join(' '))+'</span>' : '',
-      u.microsoftEmail? '<span class="chip mail">✉️ Office 365</span>' : '',
-      u.gmailEmail    ? '<span class="chip mail">✉️ Gmail</span>' : '',
-    ].filter(Boolean).join('');
+    var eqArr=Array.isArray(u.equipos)&&u.equipos.length?u.equipos:[];
+    // backward compat with old flat fields
+    if(!eqArr.length){
+      if(u.laptopModelo)  eqArr=[{tipo:'Laptop', modelo:u.laptopModelo, serie:u.laptopSerie}];
+      if(u.celularModelo) eqArr=eqArr.concat([{tipo:'Celular',modelo:u.celularModelo,serie:u.celularImei}]);
+    }
+    var chips=eqArr.slice(0,3).map(function(e){
+      var icon=({Laptop:'💻',Monitor:'🖥️',Celular:'📱',Tablet:'📲',Teclado:'⌨️',Mouse:'🖱️',Impresora:'🖨️'})[e.tipo]||'🔧';
+      return '<span class="chip ok">'+icon+' '+esc((e.modelo||e.tipo||'').split(' ').slice(0,3).join(' '))+'</span>';
+    }).join('');
+    if(eqArr.length>3) chips+='<span class="chip">+' +(eqArr.length-3)+' más</span>';
+    chips+=(u.microsoftEmail?'<span class="chip mail">✉️ Office 365</span>':'')+
+           (u.gmailEmail    ?'<span class="chip mail">✉️ Gmail</span>':'');
     return '<div class="tarjeta" onclick="verDetalle(\''+u.id+'\')">'+
       '<div class="tarjeta-header"><div class="avatar" style="background:'+col+'">'+ini+'</div>'+
       '<div class="user-info"><div class="user-nombre">'+esc(u.nombre)+'</div><div class="user-puesto">'+esc(u.puesto||u.area||'')+'</div></div></div>'+
@@ -555,10 +547,28 @@ function verDetalle(id) {
   setPass('d-ms',u.microsoftEmail,u.microsoftPass);
   setPass('d-gm',u.gmailEmail,u.gmailPass);
   setMag(u.magayaUser,u.magayaPass);
-  setEquipo('eq-laptop','d-laptop',u.laptopModelo,u.laptopSerie,'Sin laptop asignada');
-  setEquipo('eq-monitor','d-mon',u.monitorModelo,u.monitorSerie,'Sin monitor asignado');
-  setEquipo('eq-celular','d-cel',u.celularModelo,u.celularImei,'Sin celular asignado');
-  setEquipo('eq-tablet','d-tab',u.tabletModelo,u.tabletImei,'Sin tablet asignada');
+  // render dynamic equipment list
+  var eqArr=Array.isArray(u.equipos)&&u.equipos.length?u.equipos:[];
+  if(!eqArr.length){
+    if(u.laptopModelo)  eqArr=[{tipo:'Laptop', modelo:u.laptopModelo,  serie:u.laptopSerie}];
+    if(u.monitorModelo) eqArr=eqArr.concat([{tipo:'Monitor',modelo:u.monitorModelo,serie:u.monitorSerie}]);
+    if(u.celularModelo) eqArr=eqArr.concat([{tipo:'Celular',modelo:u.celularModelo, serie:u.celularImei}]);
+    if(u.tabletModelo)  eqArr=eqArr.concat([{tipo:'Tablet', modelo:u.tabletModelo,  serie:u.tabletImei}]);
+  }
+  var eqIcons={Laptop:'💻',Monitor:'🖥️',Celular:'📱',Tablet:'📲',Teclado:'⌨️',Mouse:'🖱️',Impresora:'🖨️',Otro:'🔧'};
+  var el=document.getElementById('eq-detalle-lista');
+  if(!eqArr.length){
+    el.innerHTML='<div style="color:#aaa;font-size:13px;padding:8px 0">Sin equipos asignados.</div>';
+  } else {
+    el.innerHTML=eqArr.map(function(e){
+      var icon=eqIcons[e.tipo]||'🔧';
+      return '<div class="equipo-card"><div class="equipo-icon">'+icon+'</div>'+
+        '<div class="equipo-datos">'+
+        '<div class="equipo-modelo">'+esc(e.tipo||'')+(e.modelo?' — '+esc(e.modelo):'')+'</div>'+
+        (e.serie?'<div class="equipo-serie">'+esc(e.serie)+'</div>':'')+
+        '</div></div>';
+    }).join('');
+  }
   document.getElementById('overlayDetalle').classList.add('activo');
 }
 
@@ -599,10 +609,8 @@ function abrirForm(id) {
   document.getElementById('btn-del').style.display    = u?'':'none';
   document.getElementById('btn-save').textContent     = u?'Guardar Cambios':'Agregar';
   document.getElementById('form-msg').innerHTML='';
-  document.getElementById('dir-wrap').style.display   = u?'none':'';
-  document.getElementById('dir-search').value='';
-  document.getElementById('dir-lista').style.display='none';
-  document.getElementById('dir-sel').style.display='none';
+  document.getElementById('dir-wrap').style.display = u?'none':'';
+  if (!u) document.getElementById('f-colab-sel').value='';
 
   document.getElementById('f-nombre').value   = u?u.nombre:'';
   document.getElementById('f-division').value = u?u.division:'';
@@ -618,22 +626,24 @@ function abrirForm(id) {
   document.getElementById('f-gm-pass').value  = u?u.gmailPass:'';
   document.getElementById('f-mag-user').value = u?u.magayaUser:'';
   document.getElementById('f-mag-pass').value = u?u.magayaPass:'';
-  document.getElementById('f-lap-mod').value  = u?u.laptopModelo:'';
-  document.getElementById('f-lap-ser').value  = u?u.laptopSerie:'';
-  document.getElementById('f-mon-mod').value  = u?u.monitorModelo:'';
-  document.getElementById('f-mon-ser').value  = u?u.monitorSerie:'';
-  document.getElementById('f-cel-mod').value  = u?u.celularModelo:'';
-  document.getElementById('f-cel-ser').value  = u?u.celularImei:'';
-  document.getElementById('f-tab-mod').value  = u?u.tabletModelo:'';
-  document.getElementById('f-tab-ser').value  = u?u.tabletImei:'';
 
-  // reset equipment pickers
-  ['lap','mon','cel','tab'].forEach(function(k){
-    var si=document.getElementById('eq-'+k+'-search');
-    var li=document.getElementById('eq-'+k+'-lista');
-    if(si) si.value='';
-    if(li) li.style.display='none';
-  });
+  // init equipment list
+  if(u){
+    var eq=Array.isArray(u.equipos)&&u.equipos.length?u.equipos:[];
+    if(!eq.length){
+      if(u.laptopModelo)  eq=[{tipo:'Laptop', modelo:u.laptopModelo,  serie:u.laptopSerie||''}];
+      if(u.monitorModelo) eq=eq.concat([{tipo:'Monitor',modelo:u.monitorModelo,serie:u.monitorSerie||''}]);
+      if(u.celularModelo) eq=eq.concat([{tipo:'Celular',modelo:u.celularModelo, serie:u.celularImei||''}]);
+      if(u.tabletModelo)  eq=eq.concat([{tipo:'Tablet', modelo:u.tabletModelo,  serie:u.tabletImei||''}]);
+    }
+    _equiposForm=eq.map(function(e){ return {tipo:e.tipo||'Otro',modelo:e.modelo||'',serie:e.serie||'',invId:e.invId||''}; });
+  } else {
+    _equiposForm=[];
+  }
+  document.getElementById('eq-man-mod').value='';
+  document.getElementById('eq-man-ser').value='';
+  document.getElementById('eq-inv-sel').value='';
+  renderEqFormLista();
 
   document.getElementById('overlayForm').classList.add('activo');
 }
@@ -659,14 +669,7 @@ async function guardar() {
     gmailPass:     document.getElementById('f-gm-pass').value.trim(),
     magayaUser:    document.getElementById('f-mag-user').value.trim(),
     magayaPass:    document.getElementById('f-mag-pass').value.trim(),
-    laptopModelo:  document.getElementById('f-lap-mod').value.trim(),
-    laptopSerie:   document.getElementById('f-lap-ser').value.trim(),
-    monitorModelo: document.getElementById('f-mon-mod').value.trim(),
-    monitorSerie:  document.getElementById('f-mon-ser').value.trim(),
-    celularModelo: document.getElementById('f-cel-mod').value.trim(),
-    celularImei:   document.getElementById('f-cel-ser').value.trim(),
-    tabletModelo:  document.getElementById('f-tab-mod').value.trim(),
-    tabletImei:    document.getElementById('f-tab-ser').value.trim()
+    equipos:       _equiposForm
   };
   try {
     var res, item;
@@ -682,6 +685,22 @@ async function guardar() {
       usuarios.unshift(item);
     }
     if (!res.ok) throw new Error((item||{}).error||'Error');
+    // actualizar usuarioActual en inventario para cada equipo asignado del inventario
+    var invUpdates=_equiposForm.filter(function(e){return e.invId;});
+    await Promise.all(invUpdates.map(function(e){
+      var eq=equipos.find(function(x){return x.id===e.invId;});
+      if (!eq) return Promise.resolve();
+      var upd=Object.assign({},eq,{usuarioActual:nombre});
+      return fetch('/api/inventario?id='+encodeURIComponent(e.invId),{
+        method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(upd)
+      }).then(function(){
+        // actualizar cache local
+        var i=equipos.findIndex(function(x){return x.id===e.invId;});
+        if(i!==-1) equipos[i]=upd;
+      });
+    }));
     filtrarUsuarios();
     cerrarForm();
   } catch(e) { mostrarMsg('err','Error al guardar: '+e.message); }
@@ -699,41 +718,8 @@ async function eliminarUsuario() {
 
 function mostrarMsg(t,txt) { document.getElementById('form-msg').innerHTML='<div class="msg '+t+'">'+txt+'</div>'; }
 
-/* ── Buscador de directorio ── */
-var _colabs=[], _colasCargados=false, _dirResultados=[];
-
-async function iniciarBusquedaDir() {
-  if (_colasCargados) return;
-  var hint=document.getElementById('dir-hint');
-  if (hint) hint.textContent='⏳ cargando...';
-  try {
-    var res=await fetch('/api/colaboradores');
-    var data=await res.json();
-    _colabs=Array.isArray(data) ? data : [];
-    _colasCargados=true;
-    if (hint) hint.textContent=_colabs.length ? '✓ '+_colabs.length+' colaboradores' : '⚠️ sin datos';
-  } catch(e) {
-    _colabs=[];
-    if (hint) hint.textContent='⚠️ error al cargar';
-  }
-}
-
-function buscarDir() {
-  var q=document.getElementById('dir-search').value.trim().toLowerCase();
-  var lista=document.getElementById('dir-lista');
-  if (q.length<2) { lista.style.display='none'; return; }
-  if (!Array.isArray(_colabs)||!_colabs.length) { lista.style.display='none'; return; }
-  _dirResultados=_colabs.filter(function(c){return c.nombre&&c.nombre.toLowerCase().includes(q);}).slice(0,8);
-  if (!_dirResultados.length) { lista.style.display='none'; return; }
-  lista.innerHTML=_dirResultados.map(function(c,i){
-    var col=colorAvatar(c.nombre);
-    return '<div class="dir-item" onclick="seleccionarColaborador('+i+')">'+
-      '<div class="dir-item-av" style="background:'+col+'">'+iniciales(c.nombre)+'</div>'+
-      '<div><div class="dir-item-nombre">'+esc(c.nombre)+'</div>'+
-      '<div class="dir-item-info">'+esc(c.cargo||'')+(c.oficina?' · '+esc(c.oficina):'')+'</div></div></div>';
-  }).join('');
-  lista.style.display='';
-}
+/* ── Directorio (select) ── */
+var _colabs=[], _colasCargados=false;
 
 var DIV_MAP={
   'PLG DE EL SALVADOR':'PLG DE EL SALVADOR',
@@ -743,34 +729,60 @@ var DIV_MAP={
   'PLG GROUP':'PLG GROUP'
 };
 
-function seleccionarColaborador(i) {
-  var c=_dirResultados[i];
-  document.getElementById('f-nombre').value   = c.nombre||'';
+function nombreLimpio(n) { return (n||'').split('--')[0].split(' -')[0].trim(); }
+
+async function iniciarBusquedaDir() {
+  if (_colasCargados) return;
+  var hint=document.getElementById('dir-hint');
+  if (hint) hint.textContent='⏳ cargando...';
+  try {
+    var res=await fetch('/api/colaboradores?nofoto=1');
+    var data=await res.json();
+    _colabs=Array.isArray(data) ? data : [];
+    _colabs.sort(function(a,b){ return nombreLimpio(a.nombre).localeCompare(nombreLimpio(b.nombre)); });
+    _colasCargados=true;
+    var sel=document.getElementById('f-colab-sel');
+    if (sel) {
+      sel.innerHTML='<option value="">— Seleccionar colaborador —</option>'+
+        _colabs.map(function(c,i){
+          return '<option value="'+i+'">'+esc(nombreLimpio(c.nombre))+(c.cargo?' — '+esc(c.cargo):'')+'</option>';
+        }).join('');
+    }
+    if (hint) hint.textContent=_colabs.length ? '✓ '+_colabs.length+' colaboradores' : '⚠️ sin datos';
+  } catch(e) {
+    _colabs=[];
+    var sel=document.getElementById('f-colab-sel');
+    if (sel) sel.innerHTML='<option value="">⚠️ Error al cargar directorio</option>';
+    if (hint) hint.textContent='⚠️ error';
+  }
+}
+
+function seleccionarColab() {
+  var sel=document.getElementById('f-colab-sel');
+  var i=parseInt(sel.value);
+  if (isNaN(i)||!_colabs[i]) {
+    document.getElementById('f-nombre').value='';
+    document.getElementById('f-division').value='';
+    document.getElementById('f-area').value='';
+    document.getElementById('f-puesto').value='';
+    document.getElementById('f-tel').value='';
+    document.getElementById('f-ms-email').value='';
+    return;
+  }
+  var c=_colabs[i];
+  document.getElementById('f-nombre').value   = nombreLimpio(c.nombre);
   document.getElementById('f-division').value = DIV_MAP[(c.oficina||'').toUpperCase()]||'';
   document.getElementById('f-area').value     = c.departamento||'';
   document.getElementById('f-puesto').value   = c.cargo||'';
   document.getElementById('f-tel').value      = c.telefono||'';
   document.getElementById('f-ms-email').value = c.correo||'';
-  document.getElementById('dir-sel-nombre').textContent = c.nombre;
-  document.getElementById('dir-sel').style.display='';
-  document.getElementById('dir-lista').style.display='none';
-  document.getElementById('dir-search').value='';
-}
-
-function limpiarDirSel() {
-  document.getElementById('dir-sel').style.display='none';
-  document.getElementById('f-nombre').value='';
-  document.getElementById('f-division').value='';
-  document.getElementById('f-area').value='';
-  document.getElementById('f-puesto').value='';
-  document.getElementById('f-tel').value='';
-  document.getElementById('f-ms-email').value='';
 }
 
 /* ══════════════════════════
    EQUIPOS
    ══════════════════════════ */
 var equipos=[], equiposCargados=false, _eqEditId=null, _equiposDatos=false;
+var _equiposForm=[];
 
 async function cargarEquiposData() {
   if (_equiposDatos) return;
@@ -778,7 +790,61 @@ async function cargarEquiposData() {
     var res=await fetch('/api/inventario');
     equipos=await res.json();
     _equiposDatos=true;
+    poblarEqInvSel();
   } catch(e) { /* will retry when tab opens */ }
+}
+
+function poblarEqInvSel() {
+  var sel=document.getElementById('eq-inv-sel');
+  if (!sel) return;
+  sel.innerHTML='<option value="">— Seleccionar del inventario —</option>'+
+    equipos.map(function(e){
+      var icon=({Laptop:'💻',Monitor:'🖥️',Celular:'📱',Tablet:'📲',Teclado:'⌨️',Mouse:'🖱️',Impresora:'🖨️'})[e.tipo]||'🔧';
+      var label=((e.marca||'')+' '+(e.modelo||'')).trim()||e.tipo;
+      var asig=e.usuarioActual?' — '+e.usuarioActual:'';
+      return '<option value="'+e.id+'">'+icon+' '+esc(e.tipo)+': '+esc(label)+' ('+esc(e.serial||'s/n')+')'+esc(asig)+'</option>';
+    }).join('');
+}
+
+function renderEqFormLista() {
+  var eqIcons={Laptop:'💻',Monitor:'🖥️',Celular:'📱',Tablet:'📲',Teclado:'⌨️',Mouse:'🖱️',Impresora:'🖨️',Otro:'🔧'};
+  var el=document.getElementById('eq-form-lista');
+  if(!_equiposForm.length){
+    el.innerHTML='<span style="color:#aaa;font-size:12px;padding:6px 0">Sin equipos asignados aún.</span>';
+    return;
+  }
+  el.innerHTML=_equiposForm.map(function(e,i){
+    var icon=eqIcons[e.tipo]||'🔧';
+    var label=icon+' <strong>'+esc(e.tipo)+'</strong>'+(e.modelo?' — '+esc(e.modelo):'')+(e.serie?' <span style="font-size:11px;color:#778">('+esc(e.serie)+')</span>':'');
+    return '<span class="eq-chip">'+label+'<button class="eq-chip-del" title="Quitar" onclick="quitarEq('+i+')">×</button></span>';
+  }).join('');
+}
+
+function agregarEqDeInv() {
+  var sel=document.getElementById('eq-inv-sel');
+  var id=sel.value;
+  if (!id) return;
+  var eq=equipos.find(function(e){return e.id===id;});
+  if (!eq) return;
+  _equiposForm.push({tipo:eq.tipo, modelo:((eq.marca||'')+' '+(eq.modelo||'')).trim(), serie:eq.serial||'', invId:eq.id});
+  sel.value='';
+  renderEqFormLista();
+}
+
+function agregarEqManual() {
+  var tipo=document.getElementById('eq-man-tipo').value;
+  var mod=document.getElementById('eq-man-mod').value.trim();
+  var ser=document.getElementById('eq-man-ser').value.trim();
+  if (!mod) { alert('Ingrese el modelo o marca del equipo.'); return; }
+  _equiposForm.push({tipo:tipo, modelo:mod, serie:ser, invId:''});
+  document.getElementById('eq-man-mod').value='';
+  document.getElementById('eq-man-ser').value='';
+  renderEqFormLista();
+}
+
+function quitarEq(i) {
+  _equiposForm.splice(i,1);
+  renderEqFormLista();
 }
 
 async function cargarEquipos() {
@@ -797,35 +863,6 @@ async function cargarEquipos() {
   }
 }
 
-function buscarEqForm(input, tipo, listaId, modId, serId, searchId) {
-  var q=input.value.trim().toLowerCase();
-  var lista=document.getElementById(listaId);
-  if (q.length<1) { lista.style.display='none'; return; }
-  var res=equipos.filter(function(e){
-    return e.tipo===tipo && [e.marca,e.modelo,e.serial].some(function(v){return v&&v.toLowerCase().includes(q);});
-  }).slice(0,7);
-  if (!res.length) { lista.style.display='none'; return; }
-  lista.innerHTML=res.map(function(e){
-    var icon=TIPO_ICON[e.tipo]||'🔧';
-    var ecls=ESTADO_CLS[e.estado]||'beq-bueno';
-    return '<div class="dir-item" onclick="selEqForm(\''+e.id+'\',\''+modId+'\',\''+serId+'\',\''+listaId+'\',\''+searchId+'\')">'+
-      '<span style="font-size:18px;width:32px;text-align:center;display:inline-block;flex-shrink:0">'+icon+'</span>'+
-      '<div><div class="dir-item-nombre">'+esc((e.marca||'')+' '+(e.modelo||''))+'</div>'+
-      '<div class="dir-item-info">Serie: '+esc(e.serial||'')+
-      ' &nbsp;<span class="beq '+ecls+'" style="font-size:10px">'+esc(e.estado||'')+'</span>'+
-      (e.usuarioActual?' &nbsp;· '+esc(e.usuarioActual):'')+'</div></div></div>';
-  }).join('');
-  lista.style.display='';
-}
-
-function selEqForm(eqId, modId, serId, listaId, searchId) {
-  var eq=equipos.find(function(e){return e.id===eqId;});
-  if (!eq) return;
-  document.getElementById(modId).value=((eq.marca||'')+' '+(eq.modelo||'')).trim();
-  document.getElementById(serId).value=eq.serial||'';
-  document.getElementById(listaId).style.display='none';
-  document.getElementById(searchId).value='';
-}
 
 function filtrarEquipos() {
   var q   =document.getElementById('eq-buscar').value.toLowerCase();
@@ -938,15 +975,7 @@ async function eliminarEq() {
 
 /* ── Init ── */
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){cerrarDetalle();cerrarForm();cerrarFormEq();}});
-document.addEventListener('click',function(e){
-  var lista=document.getElementById('dir-lista');
-  if (!lista.contains(e.target)&&e.target.id!=='dir-search') lista.style.display='none';
-  ['eq-lap-lista','eq-mon-lista','eq-cel-lista','eq-tab-lista'].forEach(function(id){
-    var l=document.getElementById(id);
-    var s=document.getElementById(id.replace('-lista','-search'));
-    if(l&&!l.contains(e.target)&&e.target!==s) l.style.display='none';
-  });
-});
+document.addEventListener('click',function(e){});
 cargarUsuarios();
 iniciarBusquedaDir();
 cargarEquiposData();

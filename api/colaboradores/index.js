@@ -67,7 +67,7 @@ module.exports = async function (context, req) {
             .filter(function(u) {
                 var oficina = u.officeLocation || u.companyName || '';
                 var permitidas = ['PLG DE EL SALVADOR','PLG DIVISION ADUANAS','PLG DIVISION TERRESTRE','PLG DOMINICANA','PLG GROUP'];
-                return u.mail && u.mail.includes('@plg') && permitidas.indexOf(oficina.toUpperCase()) !== -1;
+                return u.mail && permitidas.indexOf(oficina.toUpperCase()) !== -1;
             })
             .map(function(u) {
                 var tel = (u.businessPhones && u.businessPhones.length) ? u.businessPhones[0] : '';
@@ -82,18 +82,20 @@ module.exports = async function (context, req) {
                 };
             });
 
-        // Obtener fotos en paralelo para todos los usuarios
-        await Promise.all(usuarios.map(async function(u) {
-            try {
-                var fr = await request(
-                    'https://graph.microsoft.com/v1.0/users/' + u.id + '/photo/$value',
-                    { headers: Object.assign({}, authH, { Accept: 'image/jpeg' }) }
-                );
-                if (fr.ok && fr.buf.length > 0) {
-                    u.foto = 'data:image/jpeg;base64,' + fr.buf.toString('base64');
-                }
-            } catch(e) { /* sin foto */ }
-        }));
+        // Obtener fotos en paralelo (omitir si nofoto=1)
+        if (!req.query.nofoto) {
+            await Promise.all(usuarios.map(async function(u) {
+                try {
+                    var fr = await request(
+                        'https://graph.microsoft.com/v1.0/users/' + u.id + '/photo/$value',
+                        { headers: Object.assign({}, authH, { Accept: 'image/jpeg' }) }
+                    );
+                    if (fr.ok && fr.buf.length > 0) {
+                        u.foto = 'data:image/jpeg;base64,' + fr.buf.toString('base64');
+                    }
+                } catch(e) { /* sin foto */ }
+            }));
+        }
 
         reply(context, 200, usuarios);
     } catch (e) { reply(context, 500, { error: 'GET: ' + e.message }); }
