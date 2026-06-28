@@ -326,7 +326,7 @@
       <!-- Buscador de directorio (solo en modo agregar) -->
       <div id="dir-wrap">
         <div class="dir-box">
-          <div class="dir-box-label">🔍 Buscar en Directorio PLG (opcional)</div>
+          <div class="dir-box-label">🔍 Buscar en Directorio PLG (opcional) <span id="dir-hint" style="font-weight:400;color:#aaa;font-size:10px"></span></div>
           <input class="dir-input" id="dir-search" type="text" placeholder="Escribe el nombre del colaborador..." oninput="buscarDir()" autocomplete="off">
           <div class="dir-lista" id="dir-lista"></div>
           <div class="dir-sel" id="dir-sel" style="display:none">
@@ -704,17 +704,25 @@ var _colabs=[], _colasCargados=false, _dirResultados=[];
 
 async function iniciarBusquedaDir() {
   if (_colasCargados) return;
+  var hint=document.getElementById('dir-hint');
+  if (hint) hint.textContent='⏳ cargando...';
   try {
     var res=await fetch('/api/colaboradores');
-    _colabs=await res.json();
+    var data=await res.json();
+    _colabs=Array.isArray(data) ? data : [];
     _colasCargados=true;
-  } catch(e) { _colabs=[]; }
+    if (hint) hint.textContent=_colabs.length ? '✓ '+_colabs.length+' colaboradores' : '⚠️ sin datos';
+  } catch(e) {
+    _colabs=[];
+    if (hint) hint.textContent='⚠️ error al cargar';
+  }
 }
 
 function buscarDir() {
   var q=document.getElementById('dir-search').value.trim().toLowerCase();
   var lista=document.getElementById('dir-lista');
   if (q.length<2) { lista.style.display='none'; return; }
+  if (!Array.isArray(_colabs)||!_colabs.length) { lista.style.display='none'; return; }
   _dirResultados=_colabs.filter(function(c){return c.nombre&&c.nombre.toLowerCase().includes(q);}).slice(0,8);
   if (!_dirResultados.length) { lista.style.display='none'; return; }
   lista.innerHTML=_dirResultados.map(function(c,i){
@@ -722,7 +730,7 @@ function buscarDir() {
     return '<div class="dir-item" onclick="seleccionarColaborador('+i+')">'+
       '<div class="dir-item-av" style="background:'+col+'">'+iniciales(c.nombre)+'</div>'+
       '<div><div class="dir-item-nombre">'+esc(c.nombre)+'</div>'+
-      '<div class="dir-item-info">'+esc(c.puesto||'')+(c.oficina?' · '+esc(c.oficina):'')+'</div></div></div>';
+      '<div class="dir-item-info">'+esc(c.cargo||'')+(c.oficina?' · '+esc(c.oficina):'')+'</div></div></div>';
   }).join('');
   lista.style.display='';
 }
@@ -739,10 +747,10 @@ function seleccionarColaborador(i) {
   var c=_dirResultados[i];
   document.getElementById('f-nombre').value   = c.nombre||'';
   document.getElementById('f-division').value = DIV_MAP[(c.oficina||'').toUpperCase()]||'';
-  document.getElementById('f-area').value     = c.area||'';
-  document.getElementById('f-puesto').value   = c.puesto||'';
+  document.getElementById('f-area').value     = c.departamento||'';
+  document.getElementById('f-puesto').value   = c.cargo||'';
   document.getElementById('f-tel').value      = c.telefono||'';
-  document.getElementById('f-ms-email').value = c.mail||'';
+  document.getElementById('f-ms-email').value = c.correo||'';
   document.getElementById('dir-sel-nombre').textContent = c.nombre;
   document.getElementById('dir-sel').style.display='';
   document.getElementById('dir-lista').style.display='none';
