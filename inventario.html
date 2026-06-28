@@ -71,6 +71,7 @@
     .beq-regular   { background:#fef9c3; color:#854d0e; }
     .beq-baja      { background:#fee2e2; color:#991b1b; }
     .beq-disponible{ background:#dbeafe; color:#1e40af; }
+    .beq-asignado  { background:#ede9fe; color:#5b21b6; }
     .acc-eq { display:flex; gap:5px; }
     .btn-sm { padding:4px 10px; border-radius:5px; font-size:11px; font-weight:600; cursor:pointer; border:none; }
     .btn-sm-edit { background:#e4ecf7; color:var(--navy); }
@@ -238,6 +239,7 @@
       <option value="Bueno">Bueno</option>
       <option value="Regular">Regular</option>
       <option value="Disponible">Disponible</option>
+      <option value="Asignado">Asignado</option>
       <option value="Baja">Baja</option>
     </select>
     <span class="contador" id="eq-contador"></span>
@@ -431,6 +433,7 @@
             <option value="Bueno">Bueno</option>
             <option value="Regular">Regular</option>
             <option value="Disponible">Disponible</option>
+            <option value="Asignado">Asignado</option>
             <option value="Baja">Baja</option>
           </select>
         </div>
@@ -691,14 +694,14 @@ async function guardar() {
       var eq=equipos.find(function(x){return x.id===e.invId;});
       if (!eq) return Promise.resolve();
       var upd=Object.assign({},eq,{usuarioActual:nombre});
+      var upd2=Object.assign({},upd,{estado:'Asignado'});
       return fetch('/api/inventario?id='+encodeURIComponent(e.invId),{
         method:'PUT',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify(upd)
+        body:JSON.stringify(upd2)
       }).then(function(){
-        // actualizar cache local
         var i=equipos.findIndex(function(x){return x.id===e.invId;});
-        if(i!==-1) equipos[i]=upd;
+        if(i!==-1) equipos[i]=upd2;
       });
     }));
     filtrarUsuarios();
@@ -797,13 +800,14 @@ async function cargarEquiposData() {
 function poblarEqInvSel() {
   var sel=document.getElementById('eq-inv-sel');
   if (!sel) return;
+  var disponibles=equipos.filter(function(e){ return e.estado==='Disponible'; });
   sel.innerHTML='<option value="">— Seleccionar del inventario —</option>'+
-    equipos.map(function(e){
+    disponibles.map(function(e){
       var icon=({Laptop:'💻',Monitor:'🖥️',Celular:'📱',Tablet:'📲',Teclado:'⌨️',Mouse:'🖱️',Impresora:'🖨️'})[e.tipo]||'🔧';
       var label=((e.marca||'')+' '+(e.modelo||'')).trim()||e.tipo;
-      var asig=e.usuarioActual?' — '+e.usuarioActual:'';
-      return '<option value="'+e.id+'">'+icon+' '+esc(e.tipo)+': '+esc(label)+' ('+esc(e.serial||'s/n')+')'+esc(asig)+'</option>';
+      return '<option value="'+e.id+'">'+icon+' '+esc(e.tipo)+': '+esc(label)+' ('+esc(e.serial||'s/n')+')</option>';
     }).join('');
+  if (!disponibles.length) sel.innerHTML='<option value="">— Sin equipos disponibles —</option>';
 }
 
 function renderEqFormLista() {
@@ -880,7 +884,7 @@ function filtrarEquipos() {
 }
 
 var TIPO_ICON={'Laptop':'💻','Monitor':'🖥️','Celular':'📱','Tablet':'📲','Impresora':'🖨️','Otro':'🔧'};
-var ESTADO_CLS={'Bueno':'beq-bueno','Regular':'beq-regular','Baja':'beq-baja','Disponible':'beq-disponible'};
+var ESTADO_CLS={'Bueno':'beq-bueno','Regular':'beq-regular','Baja':'beq-baja','Disponible':'beq-disponible','Asignado':'beq-asignado'};
 
 function renderizarEquipos(lista) {
   document.getElementById('eq-contador').textContent=lista.length+' equipo'+(lista.length!==1?'s':'');
