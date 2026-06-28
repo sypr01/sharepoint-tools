@@ -210,7 +210,7 @@
 
   async function cargar() {
     try {
-      var res  = await fetch('/api/gestion-usuarios', { headers: { Authorization: 'Bearer ' + token } });
+      var res  = await fetch('/api/gestion-usuarios', { headers: { 'X-PLG-Auth': 'Bearer ' + token } });
       if (!checkAuth(res)) return;
       var data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error');
@@ -309,13 +309,13 @@
       if (editId) {
         res  = await fetch('/api/gestion-usuarios?id=' + editId, {
           method: 'PUT',
-          headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + token },
+          headers: { 'Content-Type':'application/json', 'X-PLG-Auth': 'Bearer ' + token },
           body: JSON.stringify({ nombre: nombre, rol: rol })
         });
       } else {
         res  = await fetch('/api/gestion-usuarios', {
           method: 'POST',
-          headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + token },
+          headers: { 'Content-Type':'application/json', 'X-PLG-Auth': 'Bearer ' + token },
           body: JSON.stringify({ nombre: nombre, usuario: usuario, contrasena: pass, rol: rol })
         });
       }
@@ -351,7 +351,7 @@
     try {
       var res = await fetch('/api/gestion-usuarios?id=' + passId, {
         method: 'PUT',
-        headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + token },
+        headers: { 'Content-Type':'application/json', 'X-PLG-Auth': 'Bearer ' + token },
         body: JSON.stringify({ contrasena: nueva })
       });
       if (!checkAuth(res)) return;
@@ -368,7 +368,7 @@
     try {
       var res  = await fetch('/api/gestion-usuarios?id=' + id, {
         method: 'PUT',
-        headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + token },
+        headers: { 'Content-Type':'application/json', 'X-PLG-Auth': 'Bearer ' + token },
         body: JSON.stringify({ activo: !actual })
       });
       if (!checkAuth(res)) return;
@@ -386,7 +386,7 @@
     try {
       var res  = await fetch('/api/gestion-usuarios?id=' + id, {
         method: 'DELETE',
-        headers: { Authorization: 'Bearer ' + token }
+        headers: { 'X-PLG-Auth': 'Bearer ' + token }
       });
       if (!checkAuth(res)) return;
       var data = await res.json();
