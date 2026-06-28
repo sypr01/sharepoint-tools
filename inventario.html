@@ -10,6 +10,7 @@
     * { box-sizing:border-box; margin:0; padding:0; }
     body { font-family:'Segoe UI',sans-serif; background:var(--bg); color:#333; }
 
+    /* Header */
     header { background:linear-gradient(135deg,var(--navy),var(--blue)); color:white; border-bottom:4px solid var(--red); }
     .header-inner { display:flex; align-items:center; gap:20px; padding:14px 32px; }
     .header-logo-wrap { background:white; border-radius:8px; padding:6px 12px; display:flex; align-items:center; }
@@ -17,21 +18,29 @@
     .header-divider { width:1px; height:40px; background:rgba(255,255,255,0.25); }
     header h1 { font-size:20px; font-weight:700; }
     header p  { font-size:12px; opacity:.7; margin-top:3px; }
-    .nav-tabs { background:var(--navy); display:flex; padding:0 32px; }
+    .nav-tabs { background:var(--navy); display:flex; align-items:center; padding:0 32px; }
     .nav-tab { padding:10px 22px; color:rgba(255,255,255,.65); font-size:13px; font-weight:600; cursor:pointer; border:none; background:none; border-bottom:3px solid transparent; transition:all .2s; text-decoration:none; display:inline-flex; align-items:center; }
     .nav-tab:hover { color:white; }
     .nav-tab.activo { color:white; border-bottom-color:var(--red); }
+    .nav-user { margin-left:auto; color:rgba(255,255,255,.55); font-size:12px; padding:0 12px; display:flex; align-items:center; }
 
-    .controles { background:white; padding:14px 32px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; border-bottom:1px solid #dde3ed; position:sticky; top:0; z-index:10; box-shadow:0 2px 8px rgba(27,58,107,.08); }
-    .buscar { flex:1; min-width:220px; padding:9px 14px; border:1px solid #c5cedb; border-radius:6px; font-size:14px; }
-    .buscar:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(47,90,168,.1); }
-    .sel { padding:8px 10px; border:1px solid #c5cedb; border-radius:6px; font-size:13px; color:#555; background:white; cursor:pointer; }
-    .btn-nuevo { padding:9px 18px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; }
+    /* Page tab switcher */
+    .page-tab-bar { background:white; border-bottom:2px solid #dde3ed; display:flex; padding:0 32px; box-shadow:0 1px 4px rgba(27,58,107,.05); }
+    .ptab { padding:12px 22px; font-size:14px; font-weight:600; color:#778; border:none; background:none; cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; transition:all .2s; display:flex; align-items:center; gap:6px; }
+    .ptab.activo { color:var(--navy); border-bottom-color:var(--red); }
+    .ptab:hover:not(.activo) { color:var(--blue); }
+
+    /* Controls bar */
+    .controles { background:white; padding:12px 32px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; border-bottom:1px solid #dde3ed; position:sticky; top:0; z-index:10; box-shadow:0 2px 8px rgba(27,58,107,.06); }
+    .buscar { flex:1; min-width:200px; padding:8px 13px; border:1px solid #c5cedb; border-radius:6px; font-size:13px; }
+    .buscar:focus { outline:none; border-color:var(--blue); }
+    .sel { padding:7px 10px; border:1px solid #c5cedb; border-radius:6px; font-size:12px; color:#555; background:white; cursor:pointer; }
+    .btn-nuevo { padding:8px 17px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
     .btn-nuevo:hover { background:var(--blue); }
-    .contador { font-size:13px; color:#778; }
+    .contador { font-size:12px; color:#778; white-space:nowrap; }
 
+    /* User grid (tab Usuarios) */
     .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; padding:24px 32px; }
-
     .tarjeta { background:white; border-radius:10px; box-shadow:0 1px 4px rgba(27,58,107,.07); border-top:4px solid var(--navy); cursor:pointer; transition:box-shadow .2s,border-color .2s; overflow:hidden; }
     .tarjeta:hover { box-shadow:0 6px 20px rgba(27,58,107,.14); border-top-color:var(--red); }
     .tarjeta-header { padding:16px 18px 10px; display:flex; align-items:center; gap:12px; }
@@ -43,67 +52,79 @@
     .badge-div { display:inline-block; font-size:10px; font-weight:700; padding:2px 9px; border-radius:10px; background:#e4ecf7; color:var(--navy); margin-bottom:8px; }
     .equipo-chips { display:flex; flex-wrap:wrap; gap:5px; }
     .chip { display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:3px 8px; border-radius:6px; background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; }
-    .chip.ok { background:#d1fae5; color:#065f46; border-color:#6ee7b7; }
+    .chip.ok   { background:#d1fae5; color:#065f46; border-color:#6ee7b7; }
     .chip.mail { background:#dbeafe; color:#1e40af; border-color:#bfdbfe; }
 
-    .sin-datos { grid-column:1/-1; text-align:center; padding:60px; color:#888; font-size:15px; }
-    .cargando { grid-column:1/-1; text-align:center; padding:60px; color:#888; }
-    .spinner { width:36px; height:36px; border:4px solid #dde3ed; border-top-color:var(--blue); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 12px; }
-    @keyframes spin { to { transform:rotate(360deg); } }
+    /* Equipment table (tab Equipos) */
+    .tabla-eq-wrap { margin:20px 32px; background:white; border-radius:10px; box-shadow:0 1px 4px rgba(27,58,107,.07); overflow:hidden; }
+    .tabla-eq { width:100%; border-collapse:collapse; }
+    .tabla-eq th { background:var(--navy); color:white; padding:10px 14px; text-align:left; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; white-space:nowrap; }
+    .tabla-eq td { padding:10px 14px; font-size:13px; border-bottom:1px solid #eef1f6; }
+    .tabla-eq tr:hover td { background:#f8fafc; }
+    .tabla-eq tr:last-child td { border-bottom:none; }
+    .tipo-icon { font-size:18px; }
+    .beq { display:inline-block; padding:2px 9px; border-radius:10px; font-size:11px; font-weight:700; }
+    .beq-bueno     { background:#d1fae5; color:#065f46; }
+    .beq-regular   { background:#fef9c3; color:#854d0e; }
+    .beq-baja      { background:#fee2e2; color:#991b1b; }
+    .beq-disponible{ background:#dbeafe; color:#1e40af; }
+    .acc-eq { display:flex; gap:5px; }
+    .btn-sm { padding:4px 10px; border-radius:5px; font-size:11px; font-weight:600; cursor:pointer; border:none; }
+    .btn-sm-edit { background:#e4ecf7; color:var(--navy); }
+    .btn-sm-edit:hover { background:#c7d9f0; }
+    .btn-sm-del  { background:#fee2e2; color:#991b1b; }
+    .btn-sm-del:hover  { background:#fecaca; }
+    .eq-vacio { text-align:center; padding:50px; color:#888; font-size:14px; }
 
-    /* Modal */
+    /* Detail modal */
     .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:100; align-items:flex-start; justify-content:center; padding:20px; overflow-y:auto; }
     .overlay.activo { display:flex; }
     .modal { background:white; border-radius:12px; width:100%; max-width:680px; margin:auto; }
     .modal-header { background:linear-gradient(135deg,var(--navy),var(--blue)); padding:20px 24px; display:flex; align-items:center; gap:14px; border-radius:12px 12px 0 0; border-bottom:3px solid var(--red); }
     .modal-avatar { width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:700; color:white; border:3px solid rgba(255,255,255,.4); flex-shrink:0; }
-    .modal-header-info { flex:1; }
-    .modal-header-info h2 { font-size:17px; color:white; font-weight:700; margin:0; }
-    .modal-header-info p  { font-size:12px; color:rgba(255,255,255,.75); margin-top:3px; }
+    .modal-hinfo { flex:1; }
+    .modal-hinfo h2 { font-size:17px; color:white; font-weight:700; margin:0; }
+    .modal-hinfo p  { font-size:12px; color:rgba(255,255,255,.75); margin-top:3px; }
     .btn-x { background:none; border:none; color:rgba(255,255,255,.7); font-size:24px; cursor:pointer; line-height:1; padding:0 4px; }
     .btn-x:hover { color:white; }
     .modal-body { padding:24px; }
-
     .seccion { margin-bottom:22px; }
-    .seccion-titulo { font-size:12px; font-weight:700; color:#556; text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px; padding-bottom:6px; border-bottom:1px solid #edf0f5; display:flex; align-items:center; gap:6px; }
+    .seccion-titulo { font-size:12px; font-weight:700; color:#556; text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px; padding-bottom:6px; border-bottom:1px solid #edf0f5; }
     .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
     .info-item { background:#f8fafc; border-radius:7px; padding:10px 12px; }
     .info-item label { font-size:10px; font-weight:700; color:#778; text-transform:uppercase; letter-spacing:.4px; display:block; margin-bottom:3px; }
     .info-item .valor { font-size:13px; color:#333; word-break:break-all; }
     .info-item .valor.mono { font-family:monospace; font-size:12px; }
-    .pass-wrap { display:flex; align-items:center; gap:6px; }
+    .pass-wrap { display:flex; align-items:center; gap:6px; margin-top:5px; }
     .pass-val { font-family:monospace; font-size:12px; color:#333; flex:1; word-break:break-all; }
     .btn-eye { background:none; border:none; cursor:pointer; color:#aaa; font-size:14px; padding:0; flex-shrink:0; }
     .btn-eye:hover { color:var(--blue); }
-    .no-dato { color:#bbb; font-size:12px; font-style:italic; }
-
     .equipo-card { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px; display:flex; align-items:flex-start; gap:12px; }
     .equipo-icon { font-size:24px; flex-shrink:0; width:36px; text-align:center; }
     .equipo-datos { flex:1; min-width:0; }
     .equipo-modelo { font-size:13px; font-weight:600; color:#333; }
     .equipo-serie  { font-size:11px; color:#888; margin-top:2px; font-family:monospace; }
     .equipos-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-
     .modal-footer { display:flex; gap:10px; justify-content:flex-end; padding:0 24px 20px; }
-    .btn-edit { padding:8px 18px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; }
-    .btn-edit:hover { background:var(--blue); }
+    .btn-edit-modal { padding:8px 18px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; }
+    .btn-edit-modal:hover { background:var(--blue); }
     .btn-close { padding:8px 16px; border:1px solid #c5cedb; border-radius:6px; background:white; font-size:13px; cursor:pointer; }
 
-    /* Modal Form */
+    /* Form modal (users + equipment) */
     .overlay-form { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:200; align-items:flex-start; justify-content:center; padding:20px; overflow-y:auto; }
     .overlay-form.activo { display:flex; }
-    .modal-form { background:white; border-radius:12px; width:100%; max-width:640px; margin:auto; }
+    .modal-form { background:white; border-radius:12px; width:100%; max-width:660px; margin:auto; }
     .form-header { background:linear-gradient(135deg,var(--navy),var(--blue)); padding:18px 24px; display:flex; justify-content:space-between; align-items:center; border-radius:12px 12px 0 0; border-bottom:3px solid var(--red); }
     .form-header h2 { font-size:16px; color:white; font-weight:700; margin:0; }
-    .form-body { padding:22px; }
+    .form-body { padding:20px 22px; }
     .form-section { font-size:11px; font-weight:700; color:#556; text-transform:uppercase; letter-spacing:.5px; margin:16px 0 10px; padding-bottom:4px; border-bottom:1px solid #edf0f5; }
-    .campo { margin-bottom:13px; }
+    .campo { margin-bottom:12px; }
     .campo label { display:block; font-size:11px; font-weight:700; color:#556; text-transform:uppercase; letter-spacing:.4px; margin-bottom:5px; }
-    .campo input, .campo select { width:100%; padding:8px 11px; border:1px solid #c5cedb; border-radius:6px; font-size:13px; font-family:inherit; }
-    .campo input:focus, .campo select:focus { outline:none; border-color:var(--blue); }
+    .campo input, .campo select, .campo textarea { width:100%; padding:8px 11px; border:1.5px solid #d1d9e6; border-radius:6px; font-size:13px; font-family:inherit; }
+    .campo input:focus, .campo select:focus, .campo textarea:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 2px rgba(47,90,168,.1); }
     .g2 { display:grid; grid-template-columns:1fr 1fr; gap:0 14px; }
     .form-footer { display:flex; gap:10px; justify-content:flex-end; margin-top:16px; }
-    .btn-del { padding:8px 14px; background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; margin-right:auto; }
+    .btn-del-form { padding:8px 14px; background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; margin-right:auto; }
     .btn-cancel { padding:8px 16px; border:1px solid #c5cedb; border-radius:6px; background:white; font-size:13px; cursor:pointer; }
     .btn-save { padding:8px 18px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; }
     .btn-save:hover { background:var(--blue); }
@@ -111,10 +132,31 @@
     .msg.ok  { background:#d1fae5; color:#065f46; border:1px solid #6ee7b7; }
     .msg.err { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
 
-    @media(max-width:600px){ .info-grid,.equipos-grid,.g2{ grid-template-columns:1fr; } }
+    /* Directory search */
+    .dir-box { background:#f0f4f9; border:1px solid #dde3ed; border-radius:8px; padding:12px; margin-bottom:4px; }
+    .dir-box-label { font-size:11px; font-weight:700; color:#556; text-transform:uppercase; letter-spacing:.4px; margin-bottom:7px; display:flex; align-items:center; gap:5px; }
+    .dir-input { width:100%; padding:8px 11px; border:1.5px solid #c5cedb; border-radius:6px; font-size:13px; font-family:inherit; }
+    .dir-input:focus { outline:none; border-color:var(--blue); }
+    .dir-lista { background:white; border:1.5px solid #c5cedb; border-radius:7px; margin-top:6px; max-height:190px; overflow-y:auto; display:none; box-shadow:0 4px 12px rgba(0,0,0,.1); }
+    .dir-item { padding:9px 12px; cursor:pointer; border-bottom:1px solid #f0f4f9; display:flex; align-items:center; gap:10px; }
+    .dir-item:hover { background:#f0f4f9; }
+    .dir-item:last-child { border-bottom:none; }
+    .dir-item-av { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:white; flex-shrink:0; }
+    .dir-item-nombre { font-size:13px; font-weight:600; color:#333; }
+    .dir-item-info   { font-size:11px; color:#778; margin-top:1px; }
+    .dir-sel { background:#d1fae5; border:1px solid #6ee7b7; border-radius:7px; padding:8px 12px; font-size:12px; color:#065f46; display:flex; align-items:center; justify-content:space-between; margin-top:7px; }
+    .dir-sel-nombre { font-weight:700; }
+    .dir-sel-clear { background:none; border:none; color:#065f46; cursor:pointer; font-size:16px; line-height:1; }
+
+    .sin-datos { grid-column:1/-1; text-align:center; padding:60px; color:#888; font-size:14px; }
+    .cargando  { grid-column:1/-1; text-align:center; padding:60px; color:#888; }
+    .spinner { width:36px; height:36px; border:4px solid #dde3ed; border-top-color:var(--blue); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 12px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @media(max-width:600px){ .info-grid,.equipos-grid,.g2{ grid-template-columns:1fr; } .tabla-eq th:nth-child(5),.tabla-eq td:nth-child(5){ display:none; } }
   </style>
 </head>
 <body>
+
 <header>
   <div class="header-inner">
     <div class="header-logo-wrap"><img src="log PLG.png" alt="PLG" class="header-logo"></div>
@@ -126,48 +168,98 @@
     <a href="inventario.html" class="nav-tab activo">💻 Inventario IT</a>
     <a href="tickets.html" class="nav-tab">🎫 Tickets IT</a>
     <a href="admin-usuarios.html" class="nav-tab" id="nav-admin" style="display:none">⚙️ Admin</a>
-    <span id="nav-nombre" style="margin-left:auto;color:rgba(255,255,255,.55);font-size:12px;padding:0 12px;display:flex;align-items:center;"></span>
+    <span id="nav-nombre" class="nav-user"></span>
     <button class="nav-tab" style="color:rgba(255,255,255,.55);" onclick="sessionStorage.clear();location.href='/login.html'">🔒 Cerrar sesión</button>
   </nav>
   <script>
     (function(){
-      var n = sessionStorage.getItem('plg_nombre'); if(n) document.getElementById('nav-nombre').textContent = '👤 '+n;
+      var n=sessionStorage.getItem('plg_nombre'); if(n) document.getElementById('nav-nombre').textContent='👤 '+n;
       if(sessionStorage.getItem('plg_rol')==='admin') document.getElementById('nav-admin').style.display='';
     })();
   </script>
 </header>
 
-<div class="controles">
-  <input class="buscar" type="text" placeholder="Buscar por nombre, correo, serial, equipo..." oninput="filtrar()">
-  <select class="sel" id="f-div" onchange="filtrar()">
-    <option value="">Todas las divisiones</option>
-    <option value="PLG DIVISION ADUANAS">PLG DIVISION ADUANAS</option>
-    <option value="PLG DE EL SALVADOR">PLG DE EL SALVADOR</option>
-    <option value="PLG DIVISION TERRESTRE">PLG DIVISION TERRESTRE</option>
-    <option value="PLG DOMINICANA">PLG DOMINICANA</option>
-    <option value="PLG GROUP">PLG GROUP</option>
-  </select>
-  <span class="contador" id="contador"></span>
-  <button class="btn-nuevo" onclick="abrirForm(null)">+ Agregar Usuario</button>
+<!-- Page tab bar -->
+<div class="page-tab-bar">
+  <button class="ptab activo" id="ptab-usuarios" onclick="cambiarTab('usuarios')">👥 Usuarios</button>
+  <button class="ptab"        id="ptab-equipos"  onclick="cambiarTab('equipos')">💻 Equipos</button>
 </div>
 
-<div class="grid" id="grid">
-  <div class="cargando"><div class="spinner"></div><p>Cargando usuarios...</p></div>
+<!-- ══ TAB USUARIOS ══ -->
+<div id="tab-usuarios">
+  <div class="controles">
+    <input class="buscar" id="u-buscar" type="text" placeholder="Buscar por nombre, correo, serial, equipo..." oninput="filtrarUsuarios()">
+    <select class="sel" id="u-div" onchange="filtrarUsuarios()">
+      <option value="">Todas las divisiones</option>
+      <option value="PLG DIVISION ADUANAS">PLG DIVISION ADUANAS</option>
+      <option value="PLG DE EL SALVADOR">PLG DE EL SALVADOR</option>
+      <option value="PLG DIVISION TERRESTRE">PLG DIVISION TERRESTRE</option>
+      <option value="PLG DOMINICANA">PLG DOMINICANA</option>
+      <option value="PLG GROUP">PLG GROUP</option>
+    </select>
+    <span class="contador" id="u-contador"></span>
+    <button class="btn-nuevo" onclick="abrirForm(null)">+ Agregar Usuario</button>
+  </div>
+  <div class="grid" id="grid">
+    <div class="cargando"><div class="spinner"></div><p>Cargando usuarios...</p></div>
+  </div>
 </div>
 
-<!-- Modal Detalle -->
+<!-- ══ TAB EQUIPOS ══ -->
+<div id="tab-equipos" style="display:none">
+  <div class="controles">
+    <input class="buscar" id="eq-buscar" type="text" placeholder="Buscar por modelo, serie, usuario..." oninput="filtrarEquipos()">
+    <select class="sel" id="eq-tipo" onchange="filtrarEquipos()">
+      <option value="">Todos los tipos</option>
+      <option value="Laptop">Laptop</option>
+      <option value="Monitor">Monitor</option>
+      <option value="Celular">Celular</option>
+      <option value="Tablet">Tablet</option>
+      <option value="Impresora">Impresora</option>
+      <option value="Otro">Otro</option>
+    </select>
+    <select class="sel" id="eq-div" onchange="filtrarEquipos()">
+      <option value="">Todas las divisiones</option>
+      <option value="PLG DIVISION ADUANAS">PLG DIVISION ADUANAS</option>
+      <option value="PLG DE EL SALVADOR">PLG DE EL SALVADOR</option>
+      <option value="PLG DIVISION TERRESTRE">PLG DIVISION TERRESTRE</option>
+      <option value="PLG DOMINICANA">PLG DOMINICANA</option>
+      <option value="PLG GROUP">PLG GROUP</option>
+    </select>
+    <select class="sel" id="eq-est" onchange="filtrarEquipos()">
+      <option value="">Todos los estados</option>
+      <option value="Bueno">Bueno</option>
+      <option value="Regular">Regular</option>
+      <option value="Disponible">Disponible</option>
+      <option value="Baja">Baja</option>
+    </select>
+    <span class="contador" id="eq-contador"></span>
+    <button class="btn-nuevo" onclick="abrirFormEq(null)">+ Agregar Equipo</button>
+  </div>
+  <div class="tabla-eq-wrap">
+    <div id="eq-cargando" class="eq-vacio"><div class="spinner" style="margin:0 auto 12px"></div>Cargando equipos...</div>
+    <table class="tabla-eq" id="tabla-eq" style="display:none">
+      <thead><tr>
+        <th>Tipo</th><th>Marca / Modelo</th><th>Serie / IMEI</th>
+        <th>Estado</th><th>División</th><th>Usuario Asignado</th><th>Acciones</th>
+      </tr></thead>
+      <tbody id="tbody-eq"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ MODAL DETALLE USUARIO ══ -->
 <div class="overlay" id="overlayDetalle">
   <div class="modal">
     <div class="modal-header">
       <div class="modal-avatar" id="d-avatar"></div>
-      <div class="modal-header-info">
+      <div class="modal-hinfo">
         <h2 id="d-nombre"></h2>
         <p id="d-puesto-div"></p>
       </div>
       <button class="btn-x" onclick="cerrarDetalle()">×</button>
     </div>
     <div class="modal-body">
-
       <div class="seccion">
         <div class="seccion-titulo">👤 Información General</div>
         <div class="info-grid">
@@ -177,83 +269,47 @@
           <div class="info-item"><label>AnyDesk ID</label><div class="valor mono" id="d-anydesk"></div></div>
         </div>
       </div>
-
       <div class="seccion">
         <div class="seccion-titulo">📧 Cuentas</div>
         <div class="info-grid">
           <div class="info-item">
             <label>Microsoft / Office 365</label>
             <div class="valor" id="d-ms-email"></div>
-            <div class="pass-wrap" style="margin-top:5px;">
-              <span class="pass-val" id="d-ms-pass"></span>
-              <button class="btn-eye" onclick="togglePass('d-ms-pass','d-ms-raw')">👁</button>
-            </div>
+            <div class="pass-wrap"><span class="pass-val" id="d-ms-pass"></span><button class="btn-eye" onclick="togglePass('d-ms-pass','d-ms-raw')">👁</button></div>
             <span id="d-ms-raw" style="display:none"></span>
           </div>
           <div class="info-item">
             <label>Gmail</label>
             <div class="valor" id="d-gm-email"></div>
-            <div class="pass-wrap" style="margin-top:5px;">
-              <span class="pass-val" id="d-gm-pass"></span>
-              <button class="btn-eye" onclick="togglePass('d-gm-pass','d-gm-raw')">👁</button>
-            </div>
+            <div class="pass-wrap"><span class="pass-val" id="d-gm-pass"></span><button class="btn-eye" onclick="togglePass('d-gm-pass','d-gm-raw')">👁</button></div>
             <span id="d-gm-raw" style="display:none"></span>
           </div>
           <div class="info-item">
             <label>Magaya</label>
             <div class="valor" id="d-mag-user"></div>
-            <div class="pass-wrap" style="margin-top:5px;">
-              <span class="pass-val" id="d-mag-pass"></span>
-              <button class="btn-eye" onclick="togglePass('d-mag-pass','d-mag-raw')">👁</button>
-            </div>
+            <div class="pass-wrap"><span class="pass-val" id="d-mag-pass"></span><button class="btn-eye" onclick="togglePass('d-mag-pass','d-mag-raw')">👁</button></div>
             <span id="d-mag-raw" style="display:none"></span>
           </div>
         </div>
       </div>
-
       <div class="seccion">
         <div class="seccion-titulo">💻 Equipos Asignados</div>
         <div class="equipos-grid">
-          <div class="equipo-card" id="eq-laptop">
-            <div class="equipo-icon">💻</div>
-            <div class="equipo-datos">
-              <div class="equipo-modelo" id="d-laptop-mod"></div>
-              <div class="equipo-serie" id="d-laptop-ser"></div>
-            </div>
-          </div>
-          <div class="equipo-card" id="eq-monitor">
-            <div class="equipo-icon">🖥</div>
-            <div class="equipo-datos">
-              <div class="equipo-modelo" id="d-mon-mod"></div>
-              <div class="equipo-serie" id="d-mon-ser"></div>
-            </div>
-          </div>
-          <div class="equipo-card" id="eq-celular">
-            <div class="equipo-icon">📱</div>
-            <div class="equipo-datos">
-              <div class="equipo-modelo" id="d-cel-mod"></div>
-              <div class="equipo-serie" id="d-cel-ser"></div>
-            </div>
-          </div>
-          <div class="equipo-card" id="eq-tablet">
-            <div class="equipo-icon">📲</div>
-            <div class="equipo-datos">
-              <div class="equipo-modelo" id="d-tab-mod"></div>
-              <div class="equipo-serie" id="d-tab-ser"></div>
-            </div>
-          </div>
+          <div class="equipo-card" id="eq-laptop"><div class="equipo-icon">💻</div><div class="equipo-datos"><div class="equipo-modelo" id="d-laptop-mod"></div><div class="equipo-serie" id="d-laptop-ser"></div></div></div>
+          <div class="equipo-card" id="eq-monitor"><div class="equipo-icon">🖥</div><div class="equipo-datos"><div class="equipo-modelo" id="d-mon-mod"></div><div class="equipo-serie" id="d-mon-ser"></div></div></div>
+          <div class="equipo-card" id="eq-celular"><div class="equipo-icon">📱</div><div class="equipo-datos"><div class="equipo-modelo" id="d-cel-mod"></div><div class="equipo-serie" id="d-cel-ser"></div></div></div>
+          <div class="equipo-card" id="eq-tablet"><div class="equipo-icon">📲</div><div class="equipo-datos"><div class="equipo-modelo" id="d-tab-mod"></div><div class="equipo-serie" id="d-tab-ser"></div></div></div>
         </div>
       </div>
-
     </div>
     <div class="modal-footer">
       <button class="btn-close" onclick="cerrarDetalle()">Cerrar</button>
-      <button class="btn-edit" onclick="editarActual()">✏️ Editar</button>
+      <button class="btn-edit-modal" onclick="editarActual()">✏️ Editar</button>
     </div>
   </div>
 </div>
 
-<!-- Modal Formulario -->
+<!-- ══ MODAL FORMULARIO USUARIO ══ -->
 <div class="overlay-form" id="overlayForm">
   <div class="modal-form">
     <div class="form-header">
@@ -263,11 +319,24 @@
     <div class="form-body">
       <div id="form-msg"></div>
 
+      <!-- Buscador de directorio (solo en modo agregar) -->
+      <div id="dir-wrap">
+        <div class="dir-box">
+          <div class="dir-box-label">🔍 Buscar en Directorio PLG (opcional)</div>
+          <input class="dir-input" id="dir-search" type="text" placeholder="Escribe el nombre del colaborador..." oninput="buscarDir()" autocomplete="off">
+          <div class="dir-lista" id="dir-lista"></div>
+          <div class="dir-sel" id="dir-sel" style="display:none">
+            <span>✅ Pre-llenado desde directorio: <span class="dir-sel-nombre" id="dir-sel-nombre"></span></span>
+            <button class="dir-sel-clear" onclick="limpiarDirSel()" title="Quitar">×</button>
+          </div>
+        </div>
+      </div>
+
       <div class="form-section">👤 Información Personal</div>
       <div class="g2">
         <div class="campo"><label>Nombre completo *</label><input id="f-nombre" type="text" placeholder="Nombre completo"></div>
         <div class="campo"><label>División</label>
-          <select id="f-div">
+          <select id="f-division">
             <option value="">— Seleccionar —</option>
             <option value="PLG DIVISION ADUANAS">PLG DIVISION ADUANAS</option>
             <option value="PLG DE EL SALVADOR">PLG DE EL SALVADOR</option>
@@ -307,250 +376,478 @@
       </div>
 
       <div class="form-footer">
-        <button class="btn-del" id="btn-del" onclick="eliminar()" style="display:none">🗑 Eliminar</button>
+        <button class="btn-del-form" id="btn-del" onclick="eliminarUsuario()" style="display:none">🗑 Eliminar</button>
         <button class="btn-cancel" onclick="cerrarForm()">Cancelar</button>
-        <button class="btn-save" id="btn-save" onclick="guardar()">Guardar</button>
+        <button class="btn-save" id="btn-save" onclick="guardar()">Agregar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL FORMULARIO EQUIPO ══ -->
+<div class="overlay-form" id="overlayFormEq">
+  <div class="modal-form">
+    <div class="form-header">
+      <h2 id="eq-form-titulo">Agregar Equipo</h2>
+      <button class="btn-x" onclick="cerrarFormEq()">×</button>
+    </div>
+    <div class="form-body">
+      <div id="eq-form-msg"></div>
+      <div class="g2">
+        <div class="campo"><label>Tipo *</label>
+          <select id="f-eq-tipo">
+            <option value="Laptop">Laptop</option>
+            <option value="Monitor">Monitor</option>
+            <option value="Celular">Celular</option>
+            <option value="Tablet">Tablet</option>
+            <option value="Impresora">Impresora</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="campo"><label>Estado</label>
+          <select id="f-eq-estado">
+            <option value="Bueno">Bueno</option>
+            <option value="Regular">Regular</option>
+            <option value="Disponible">Disponible</option>
+            <option value="Baja">Baja</option>
+          </select>
+        </div>
+        <div class="campo"><label>Marca</label><input id="f-eq-marca" type="text" placeholder="Ej: Lenovo, Samsung"></div>
+        <div class="campo"><label>Modelo</label><input id="f-eq-modelo" type="text" placeholder="Ej: ThinkPad E16"></div>
+        <div class="campo"><label>Serie / IMEI *</label><input id="f-eq-serial" type="text" placeholder="Número de serie o IMEI"></div>
+        <div class="campo"><label>División</label>
+          <select id="f-eq-div">
+            <option value="">— Seleccionar —</option>
+            <option value="PLG DIVISION ADUANAS">PLG DIVISION ADUANAS</option>
+            <option value="PLG DE EL SALVADOR">PLG DE EL SALVADOR</option>
+            <option value="PLG DIVISION TERRESTRE">PLG DIVISION TERRESTRE</option>
+            <option value="PLG DOMINICANA">PLG DOMINICANA</option>
+            <option value="PLG GROUP">PLG GROUP</option>
+          </select>
+        </div>
+      </div>
+      <div class="campo"><label>Usuario Asignado</label><input id="f-eq-user" type="text" placeholder="Nombre del colaborador"></div>
+      <div class="campo"><label>Notas</label><textarea id="f-eq-notas" rows="2" placeholder="Observaciones, RAM, etc."></textarea></div>
+      <div class="form-footer">
+        <button class="btn-del-form" id="eq-btn-del" onclick="eliminarEq()" style="display:none">🗑 Eliminar</button>
+        <button class="btn-cancel" onclick="cerrarFormEq()">Cancelar</button>
+        <button class="btn-save" id="eq-btn-save" onclick="guardarEq()">Agregar</button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-  const COLORES = ['#1B3A6B','#2F5AA8','#CC1F2A','#065f46','#92400e','#5b21b6','#9d174d','#9a3412'];
-  function colorAvatar(n) { var s=0; for(var i=0;i<n.length;i++) s+=n.charCodeAt(i); return COLORES[s%COLORES.length]; }
-  function iniciales(n) { return (n||'').split(' ').filter(Boolean).slice(0,2).map(p=>p[0]).join('').toUpperCase(); }
-  function esc(s) { var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
-  function vacio(v) { return !v || v.trim()==='' || v.trim().toUpperCase()==='NO POSEE' || v.trim()==='*'; }
+/* ── Helpers ── */
+const COLORES = ['#1B3A6B','#2F5AA8','#CC1F2A','#065f46','#92400e','#5b21b6','#9d174d','#9a3412'];
+function colorAvatar(n) { var s=0; for(var i=0;i<(n||'').length;i++) s+=n.charCodeAt(i); return COLORES[s%COLORES.length]; }
+function iniciales(n)  { return (n||'').split(' ').filter(Boolean).slice(0,2).map(function(p){return p[0];}).join('').toUpperCase(); }
+function esc(s)        { var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+function vacio(v)      { return !v||v.trim()===''||v.trim().toUpperCase()==='NO POSEE'||v.trim()==='*'; }
 
-  let usuarios = [], detalleId = null;
+/* ── Page tab ── */
+function cambiarTab(tab) {
+  document.getElementById('tab-usuarios').style.display = tab==='usuarios' ? '' : 'none';
+  document.getElementById('tab-equipos').style.display  = tab==='equipos'  ? '' : 'none';
+  document.getElementById('ptab-usuarios').classList.toggle('activo', tab==='usuarios');
+  document.getElementById('ptab-equipos').classList.toggle('activo',  tab==='equipos');
+  if (tab==='equipos' && !equiposCargados) cargarEquipos();
+}
 
-  async function cargar() {
-    try {
-      const res = await fetch('/api/usuarios');
-      if (!res.ok) throw new Error('Error '+res.status);
-      usuarios = await res.json();
-      filtrar();
-    } catch(e) {
-      document.getElementById('grid').innerHTML = '<div class="sin-datos">Error al cargar: '+e.message+'</div>';
-    }
+/* ══════════════════════════
+   USUARIOS
+   ══════════════════════════ */
+var usuarios = [], detalleId = null, _editId = null;
+
+async function cargarUsuarios() {
+  try {
+    var res = await fetch('/api/usuarios');
+    if (!res.ok) throw new Error('Error '+res.status);
+    usuarios = await res.json();
+    filtrarUsuarios();
+  } catch(e) {
+    document.getElementById('grid').innerHTML='<div class="sin-datos">Error al cargar: '+e.message+'</div>';
   }
+}
 
-  function filtrar() {
-    const q   = document.querySelector('.buscar').value.toLowerCase();
-    const div = document.getElementById('f-div').value;
-    const res = usuarios.filter(u => {
-      const mD = !div || u.division === div;
-      const mQ = !q  || [u.nombre,u.microsoftEmail,u.gmailEmail,u.puesto,u.area,u.laptopSerie,u.celularImei,u.hostname].some(v=>v&&v.toLowerCase().includes(q));
-      return mD && mQ;
-    });
-    renderizar(res);
+function filtrarUsuarios() {
+  var q   = document.getElementById('u-buscar').value.toLowerCase();
+  var div = document.getElementById('u-div').value;
+  var res = usuarios.filter(function(u){
+    var mD = !div || u.division===div;
+    var mQ = !q  || [u.nombre,u.microsoftEmail,u.gmailEmail,u.puesto,u.area,u.laptopSerie,u.celularImei,u.hostname].some(function(v){return v&&v.toLowerCase().includes(q);});
+    return mD && mQ;
+  });
+  renderizarUsuarios(res);
+}
+
+function renderizarUsuarios(lista) {
+  document.getElementById('u-contador').textContent = lista.length+' usuario'+(lista.length!==1?'s':'');
+  if (!lista.length) { document.getElementById('grid').innerHTML='<div class="sin-datos">No se encontraron usuarios.</div>'; return; }
+  document.getElementById('grid').innerHTML = lista.map(function(u){
+    var col=colorAvatar(u.nombre||'?'), ini=iniciales(u.nombre||'?');
+    var divCorto=(u.division||'').replace('PLG ','').replace('DIVISION ','DIV. ');
+    var chips=[
+      u.laptopModelo  ? '<span class="chip ok">💻 '+esc(u.laptopModelo.split(' ').slice(0,3).join(' '))+'</span>' : '',
+      u.celularModelo ? '<span class="chip ok">📱 '+esc(u.celularModelo.split(' ').slice(0,3).join(' '))+'</span>' : '',
+      u.microsoftEmail? '<span class="chip mail">✉️ Office 365</span>' : '',
+      u.gmailEmail    ? '<span class="chip mail">✉️ Gmail</span>' : '',
+    ].filter(Boolean).join('');
+    return '<div class="tarjeta" onclick="verDetalle(\''+u.id+'\')">'+
+      '<div class="tarjeta-header"><div class="avatar" style="background:'+col+'">'+ini+'</div>'+
+      '<div class="user-info"><div class="user-nombre">'+esc(u.nombre)+'</div><div class="user-puesto">'+esc(u.puesto||u.area||'')+'</div></div></div>'+
+      '<div class="tarjeta-body">'+(divCorto?'<span class="badge-div">'+esc(divCorto)+'</span>':'')+
+      '<div class="equipo-chips">'+chips+'</div></div></div>';
+  }).join('');
+}
+
+function verDetalle(id) {
+  var u=usuarios.find(function(x){return x.id===id;});
+  if (!u) return;
+  detalleId=id;
+  var col=colorAvatar(u.nombre||'?');
+  document.getElementById('d-avatar').style.background=col;
+  document.getElementById('d-avatar').textContent=iniciales(u.nombre||'?');
+  document.getElementById('d-nombre').textContent=u.nombre||'—';
+  document.getElementById('d-puesto-div').textContent=[u.puesto,u.division].filter(Boolean).join(' · ');
+  document.getElementById('d-area').textContent=[u.area,'—'].filter(Boolean)[0];
+  document.getElementById('d-tel').textContent=[u.telefono,u.extension?'Ext. '+u.extension:''].filter(Boolean).join(' / ')||'—';
+  document.getElementById('d-host').textContent=u.hostname||'—';
+  document.getElementById('d-anydesk').textContent=u.anydesk||'—';
+  setPass('d-ms',u.microsoftEmail,u.microsoftPass);
+  setPass('d-gm',u.gmailEmail,u.gmailPass);
+  setMag(u.magayaUser,u.magayaPass);
+  setEquipo('eq-laptop','d-laptop',u.laptopModelo,u.laptopSerie,'Sin laptop asignada');
+  setEquipo('eq-monitor','d-mon',u.monitorModelo,u.monitorSerie,'Sin monitor asignado');
+  setEquipo('eq-celular','d-cel',u.celularModelo,u.celularImei,'Sin celular asignado');
+  setEquipo('eq-tablet','d-tab',u.tabletModelo,u.tabletImei,'Sin tablet asignada');
+  document.getElementById('overlayDetalle').classList.add('activo');
+}
+
+function setPass(pre,email,pass) {
+  document.getElementById(pre+'-email').textContent=email||'—';
+  if (pass) { document.getElementById(pre+'-raw').textContent=pass; document.getElementById(pre+'-pass').textContent='••••••••'; }
+  else       { document.getElementById(pre+'-pass').textContent='—'; document.getElementById(pre+'-raw').textContent=''; }
+}
+function setMag(user,pass) {
+  document.getElementById('d-mag-user').textContent=user||'—';
+  if (pass) { document.getElementById('d-mag-raw').textContent=pass; document.getElementById('d-mag-pass').textContent='••••••••'; }
+  else       { document.getElementById('d-mag-pass').textContent='—'; document.getElementById('d-mag-raw').textContent=''; }
+}
+function setEquipo(cardId,pre,modelo,serie,sinTexto) {
+  var card=document.getElementById(cardId);
+  if (!vacio(modelo)||!vacio(serie)) {
+    document.getElementById(pre+'-mod').textContent=modelo||'—';
+    document.getElementById(pre+'-ser').textContent=serie||'—';
+    card.style.opacity='1';
+  } else {
+    document.getElementById(pre+'-mod').textContent=sinTexto;
+    document.getElementById(pre+'-ser').textContent='';
+    card.style.opacity='0.4';
   }
+}
+function togglePass(passId,rawId) {
+  var el=document.getElementById(passId), raw=document.getElementById(rawId).textContent;
+  if (!raw) return;
+  el.textContent=el.textContent==='••••••••'?raw:'••••••••';
+}
+function cerrarDetalle() { document.getElementById('overlayDetalle').classList.remove('activo'); }
+function editarActual()  { cerrarDetalle(); abrirForm(detalleId); }
 
-  function renderizar(lista) {
-    document.getElementById('contador').textContent = lista.length + ' usuario' + (lista.length!==1?'s':'');
-    if (!lista.length) { document.getElementById('grid').innerHTML='<div class="sin-datos">No se encontraron usuarios.</div>'; return; }
+function abrirForm(id) {
+  var u=id?usuarios.find(function(x){return x.id===id;}):null;
+  _editId=id||null;
+  document.getElementById('form-titulo').textContent  = u?'Editar Usuario':'Agregar Usuario';
+  document.getElementById('btn-del').style.display    = u?'':'none';
+  document.getElementById('btn-save').textContent     = u?'Guardar Cambios':'Agregar';
+  document.getElementById('form-msg').innerHTML='';
+  document.getElementById('dir-wrap').style.display   = u?'none':'';
+  document.getElementById('dir-search').value='';
+  document.getElementById('dir-lista').style.display='none';
+  document.getElementById('dir-sel').style.display='none';
 
-    document.getElementById('grid').innerHTML = lista.map(u => {
-      const col  = colorAvatar(u.nombre||'?');
-      const ini  = iniciales(u.nombre||'?');
-      const divCorto = (u.division||'').replace('PLG ','').replace('DIVISION ','DIV. ');
-      const chips = [
-        u.laptopModelo  ? `<span class="chip ok">💻 ${esc(u.laptopModelo.split(' ').slice(0,3).join(' '))}</span>` : '',
-        u.celularModelo ? `<span class="chip ok">📱 ${esc(u.celularModelo.split(' ').slice(0,3).join(' '))}</span>` : '',
-        u.microsoftEmail? `<span class="chip mail">✉️ Office 365</span>` : '',
-        u.gmailEmail    ? `<span class="chip mail">✉️ Gmail</span>` : '',
-      ].filter(Boolean).join('');
-      return `<div class="tarjeta" onclick="verDetalle('${u.id}')">
-        <div class="tarjeta-header">
-          <div class="avatar" style="background:${col}">${ini}</div>
-          <div class="user-info">
-            <div class="user-nombre">${esc(u.nombre)}</div>
-            <div class="user-puesto">${esc(u.puesto||u.area||'')}</div>
-          </div>
-        </div>
-        <div class="tarjeta-body">
-          ${divCorto ? `<span class="badge-div">${esc(divCorto)}</span>` : ''}
-          <div class="equipo-chips">${chips}</div>
-        </div>
-      </div>`;
-    }).join('');
-  }
+  document.getElementById('f-nombre').value   = u?u.nombre:'';
+  document.getElementById('f-division').value = u?u.division:'';
+  document.getElementById('f-area').value     = u?u.area:'';
+  document.getElementById('f-puesto').value   = u?u.puesto:'';
+  document.getElementById('f-tel').value      = u?u.telefono:'';
+  document.getElementById('f-ext').value      = u?u.extension:'';
+  document.getElementById('f-host').value     = u?u.hostname:'';
+  document.getElementById('f-anydesk').value  = u?u.anydesk:'';
+  document.getElementById('f-ms-email').value = u?u.microsoftEmail:'';
+  document.getElementById('f-ms-pass').value  = u?u.microsoftPass:'';
+  document.getElementById('f-gm-email').value = u?u.gmailEmail:'';
+  document.getElementById('f-gm-pass').value  = u?u.gmailPass:'';
+  document.getElementById('f-mag-user').value = u?u.magayaUser:'';
+  document.getElementById('f-mag-pass').value = u?u.magayaPass:'';
+  document.getElementById('f-lap-mod').value  = u?u.laptopModelo:'';
+  document.getElementById('f-lap-ser').value  = u?u.laptopSerie:'';
+  document.getElementById('f-mon-mod').value  = u?u.monitorModelo:'';
+  document.getElementById('f-mon-ser').value  = u?u.monitorSerie:'';
+  document.getElementById('f-cel-mod').value  = u?u.celularModelo:'';
+  document.getElementById('f-cel-ser').value  = u?u.celularImei:'';
+  document.getElementById('f-tab-mod').value  = u?u.tabletModelo:'';
+  document.getElementById('f-tab-ser').value  = u?u.tabletImei:'';
 
-  function verDetalle(id) {
-    const u = usuarios.find(x=>x.id===id);
-    if (!u) return;
-    detalleId = id;
-    const col = colorAvatar(u.nombre||'?');
-    document.getElementById('d-avatar').style.background = col;
-    document.getElementById('d-avatar').textContent = iniciales(u.nombre||'?');
-    document.getElementById('d-nombre').textContent = u.nombre||'—';
-    document.getElementById('d-puesto-div').textContent = [u.puesto, u.division].filter(Boolean).join(' · ');
-    document.getElementById('d-area').textContent    = u.area     || '—';
-    document.getElementById('d-tel').textContent     = [u.telefono, u.extension ? 'Ext. '+u.extension : ''].filter(Boolean).join(' / ') || '—';
-    document.getElementById('d-host').textContent    = u.hostname || '—';
-    document.getElementById('d-anydesk').textContent = u.anydesk  || '—';
+  if (!u) iniciarBusquedaDir();
+  document.getElementById('overlayForm').classList.add('activo');
+}
+function cerrarForm() { document.getElementById('overlayForm').classList.remove('activo'); }
 
-    // Cuentas
-    setPass('d-ms',  u.microsoftEmail, u.microsoftPass);
-    setPass('d-gm',  u.gmailEmail,     u.gmailPass);
-    setMag(u.magayaUser, u.magayaPass);
-
-    // Equipos
-    setEquipo('eq-laptop',  'd-laptop', u.laptopModelo,  u.laptopSerie,  'Sin laptop asignada');
-    setEquipo('eq-monitor', 'd-mon',    u.monitorModelo, u.monitorSerie, 'Sin monitor asignado');
-    setEquipo('eq-celular', 'd-cel',    u.celularModelo, u.celularImei,  'Sin celular asignado');
-    setEquipo('eq-tablet',  'd-tab',    u.tabletModelo,  u.tabletImei,   'Sin tablet asignada');
-
-    document.getElementById('overlayDetalle').classList.add('activo');
-  }
-
-  function setPass(pre, email, pass) {
-    document.getElementById(pre+'-email').textContent = email || '—';
-    if (pass) {
-      document.getElementById(pre+'-raw').textContent = pass;
-      document.getElementById(pre+'-pass').textContent = '••••••••';
+async function guardar() {
+  var nombre=document.getElementById('f-nombre').value.trim();
+  if (!nombre) { mostrarMsg('err','El nombre es obligatorio.'); return; }
+  var btn=document.getElementById('btn-save');
+  btn.disabled=true;
+  var payload={
+    nombre,
+    division:      document.getElementById('f-division').value,
+    area:          document.getElementById('f-area').value.trim(),
+    puesto:        document.getElementById('f-puesto').value.trim(),
+    telefono:      document.getElementById('f-tel').value.trim(),
+    extension:     document.getElementById('f-ext').value.trim(),
+    hostname:      document.getElementById('f-host').value.trim(),
+    anydesk:       document.getElementById('f-anydesk').value.trim(),
+    microsoftEmail:document.getElementById('f-ms-email').value.trim(),
+    microsoftPass: document.getElementById('f-ms-pass').value.trim(),
+    gmailEmail:    document.getElementById('f-gm-email').value.trim(),
+    gmailPass:     document.getElementById('f-gm-pass').value.trim(),
+    magayaUser:    document.getElementById('f-mag-user').value.trim(),
+    magayaPass:    document.getElementById('f-mag-pass').value.trim(),
+    laptopModelo:  document.getElementById('f-lap-mod').value.trim(),
+    laptopSerie:   document.getElementById('f-lap-ser').value.trim(),
+    monitorModelo: document.getElementById('f-mon-mod').value.trim(),
+    monitorSerie:  document.getElementById('f-mon-ser').value.trim(),
+    celularModelo: document.getElementById('f-cel-mod').value.trim(),
+    celularImei:   document.getElementById('f-cel-ser').value.trim(),
+    tabletModelo:  document.getElementById('f-tab-mod').value.trim(),
+    tabletImei:    document.getElementById('f-tab-ser').value.trim()
+  };
+  try {
+    var res, item;
+    if (_editId) {
+      payload.id=_editId;
+      res=await fetch('/api/usuarios?id='+encodeURIComponent(_editId),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      item=await res.json();
+      var idx=usuarios.findIndex(function(x){return x.id===_editId;});
+      if (idx!==-1) usuarios[idx]=Object.assign({},usuarios[idx],payload);
     } else {
-      document.getElementById(pre+'-pass').textContent = '—';
-      document.getElementById(pre+'-raw').textContent = '';
+      res=await fetch('/api/usuarios',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      item=await res.json();
+      usuarios.unshift(item);
     }
-  }
+    if (!res.ok) throw new Error((item||{}).error||'Error');
+    filtrarUsuarios();
+    cerrarForm();
+  } catch(e) { mostrarMsg('err','Error al guardar: '+e.message); }
+  btn.disabled=false;
+}
 
-  function setMag(user, pass) {
-    document.getElementById('d-mag-user').textContent = user || '—';
-    if (pass) {
-      document.getElementById('d-mag-raw').textContent = pass;
-      document.getElementById('d-mag-pass').textContent = '••••••••';
+async function eliminarUsuario() {
+  if (!_editId||!confirm('¿Eliminar este usuario del inventario?')) return;
+  try {
+    await fetch('/api/usuarios?id='+encodeURIComponent(_editId),{method:'DELETE'});
+    usuarios=usuarios.filter(function(x){return x.id!==_editId;});
+    filtrarUsuarios(); cerrarForm();
+  } catch(e) { mostrarMsg('err','Error: '+e.message); }
+}
+
+function mostrarMsg(t,txt) { document.getElementById('form-msg').innerHTML='<div class="msg '+t+'">'+txt+'</div>'; }
+
+/* ── Buscador de directorio ── */
+var _colabs=[], _colasCargados=false, _dirResultados=[];
+
+async function iniciarBusquedaDir() {
+  if (_colasCargados) return;
+  try {
+    var res=await fetch('/api/colaboradores');
+    _colabs=await res.json();
+    _colasCargados=true;
+  } catch(e) { _colabs=[]; }
+}
+
+function buscarDir() {
+  var q=document.getElementById('dir-search').value.trim().toLowerCase();
+  var lista=document.getElementById('dir-lista');
+  if (q.length<2) { lista.style.display='none'; return; }
+  _dirResultados=_colabs.filter(function(c){return c.nombre&&c.nombre.toLowerCase().includes(q);}).slice(0,8);
+  if (!_dirResultados.length) { lista.style.display='none'; return; }
+  lista.innerHTML=_dirResultados.map(function(c,i){
+    var col=colorAvatar(c.nombre);
+    return '<div class="dir-item" onclick="seleccionarColaborador('+i+')">'+
+      '<div class="dir-item-av" style="background:'+col+'">'+iniciales(c.nombre)+'</div>'+
+      '<div><div class="dir-item-nombre">'+esc(c.nombre)+'</div>'+
+      '<div class="dir-item-info">'+esc(c.puesto||'')+(c.oficina?' · '+esc(c.oficina):'')+'</div></div></div>';
+  }).join('');
+  lista.style.display='';
+}
+
+var DIV_MAP={
+  'PLG DE EL SALVADOR':'PLG DE EL SALVADOR',
+  'PLG DIVISION ADUANAS':'PLG DIVISION ADUANAS',
+  'PLG DIVISION TERRESTRE':'PLG DIVISION TERRESTRE',
+  'PLG DOMINICANA':'PLG DOMINICANA',
+  'PLG GROUP':'PLG GROUP'
+};
+
+function seleccionarColaborador(i) {
+  var c=_dirResultados[i];
+  document.getElementById('f-nombre').value   = c.nombre||'';
+  document.getElementById('f-division').value = DIV_MAP[(c.oficina||'').toUpperCase()]||'';
+  document.getElementById('f-area').value     = c.area||'';
+  document.getElementById('f-puesto').value   = c.puesto||'';
+  document.getElementById('f-tel').value      = c.telefono||'';
+  document.getElementById('f-ms-email').value = c.mail||'';
+  document.getElementById('dir-sel-nombre').textContent = c.nombre;
+  document.getElementById('dir-sel').style.display='';
+  document.getElementById('dir-lista').style.display='none';
+  document.getElementById('dir-search').value='';
+}
+
+function limpiarDirSel() {
+  document.getElementById('dir-sel').style.display='none';
+  document.getElementById('f-nombre').value='';
+  document.getElementById('f-division').value='';
+  document.getElementById('f-area').value='';
+  document.getElementById('f-puesto').value='';
+  document.getElementById('f-tel').value='';
+  document.getElementById('f-ms-email').value='';
+}
+
+/* ══════════════════════════
+   EQUIPOS
+   ══════════════════════════ */
+var equipos=[], equiposCargados=false, _eqEditId=null;
+
+async function cargarEquipos() {
+  try {
+    var res=await fetch('/api/inventario');
+    equipos=await res.json();
+    equiposCargados=true;
+    document.getElementById('eq-cargando').style.display='none';
+    document.getElementById('tabla-eq').style.display='';
+    filtrarEquipos();
+  } catch(e) {
+    document.getElementById('eq-cargando').textContent='Error al cargar: '+e.message;
+  }
+}
+
+function filtrarEquipos() {
+  var q   =document.getElementById('eq-buscar').value.toLowerCase();
+  var tipo=document.getElementById('eq-tipo').value;
+  var div =document.getElementById('eq-div').value;
+  var est =document.getElementById('eq-est').value;
+  var res=equipos.filter(function(e){
+    var mT=!tipo||e.tipo===tipo;
+    var mD=!div ||e.division===div;
+    var mE=!est ||e.estado===est;
+    var mQ=!q   ||[e.tipo,e.marca,e.modelo,e.serial,e.usuarioActual,e.division].some(function(v){return v&&v.toLowerCase().includes(q);});
+    return mT&&mD&&mE&&mQ;
+  });
+  renderizarEquipos(res);
+}
+
+var TIPO_ICON={'Laptop':'💻','Monitor':'🖥️','Celular':'📱','Tablet':'📲','Impresora':'🖨️','Otro':'🔧'};
+var ESTADO_CLS={'Bueno':'beq-bueno','Regular':'beq-regular','Baja':'beq-baja','Disponible':'beq-disponible'};
+
+function renderizarEquipos(lista) {
+  document.getElementById('eq-contador').textContent=lista.length+' equipo'+(lista.length!==1?'s':'');
+  var tbody=document.getElementById('tbody-eq');
+  if (!lista.length) {
+    tbody.innerHTML='<tr><td colspan="7"><div class="eq-vacio">No se encontraron equipos.</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML=lista.map(function(e){
+    var icon=TIPO_ICON[e.tipo]||'🔧';
+    var ecls=ESTADO_CLS[e.estado]||'beq-bueno';
+    var divCorto=(e.division||'').replace('PLG ','').replace('DIVISION ','DIV. ');
+    return '<tr>'+
+      '<td><span style="font-size:17px">'+icon+'</span> '+esc(e.tipo||'')+'</td>'+
+      '<td><strong>'+esc(e.marca||'')+' '+esc(e.modelo||'')+'</strong></td>'+
+      '<td style="font-family:monospace;font-size:12px">'+esc(e.serial||'')+'</td>'+
+      '<td><span class="beq '+ecls+'">'+esc(e.estado||'')+'</span></td>'+
+      '<td style="font-size:12px">'+esc(divCorto)+'</td>'+
+      '<td style="font-size:12px">'+esc(e.usuarioActual||'—')+'</td>'+
+      '<td><div class="acc-eq">'+
+        '<button class="btn-sm btn-sm-edit" onclick="abrirFormEq(\''+e.id+'\')">Editar</button>'+
+        '<button class="btn-sm btn-sm-del"  onclick="confirmarElimEq(\''+e.id+'\')">Eliminar</button>'+
+      '</div></td></tr>';
+  }).join('');
+}
+
+function abrirFormEq(id) {
+  var e=id?equipos.find(function(x){return x.id===id;}):null;
+  _eqEditId=id||null;
+  document.getElementById('eq-form-titulo').textContent = e?'Editar Equipo':'Agregar Equipo';
+  document.getElementById('eq-btn-del').style.display   = e?'':'none';
+  document.getElementById('eq-btn-save').textContent    = e?'Guardar Cambios':'Agregar';
+  document.getElementById('eq-form-msg').innerHTML='';
+  document.getElementById('f-eq-tipo').value    = e?e.tipo:'Laptop';
+  document.getElementById('f-eq-estado').value  = e?e.estado:'Bueno';
+  document.getElementById('f-eq-marca').value   = e?e.marca:'';
+  document.getElementById('f-eq-modelo').value  = e?e.modelo:'';
+  document.getElementById('f-eq-serial').value  = e?e.serial:'';
+  document.getElementById('f-eq-div').value     = e?e.division:'';
+  document.getElementById('f-eq-user').value    = e?e.usuarioActual:'';
+  document.getElementById('f-eq-notas').value   = e?e.notas:'';
+  document.getElementById('overlayFormEq').classList.add('activo');
+}
+function cerrarFormEq() { document.getElementById('overlayFormEq').classList.remove('activo'); }
+
+async function guardarEq() {
+  var serial=document.getElementById('f-eq-serial').value.trim();
+  if (!serial) { document.getElementById('eq-form-msg').innerHTML='<div class="msg err">El número de serie es obligatorio.</div>'; return; }
+  var btn=document.getElementById('eq-btn-save');
+  btn.disabled=true;
+  var payload={
+    tipo:         document.getElementById('f-eq-tipo').value,
+    marca:        document.getElementById('f-eq-marca').value.trim(),
+    modelo:       document.getElementById('f-eq-modelo').value.trim(),
+    serial,
+    estado:       document.getElementById('f-eq-estado').value,
+    division:     document.getElementById('f-eq-div').value,
+    usuarioActual:document.getElementById('f-eq-user').value.trim(),
+    notas:        document.getElementById('f-eq-notas').value.trim()
+  };
+  try {
+    var res,item;
+    if (_eqEditId) {
+      payload.id=_eqEditId;
+      res=await fetch('/api/inventario?id='+encodeURIComponent(_eqEditId),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      item=await res.json();
+      var idx=equipos.findIndex(function(x){return x.id===_eqEditId;});
+      if (idx!==-1) equipos[idx]=Object.assign({},equipos[idx],payload,{id:_eqEditId});
     } else {
-      document.getElementById('d-mag-pass').textContent = '—';
-      document.getElementById('d-mag-raw').textContent = '';
+      res=await fetch('/api/inventario',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      item=await res.json();
+      equipos.unshift(item);
     }
-  }
+    if (!res.ok) throw new Error((item||{}).error||'Error');
+    filtrarEquipos();
+    cerrarFormEq();
+  } catch(e) { document.getElementById('eq-form-msg').innerHTML='<div class="msg err">'+e.message+'</div>'; }
+  btn.disabled=false;
+}
 
-  function setEquipo(cardId, pre, modelo, serie, sinTexto) {
-    const card = document.getElementById(cardId);
-    if (!vacio(modelo) || !vacio(serie)) {
-      document.getElementById(pre+'-mod').textContent = modelo || '—';
-      document.getElementById(pre+'-ser').textContent = serie  || '—';
-      card.style.opacity = '1';
-    } else {
-      document.getElementById(pre+'-mod').textContent = sinTexto;
-      document.getElementById(pre+'-ser').textContent = '';
-      card.style.opacity = '0.4';
-    }
-  }
+function confirmarElimEq(id) { _eqEditId=id; eliminarEq(); }
 
-  function togglePass(passId, rawId) {
-    const el  = document.getElementById(passId);
-    const raw = document.getElementById(rawId).textContent;
-    if (!raw) return;
-    el.textContent = el.textContent === '••••••••' ? raw : '••••••••';
-  }
+async function eliminarEq() {
+  if (!_eqEditId||!confirm('¿Eliminar este equipo del inventario?')) return;
+  try {
+    await fetch('/api/inventario?id='+encodeURIComponent(_eqEditId),{method:'DELETE'});
+    equipos=equipos.filter(function(x){return x.id!==_eqEditId;});
+    filtrarEquipos();
+    cerrarFormEq();
+  } catch(e) { alert('Error: '+e.message); }
+}
 
-  function cerrarDetalle() { document.getElementById('overlayDetalle').classList.remove('activo'); }
-  function editarActual()  { cerrarDetalle(); abrirForm(detalleId); }
-
-  const CAMPOS = ['nombre','div','area','puesto','tel','ext','host','anydesk','ms-email','ms-pass','gm-email','gm-pass','mag-user','mag-pass','lap-mod','lap-ser','mon-mod','mon-ser','cel-mod','cel-ser','tab-mod','tab-ser'];
-
-  function abrirForm(id) {
-    const u = id ? usuarios.find(x=>x.id===id) : null;
-    document.getElementById('form-titulo').textContent = u ? 'Editar Usuario' : 'Agregar Usuario';
-    document.getElementById('btn-del').style.display   = u ? '' : 'none';
-    document.getElementById('btn-save').textContent    = u ? 'Guardar Cambios' : 'Agregar';
-    document.getElementById('form-msg').innerHTML = '';
-
-    document.getElementById('f-nombre').value   = u ? u.nombre          : '';
-    document.getElementById('f-div').value      = u ? u.division        : '';
-    document.getElementById('f-area').value     = u ? u.area            : '';
-    document.getElementById('f-puesto').value   = u ? u.puesto          : '';
-    document.getElementById('f-tel').value      = u ? u.telefono        : '';
-    document.getElementById('f-ext').value      = u ? u.extension       : '';
-    document.getElementById('f-host').value     = u ? u.hostname        : '';
-    document.getElementById('f-anydesk').value  = u ? u.anydesk         : '';
-    document.getElementById('f-ms-email').value = u ? u.microsoftEmail  : '';
-    document.getElementById('f-ms-pass').value  = u ? u.microsoftPass   : '';
-    document.getElementById('f-gm-email').value = u ? u.gmailEmail      : '';
-    document.getElementById('f-gm-pass').value  = u ? u.gmailPass       : '';
-    document.getElementById('f-mag-user').value = u ? u.magayaUser      : '';
-    document.getElementById('f-mag-pass').value = u ? u.magayaPass      : '';
-    document.getElementById('f-lap-mod').value  = u ? u.laptopModelo    : '';
-    document.getElementById('f-lap-ser').value  = u ? u.laptopSerie     : '';
-    document.getElementById('f-mon-mod').value  = u ? u.monitorModelo   : '';
-    document.getElementById('f-mon-ser').value  = u ? u.monitorSerie    : '';
-    document.getElementById('f-cel-mod').value  = u ? u.celularModelo   : '';
-    document.getElementById('f-cel-ser').value  = u ? u.celularImei     : '';
-    document.getElementById('f-tab-mod').value  = u ? u.tabletModelo    : '';
-    document.getElementById('f-tab-ser').value  = u ? u.tabletImei      : '';
-
-    document.getElementById('overlayForm').classList.add('activo');
-    window._editId = id || null;
-  }
-
-  function cerrarForm() { document.getElementById('overlayForm').classList.remove('activo'); }
-
-  async function guardar() {
-    const nombre = document.getElementById('f-nombre').value.trim();
-    if (!nombre) { mostrarMsg('err','El nombre es obligatorio.'); return; }
-    const btn = document.getElementById('btn-save');
-    btn.disabled = true;
-    const payload = {
-      nombre,
-      division:       document.getElementById('f-div').value,
-      area:           document.getElementById('f-area').value.trim(),
-      puesto:         document.getElementById('f-puesto').value.trim(),
-      telefono:       document.getElementById('f-tel').value.trim(),
-      extension:      document.getElementById('f-ext').value.trim(),
-      hostname:       document.getElementById('f-host').value.trim(),
-      anydesk:        document.getElementById('f-anydesk').value.trim(),
-      microsoftEmail: document.getElementById('f-ms-email').value.trim(),
-      microsoftPass:  document.getElementById('f-ms-pass').value.trim(),
-      gmailEmail:     document.getElementById('f-gm-email').value.trim(),
-      gmailPass:      document.getElementById('f-gm-pass').value.trim(),
-      magayaUser:     document.getElementById('f-mag-user').value.trim(),
-      magayaPass:     document.getElementById('f-mag-pass').value.trim(),
-      laptopModelo:   document.getElementById('f-lap-mod').value.trim(),
-      laptopSerie:    document.getElementById('f-lap-ser').value.trim(),
-      monitorModelo:  document.getElementById('f-mon-mod').value.trim(),
-      monitorSerie:   document.getElementById('f-mon-ser').value.trim(),
-      celularModelo:  document.getElementById('f-cel-mod').value.trim(),
-      celularImei:    document.getElementById('f-cel-ser').value.trim(),
-      tabletModelo:   document.getElementById('f-tab-mod').value.trim(),
-      tabletImei:     document.getElementById('f-tab-ser').value.trim()
-    };
-    try {
-      let res, item;
-      if (window._editId) {
-        payload.id = window._editId;
-        res  = await fetch('/api/usuarios?id='+encodeURIComponent(window._editId), { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
-        item = await res.json();
-        const idx = usuarios.findIndex(x=>x.id===window._editId);
-        if (idx!==-1) usuarios[idx] = { ...usuarios[idx], ...payload };
-      } else {
-        res  = await fetch('/api/usuarios', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
-        item = await res.json();
-        usuarios.unshift(item);
-      }
-      if (!res.ok) throw new Error(item.error||'Error');
-      filtrar();
-      cerrarForm();
-    } catch(e) {
-      mostrarMsg('err','Error al guardar: '+e.message);
-    }
-    btn.disabled = false;
-  }
-
-  async function eliminar() {
-    if (!window._editId || !confirm('¿Eliminar este usuario del inventario?')) return;
-    try {
-      await fetch('/api/usuarios?id='+encodeURIComponent(window._editId), { method:'DELETE' });
-      usuarios = usuarios.filter(x=>x.id!==window._editId);
-      filtrar(); cerrarForm();
-    } catch(e) { mostrarMsg('err','Error: '+e.message); }
-  }
-
-  function mostrarMsg(t,txt) { document.getElementById('form-msg').innerHTML='<div class="msg '+t+'">'+txt+'</div>'; }
-
-  document.addEventListener('keydown', e => { if(e.key==='Escape'){ cerrarDetalle(); cerrarForm(); } });
-  cargar();
+/* ── Init ── */
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){cerrarDetalle();cerrarForm();cerrarFormEq();}});
+document.addEventListener('click',function(e){
+  var lista=document.getElementById('dir-lista');
+  if (!lista.contains(e.target)&&e.target.id!=='dir-search') lista.style.display='none';
+});
+cargarUsuarios();
 </script>
 </body>
 </html>
