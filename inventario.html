@@ -323,16 +323,13 @@
     <div class="form-body">
       <div id="form-msg"></div>
 
-      <!-- Buscador de directorio (solo en modo agregar) -->
+      <!-- Selector de colaborador -->
       <div id="dir-wrap">
         <div class="dir-box">
-          <div class="dir-box-label">🔍 Buscar en Directorio PLG (opcional) <span id="dir-hint" style="font-weight:400;color:#aaa;font-size:10px"></span></div>
-          <input class="dir-input" id="dir-search" type="text" placeholder="Escribe el nombre del colaborador..." oninput="buscarDir()" autocomplete="off">
-          <div class="dir-lista" id="dir-lista"></div>
-          <div class="dir-sel" id="dir-sel" style="display:none">
-            <span>✅ Pre-llenado desde directorio: <span class="dir-sel-nombre" id="dir-sel-nombre"></span></span>
-            <button class="dir-sel-clear" onclick="limpiarDirSel()" title="Quitar">×</button>
-          </div>
+          <div class="dir-box-label">👤 Seleccionar Colaborador del Directorio PLG <span id="dir-hint" style="font-weight:400;color:#aaa;font-size:10px"></span></div>
+          <select id="f-colab-sel" style="width:100%;padding:8px 11px;border:1.5px solid #c5cedb;border-radius:6px;font-size:13px;font-family:inherit;background:white;color:#333" onchange="seleccionarColab()">
+            <option value="">⏳ Cargando directorio...</option>
+          </select>
         </div>
       </div>
 
@@ -369,46 +366,50 @@
 
       <div class="form-section">💻 Equipos Asignados</div>
 
-      <!-- Laptop picker -->
+      <!-- Laptop -->
       <div class="eq-picker-box">
         <div class="eq-picker-label">💻 Laptop</div>
-        <input class="dir-input" id="eq-lap-search" type="text" placeholder="Buscar laptop en inventario..." oninput="buscarEqForm(this,'Laptop','eq-lap-lista','f-lap-mod','f-lap-ser','eq-lap-search')" autocomplete="off">
-        <div class="dir-lista" id="eq-lap-lista"></div>
+        <select id="f-lap-sel" style="width:100%;padding:8px 11px;border:1.5px solid #c5cedb;border-radius:6px;font-size:13px;font-family:inherit;background:white" onchange="selEqDrop('Laptop','f-lap-mod','f-lap-ser')">
+          <option value="">— Sin laptop asignada —</option>
+        </select>
         <div class="g2" style="margin-top:8px">
-          <div class="campo"><label>Modelo</label><input id="f-lap-mod" type="text" placeholder="Ej: Lenovo E16 Gen 2"></div>
+          <div class="campo"><label>Modelo</label><input id="f-lap-mod" type="text" placeholder="O ingresar manualmente"></div>
           <div class="campo"><label>Serie</label><input id="f-lap-ser" type="text" placeholder="Número de serie"></div>
         </div>
       </div>
 
-      <!-- Monitor picker -->
+      <!-- Monitor -->
       <div class="eq-picker-box">
         <div class="eq-picker-label">🖥️ Monitor</div>
-        <input class="dir-input" id="eq-mon-search" type="text" placeholder="Buscar monitor en inventario..." oninput="buscarEqForm(this,'Monitor','eq-mon-lista','f-mon-mod','f-mon-ser','eq-mon-search')" autocomplete="off">
-        <div class="dir-lista" id="eq-mon-lista"></div>
+        <select id="f-mon-sel" style="width:100%;padding:8px 11px;border:1.5px solid #c5cedb;border-radius:6px;font-size:13px;font-family:inherit;background:white" onchange="selEqDrop('Monitor','f-mon-mod','f-mon-ser')">
+          <option value="">— Sin monitor asignado —</option>
+        </select>
         <div class="g2" style="margin-top:8px">
-          <div class="campo"><label>Modelo</label><input id="f-mon-mod" type="text" placeholder="Ej: Samsung F24T350"></div>
+          <div class="campo"><label>Modelo</label><input id="f-mon-mod" type="text" placeholder="O ingresar manualmente"></div>
           <div class="campo"><label>Serie</label><input id="f-mon-ser" type="text" placeholder="Número de serie"></div>
         </div>
       </div>
 
-      <!-- Celular picker -->
+      <!-- Celular -->
       <div class="eq-picker-box">
         <div class="eq-picker-label">📱 Celular</div>
-        <input class="dir-input" id="eq-cel-search" type="text" placeholder="Buscar celular en inventario..." oninput="buscarEqForm(this,'Celular','eq-cel-lista','f-cel-mod','f-cel-ser','eq-cel-search')" autocomplete="off">
-        <div class="dir-lista" id="eq-cel-lista"></div>
+        <select id="f-cel-sel" style="width:100%;padding:8px 11px;border:1.5px solid #c5cedb;border-radius:6px;font-size:13px;font-family:inherit;background:white" onchange="selEqDrop('Celular','f-cel-mod','f-cel-ser')">
+          <option value="">— Sin celular asignado —</option>
+        </select>
         <div class="g2" style="margin-top:8px">
-          <div class="campo"><label>Modelo</label><input id="f-cel-mod" type="text" placeholder="Ej: iPhone 17 Pro Max"></div>
+          <div class="campo"><label>Modelo</label><input id="f-cel-mod" type="text" placeholder="O ingresar manualmente"></div>
           <div class="campo"><label>IMEI</label><input id="f-cel-ser" type="text" placeholder="IMEI"></div>
         </div>
       </div>
 
-      <!-- Tablet picker -->
+      <!-- Tablet -->
       <div class="eq-picker-box">
         <div class="eq-picker-label">📲 Tablet</div>
-        <input class="dir-input" id="eq-tab-search" type="text" placeholder="Buscar tablet en inventario..." oninput="buscarEqForm(this,'Tablet','eq-tab-lista','f-tab-mod','f-tab-ser','eq-tab-search')" autocomplete="off">
-        <div class="dir-lista" id="eq-tab-lista"></div>
+        <select id="f-tab-sel" style="width:100%;padding:8px 11px;border:1.5px solid #c5cedb;border-radius:6px;font-size:13px;font-family:inherit;background:white" onchange="selEqDrop('Tablet','f-tab-mod','f-tab-ser')">
+          <option value="">— Sin tablet asignada —</option>
+        </select>
         <div class="g2" style="margin-top:8px">
-          <div class="campo"><label>Modelo</label><input id="f-tab-mod" type="text" placeholder="Modelo de tablet"></div>
+          <div class="campo"><label>Modelo</label><input id="f-tab-mod" type="text" placeholder="O ingresar manualmente"></div>
           <div class="campo"><label>IMEI</label><input id="f-tab-ser" type="text" placeholder="IMEI"></div>
         </div>
       </div>
@@ -599,10 +600,8 @@ function abrirForm(id) {
   document.getElementById('btn-del').style.display    = u?'':'none';
   document.getElementById('btn-save').textContent     = u?'Guardar Cambios':'Agregar';
   document.getElementById('form-msg').innerHTML='';
-  document.getElementById('dir-wrap').style.display   = u?'none':'';
-  document.getElementById('dir-search').value='';
-  document.getElementById('dir-lista').style.display='none';
-  document.getElementById('dir-sel').style.display='none';
+  document.getElementById('dir-wrap').style.display = u?'none':'';
+  if (!u) document.getElementById('f-colab-sel').value='';
 
   document.getElementById('f-nombre').value   = u?u.nombre:'';
   document.getElementById('f-division').value = u?u.division:'';
@@ -627,12 +626,9 @@ function abrirForm(id) {
   document.getElementById('f-tab-mod').value  = u?u.tabletModelo:'';
   document.getElementById('f-tab-ser').value  = u?u.tabletImei:'';
 
-  // reset equipment pickers
-  ['lap','mon','cel','tab'].forEach(function(k){
-    var si=document.getElementById('eq-'+k+'-search');
-    var li=document.getElementById('eq-'+k+'-lista');
-    if(si) si.value='';
-    if(li) li.style.display='none';
+  // reset equipment selects
+  ['f-lap-sel','f-mon-sel','f-cel-sel','f-tab-sel'].forEach(function(id){
+    var s=document.getElementById(id); if(s) s.value='';
   });
 
   document.getElementById('overlayForm').classList.add('activo');
@@ -699,50 +695,8 @@ async function eliminarUsuario() {
 
 function mostrarMsg(t,txt) { document.getElementById('form-msg').innerHTML='<div class="msg '+t+'">'+txt+'</div>'; }
 
-/* ── Buscador de directorio ── */
-var _colabs=[], _colasCargados=false, _dirResultados=[];
-
-async function iniciarBusquedaDir() {
-  if (_colasCargados) return;
-  var hint=document.getElementById('dir-hint');
-  if (hint) hint.textContent='⏳ cargando...';
-  try {
-    var res=await fetch('/api/colaboradores?nofoto=1');
-    var data=await res.json();
-    _colabs=Array.isArray(data) ? data : [];
-    _colasCargados=true;
-    if (hint) hint.textContent=_colabs.length ? '✓ '+_colabs.length+' disponibles' : '⚠️ sin datos';
-  } catch(e) {
-    _colabs=[];
-    if (hint) hint.textContent='⚠️ error al cargar';
-  }
-}
-
-function buscarDir() {
-  var q=document.getElementById('dir-search').value.trim().toLowerCase();
-  var lista=document.getElementById('dir-lista');
-  if (q.length<2) { lista.style.display='none'; return; }
-  if (!_colasCargados) {
-    lista.innerHTML='<div class="dir-item" style="color:#778;cursor:default;justify-content:center">⏳ Cargando directorio PLG...</div>';
-    lista.style.display='';
-    return;
-  }
-  if (!Array.isArray(_colabs)||!_colabs.length) { lista.style.display='none'; return; }
-  _dirResultados=_colabs.filter(function(c){return c.nombre&&c.nombre.toLowerCase().includes(q);}).slice(0,8);
-  if (!_dirResultados.length) {
-    lista.innerHTML='<div class="dir-item" style="color:#778;cursor:default">'+'Sin resultados para "'+esc(q)+'" — puedes ingresar los datos manualmente.</div>';
-    lista.style.display='';
-    return;
-  }
-  lista.innerHTML=_dirResultados.map(function(c,i){
-    var col=colorAvatar(c.nombre);
-    return '<div class="dir-item" onclick="seleccionarColaborador('+i+')">'+
-      '<div class="dir-item-av" style="background:'+col+'">'+iniciales(c.nombre)+'</div>'+
-      '<div><div class="dir-item-nombre">'+esc(nombreLimpio(c.nombre))+'</div>'+
-      '<div class="dir-item-info">'+esc(c.cargo||'')+(c.oficina?' · '+esc(c.oficina):'')+'</div></div></div>';
-  }).join('');
-  lista.style.display='';
-}
+/* ── Directorio (select) ── */
+var _colabs=[], _colasCargados=false;
 
 var DIV_MAP={
   'PLG DE EL SALVADOR':'PLG DE EL SALVADOR',
@@ -754,29 +708,51 @@ var DIV_MAP={
 
 function nombreLimpio(n) { return (n||'').split('--')[0].split(' -')[0].trim(); }
 
-function seleccionarColaborador(i) {
-  var c=_dirResultados[i];
-  var nombre=nombreLimpio(c.nombre);
-  document.getElementById('f-nombre').value   = nombre;
+async function iniciarBusquedaDir() {
+  if (_colasCargados) return;
+  var hint=document.getElementById('dir-hint');
+  if (hint) hint.textContent='⏳ cargando...';
+  try {
+    var res=await fetch('/api/colaboradores?nofoto=1');
+    var data=await res.json();
+    _colabs=Array.isArray(data) ? data : [];
+    _colabs.sort(function(a,b){ return nombreLimpio(a.nombre).localeCompare(nombreLimpio(b.nombre)); });
+    _colasCargados=true;
+    var sel=document.getElementById('f-colab-sel');
+    if (sel) {
+      sel.innerHTML='<option value="">— Seleccionar colaborador —</option>'+
+        _colabs.map(function(c,i){
+          return '<option value="'+i+'">'+esc(nombreLimpio(c.nombre))+(c.cargo?' — '+esc(c.cargo):'')+'</option>';
+        }).join('');
+    }
+    if (hint) hint.textContent=_colabs.length ? '✓ '+_colabs.length+' colaboradores' : '⚠️ sin datos';
+  } catch(e) {
+    _colabs=[];
+    var sel=document.getElementById('f-colab-sel');
+    if (sel) sel.innerHTML='<option value="">⚠️ Error al cargar directorio</option>';
+    if (hint) hint.textContent='⚠️ error';
+  }
+}
+
+function seleccionarColab() {
+  var sel=document.getElementById('f-colab-sel');
+  var i=parseInt(sel.value);
+  if (isNaN(i)||!_colabs[i]) {
+    document.getElementById('f-nombre').value='';
+    document.getElementById('f-division').value='';
+    document.getElementById('f-area').value='';
+    document.getElementById('f-puesto').value='';
+    document.getElementById('f-tel').value='';
+    document.getElementById('f-ms-email').value='';
+    return;
+  }
+  var c=_colabs[i];
+  document.getElementById('f-nombre').value   = nombreLimpio(c.nombre);
   document.getElementById('f-division').value = DIV_MAP[(c.oficina||'').toUpperCase()]||'';
   document.getElementById('f-area').value     = c.departamento||'';
   document.getElementById('f-puesto').value   = c.cargo||'';
   document.getElementById('f-tel').value      = c.telefono||'';
   document.getElementById('f-ms-email').value = c.correo||'';
-  document.getElementById('dir-sel-nombre').textContent = nombre;
-  document.getElementById('dir-sel').style.display='';
-  document.getElementById('dir-lista').style.display='none';
-  document.getElementById('dir-search').value='';
-}
-
-function limpiarDirSel() {
-  document.getElementById('dir-sel').style.display='none';
-  document.getElementById('f-nombre').value='';
-  document.getElementById('f-division').value='';
-  document.getElementById('f-area').value='';
-  document.getElementById('f-puesto').value='';
-  document.getElementById('f-tel').value='';
-  document.getElementById('f-ms-email').value='';
 }
 
 /* ══════════════════════════
@@ -790,7 +766,39 @@ async function cargarEquiposData() {
     var res=await fetch('/api/inventario');
     equipos=await res.json();
     _equiposDatos=true;
+    poblarSelectEquipos();
   } catch(e) { /* will retry when tab opens */ }
+}
+
+function poblarSelectEquipos() {
+  var tipos=[
+    {tipo:'Laptop',  id:'f-lap-sel', vacio:'— Sin laptop asignada —'},
+    {tipo:'Monitor', id:'f-mon-sel', vacio:'— Sin monitor asignado —'},
+    {tipo:'Celular', id:'f-cel-sel', vacio:'— Sin celular asignado —'},
+    {tipo:'Tablet',  id:'f-tab-sel', vacio:'— Sin tablet asignada —'}
+  ];
+  tipos.forEach(function(t){
+    var sel=document.getElementById(t.id);
+    if (!sel) return;
+    var items=equipos.filter(function(e){ return e.tipo===t.tipo; });
+    sel.innerHTML='<option value="">'+t.vacio+'</option>'+
+      items.map(function(e){
+        var label=((e.marca||'')+' '+(e.modelo||'')).trim();
+        var asig=e.usuarioActual?' ('+e.usuarioActual+')':'';
+        return '<option value="'+e.id+'">'+esc(label)+' · '+esc(e.serial)+esc(asig)+'</option>';
+      }).join('');
+  });
+}
+
+function selEqDrop(tipo, modId, serId) {
+  var key={Laptop:'f-lap-sel',Monitor:'f-mon-sel',Celular:'f-cel-sel',Tablet:'f-tab-sel'}[tipo];
+  var eqId=document.getElementById(key).value;
+  if (!eqId) { document.getElementById(modId).value=''; document.getElementById(serId).value=''; return; }
+  var eq=equipos.find(function(e){return e.id===eqId;});
+  if (eq) {
+    document.getElementById(modId).value=((eq.marca||'')+' '+(eq.modelo||'')).trim();
+    document.getElementById(serId).value=eq.serial||'';
+  }
 }
 
 async function cargarEquipos() {
@@ -809,35 +817,6 @@ async function cargarEquipos() {
   }
 }
 
-function buscarEqForm(input, tipo, listaId, modId, serId, searchId) {
-  var q=input.value.trim().toLowerCase();
-  var lista=document.getElementById(listaId);
-  if (q.length<1) { lista.style.display='none'; return; }
-  var res=equipos.filter(function(e){
-    return e.tipo===tipo && [e.marca,e.modelo,e.serial].some(function(v){return v&&v.toLowerCase().includes(q);});
-  }).slice(0,7);
-  if (!res.length) { lista.style.display='none'; return; }
-  lista.innerHTML=res.map(function(e){
-    var icon=TIPO_ICON[e.tipo]||'🔧';
-    var ecls=ESTADO_CLS[e.estado]||'beq-bueno';
-    return '<div class="dir-item" onclick="selEqForm(\''+e.id+'\',\''+modId+'\',\''+serId+'\',\''+listaId+'\',\''+searchId+'\')">'+
-      '<span style="font-size:18px;width:32px;text-align:center;display:inline-block;flex-shrink:0">'+icon+'</span>'+
-      '<div><div class="dir-item-nombre">'+esc((e.marca||'')+' '+(e.modelo||''))+'</div>'+
-      '<div class="dir-item-info">Serie: '+esc(e.serial||'')+
-      ' &nbsp;<span class="beq '+ecls+'" style="font-size:10px">'+esc(e.estado||'')+'</span>'+
-      (e.usuarioActual?' &nbsp;· '+esc(e.usuarioActual):'')+'</div></div></div>';
-  }).join('');
-  lista.style.display='';
-}
-
-function selEqForm(eqId, modId, serId, listaId, searchId) {
-  var eq=equipos.find(function(e){return e.id===eqId;});
-  if (!eq) return;
-  document.getElementById(modId).value=((eq.marca||'')+' '+(eq.modelo||'')).trim();
-  document.getElementById(serId).value=eq.serial||'';
-  document.getElementById(listaId).style.display='none';
-  document.getElementById(searchId).value='';
-}
 
 function filtrarEquipos() {
   var q   =document.getElementById('eq-buscar').value.toLowerCase();
@@ -950,15 +929,7 @@ async function eliminarEq() {
 
 /* ── Init ── */
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){cerrarDetalle();cerrarForm();cerrarFormEq();}});
-document.addEventListener('click',function(e){
-  var lista=document.getElementById('dir-lista');
-  if (!lista.contains(e.target)&&e.target.id!=='dir-search') lista.style.display='none';
-  ['eq-lap-lista','eq-mon-lista','eq-cel-lista','eq-tab-lista'].forEach(function(id){
-    var l=document.getElementById(id);
-    var s=document.getElementById(id.replace('-lista','-search'));
-    if(l&&!l.contains(e.target)&&e.target!==s) l.style.display='none';
-  });
-});
+document.addEventListener('click',function(e){});
 cargarUsuarios();
 iniciarBusquedaDir();
 cargarEquiposData();
