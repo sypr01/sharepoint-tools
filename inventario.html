@@ -54,6 +54,9 @@
     .chip { display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:3px 8px; border-radius:6px; background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; }
     .chip.ok   { background:#d1fae5; color:#065f46; border-color:#6ee7b7; }
     .chip.mail { background:#dbeafe; color:#1e40af; border-color:#bfdbfe; }
+    .eq-chip { display:inline-flex; align-items:center; gap:5px; font-size:12px; padding:5px 10px; border-radius:6px; background:#e4ecf7; color:var(--navy); border:1px solid #c5cedb; }
+    .eq-chip-del { background:none; border:none; cursor:pointer; color:#999; font-size:14px; line-height:1; padding:0 0 0 3px; }
+    .eq-chip-del:hover { color:var(--red); }
 
     /* Equipment table (tab Equipos) */
     .tabla-eq-wrap { margin:20px 32px; background:white; border-radius:10px; box-shadow:0 1px 4px rgba(27,58,107,.07); overflow:hidden; }
@@ -298,12 +301,7 @@
       </div>
       <div class="seccion">
         <div class="seccion-titulo">💻 Equipos Asignados</div>
-        <div class="equipos-grid">
-          <div class="equipo-card" id="eq-laptop"><div class="equipo-icon">💻</div><div class="equipo-datos"><div class="equipo-modelo" id="d-laptop-mod"></div><div class="equipo-serie" id="d-laptop-ser"></div></div></div>
-          <div class="equipo-card" id="eq-monitor"><div class="equipo-icon">🖥</div><div class="equipo-datos"><div class="equipo-modelo" id="d-mon-mod"></div><div class="equipo-serie" id="d-mon-ser"></div></div></div>
-          <div class="equipo-card" id="eq-celular"><div class="equipo-icon">📱</div><div class="equipo-datos"><div class="equipo-modelo" id="d-cel-mod"></div><div class="equipo-serie" id="d-cel-ser"></div></div></div>
-          <div class="equipo-card" id="eq-tablet"><div class="equipo-icon">📲</div><div class="equipo-datos"><div class="equipo-modelo" id="d-tab-mod"></div><div class="equipo-serie" id="d-tab-ser"></div></div></div>
-        </div>
+        <div id="eq-detalle-lista" style="display:flex;flex-direction:column;gap:8px"></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -366,51 +364,36 @@
 
       <div class="form-section">💻 Equipos Asignados</div>
 
-      <!-- Laptop -->
-      <div class="eq-picker-box">
-        <div class="eq-picker-label">💻 Laptop</div>
-        <select id="f-lap-sel" style="width:100%;padding:8px 11px;border:1.5px solid #c5cedb;border-radius:6px;font-size:13px;font-family:inherit;background:white" onchange="selEqDrop('Laptop','f-lap-mod','f-lap-ser')">
-          <option value="">— Sin laptop asignada —</option>
-        </select>
-        <div class="g2" style="margin-top:8px">
-          <div class="campo"><label>Modelo</label><input id="f-lap-mod" type="text" placeholder="O ingresar manualmente"></div>
-          <div class="campo"><label>Serie</label><input id="f-lap-ser" type="text" placeholder="Número de serie"></div>
+      <!-- Lista dinámica -->
+      <div id="eq-form-lista" style="display:flex;flex-wrap:wrap;gap:6px;min-height:34px;margin-bottom:10px;padding:4px 0"></div>
+
+      <!-- Desde inventario -->
+      <div class="dir-box" style="margin-bottom:10px">
+        <div class="dir-box-label">📦 Agregar del inventario</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="eq-inv-sel" style="flex:1;padding:8px 11px;border:1.5px solid #c5cedb;border-radius:6px;font-size:13px;font-family:inherit;background:white">
+            <option value="">⏳ Cargando inventario...</option>
+          </select>
+          <button type="button" onclick="agregarEqDeInv()" class="btn-save" style="white-space:nowrap;padding:8px 14px">+ Agregar</button>
         </div>
       </div>
 
-      <!-- Monitor -->
-      <div class="eq-picker-box">
-        <div class="eq-picker-label">🖥️ Monitor</div>
-        <select id="f-mon-sel" style="width:100%;padding:8px 11px;border:1.5px solid #c5cedb;border-radius:6px;font-size:13px;font-family:inherit;background:white" onchange="selEqDrop('Monitor','f-mon-mod','f-mon-ser')">
-          <option value="">— Sin monitor asignado —</option>
-        </select>
-        <div class="g2" style="margin-top:8px">
-          <div class="campo"><label>Modelo</label><input id="f-mon-mod" type="text" placeholder="O ingresar manualmente"></div>
-          <div class="campo"><label>Serie</label><input id="f-mon-ser" type="text" placeholder="Número de serie"></div>
-        </div>
-      </div>
-
-      <!-- Celular -->
-      <div class="eq-picker-box">
-        <div class="eq-picker-label">📱 Celular</div>
-        <select id="f-cel-sel" style="width:100%;padding:8px 11px;border:1.5px solid #c5cedb;border-radius:6px;font-size:13px;font-family:inherit;background:white" onchange="selEqDrop('Celular','f-cel-mod','f-cel-ser')">
-          <option value="">— Sin celular asignado —</option>
-        </select>
-        <div class="g2" style="margin-top:8px">
-          <div class="campo"><label>Modelo</label><input id="f-cel-mod" type="text" placeholder="O ingresar manualmente"></div>
-          <div class="campo"><label>IMEI</label><input id="f-cel-ser" type="text" placeholder="IMEI"></div>
-        </div>
-      </div>
-
-      <!-- Tablet -->
-      <div class="eq-picker-box">
-        <div class="eq-picker-label">📲 Tablet</div>
-        <select id="f-tab-sel" style="width:100%;padding:8px 11px;border:1.5px solid #c5cedb;border-radius:6px;font-size:13px;font-family:inherit;background:white" onchange="selEqDrop('Tablet','f-tab-mod','f-tab-ser')">
-          <option value="">— Sin tablet asignada —</option>
-        </select>
-        <div class="g2" style="margin-top:8px">
-          <div class="campo"><label>Modelo</label><input id="f-tab-mod" type="text" placeholder="O ingresar manualmente"></div>
-          <div class="campo"><label>IMEI</label><input id="f-tab-ser" type="text" placeholder="IMEI"></div>
+      <!-- Manual -->
+      <div class="dir-box">
+        <div class="dir-box-label">✏️ Ingresar manualmente</div>
+        <div class="g2">
+          <div class="campo"><label>Tipo</label>
+            <select id="eq-man-tipo">
+              <option>Laptop</option><option>Monitor</option><option>Celular</option>
+              <option>Teclado</option><option>Mouse</option><option>Tablet</option>
+              <option>Impresora</option><option>Otro</option>
+            </select>
+          </div>
+          <div class="campo"><label>Modelo / Marca</label><input id="eq-man-mod" type="text" placeholder="Ej: Lenovo ThinkPad E16"></div>
+          <div class="campo"><label>Serie / IMEI</label><input id="eq-man-ser" type="text" placeholder="Opcional"></div>
+          <div class="campo" style="display:flex;align-items:flex-end">
+            <button type="button" onclick="agregarEqManual()" class="btn-save" style="width:100%">+ Agregar</button>
+          </div>
         </div>
       </div>
 
@@ -514,7 +497,8 @@ function filtrarUsuarios() {
   var div = document.getElementById('u-div').value;
   var res = usuarios.filter(function(u){
     var mD = !div || u.division===div;
-    var mQ = !q  || [u.nombre,u.microsoftEmail,u.gmailEmail,u.puesto,u.area,u.laptopSerie,u.celularImei,u.hostname].some(function(v){return v&&v.toLowerCase().includes(q);});
+    var eqTxt=(u.equipos||[]).map(function(e){return (e.tipo||'')+' '+(e.modelo||'')+' '+(e.serie||'');}).join(' ');
+    var mQ = !q  || [u.nombre,u.microsoftEmail,u.gmailEmail,u.puesto,u.area,u.hostname,eqTxt].some(function(v){return v&&v.toLowerCase().includes(q);});
     return mD && mQ;
   });
   renderizarUsuarios(res);
@@ -526,12 +510,19 @@ function renderizarUsuarios(lista) {
   document.getElementById('grid').innerHTML = lista.map(function(u){
     var col=colorAvatar(u.nombre||'?'), ini=iniciales(u.nombre||'?');
     var divCorto=(u.division||'').replace('PLG ','').replace('DIVISION ','DIV. ');
-    var chips=[
-      u.laptopModelo  ? '<span class="chip ok">💻 '+esc(u.laptopModelo.split(' ').slice(0,3).join(' '))+'</span>' : '',
-      u.celularModelo ? '<span class="chip ok">📱 '+esc(u.celularModelo.split(' ').slice(0,3).join(' '))+'</span>' : '',
-      u.microsoftEmail? '<span class="chip mail">✉️ Office 365</span>' : '',
-      u.gmailEmail    ? '<span class="chip mail">✉️ Gmail</span>' : '',
-    ].filter(Boolean).join('');
+    var eqArr=Array.isArray(u.equipos)&&u.equipos.length?u.equipos:[];
+    // backward compat with old flat fields
+    if(!eqArr.length){
+      if(u.laptopModelo)  eqArr=[{tipo:'Laptop', modelo:u.laptopModelo, serie:u.laptopSerie}];
+      if(u.celularModelo) eqArr=eqArr.concat([{tipo:'Celular',modelo:u.celularModelo,serie:u.celularImei}]);
+    }
+    var chips=eqArr.slice(0,3).map(function(e){
+      var icon=({Laptop:'💻',Monitor:'🖥️',Celular:'📱',Tablet:'📲',Teclado:'⌨️',Mouse:'🖱️',Impresora:'🖨️'})[e.tipo]||'🔧';
+      return '<span class="chip ok">'+icon+' '+esc((e.modelo||e.tipo||'').split(' ').slice(0,3).join(' '))+'</span>';
+    }).join('');
+    if(eqArr.length>3) chips+='<span class="chip">+' +(eqArr.length-3)+' más</span>';
+    chips+=(u.microsoftEmail?'<span class="chip mail">✉️ Office 365</span>':'')+
+           (u.gmailEmail    ?'<span class="chip mail">✉️ Gmail</span>':'');
     return '<div class="tarjeta" onclick="verDetalle(\''+u.id+'\')">'+
       '<div class="tarjeta-header"><div class="avatar" style="background:'+col+'">'+ini+'</div>'+
       '<div class="user-info"><div class="user-nombre">'+esc(u.nombre)+'</div><div class="user-puesto">'+esc(u.puesto||u.area||'')+'</div></div></div>'+
@@ -556,10 +547,28 @@ function verDetalle(id) {
   setPass('d-ms',u.microsoftEmail,u.microsoftPass);
   setPass('d-gm',u.gmailEmail,u.gmailPass);
   setMag(u.magayaUser,u.magayaPass);
-  setEquipo('eq-laptop','d-laptop',u.laptopModelo,u.laptopSerie,'Sin laptop asignada');
-  setEquipo('eq-monitor','d-mon',u.monitorModelo,u.monitorSerie,'Sin monitor asignado');
-  setEquipo('eq-celular','d-cel',u.celularModelo,u.celularImei,'Sin celular asignado');
-  setEquipo('eq-tablet','d-tab',u.tabletModelo,u.tabletImei,'Sin tablet asignada');
+  // render dynamic equipment list
+  var eqArr=Array.isArray(u.equipos)&&u.equipos.length?u.equipos:[];
+  if(!eqArr.length){
+    if(u.laptopModelo)  eqArr=[{tipo:'Laptop', modelo:u.laptopModelo,  serie:u.laptopSerie}];
+    if(u.monitorModelo) eqArr=eqArr.concat([{tipo:'Monitor',modelo:u.monitorModelo,serie:u.monitorSerie}]);
+    if(u.celularModelo) eqArr=eqArr.concat([{tipo:'Celular',modelo:u.celularModelo, serie:u.celularImei}]);
+    if(u.tabletModelo)  eqArr=eqArr.concat([{tipo:'Tablet', modelo:u.tabletModelo,  serie:u.tabletImei}]);
+  }
+  var eqIcons={Laptop:'💻',Monitor:'🖥️',Celular:'📱',Tablet:'📲',Teclado:'⌨️',Mouse:'🖱️',Impresora:'🖨️',Otro:'🔧'};
+  var el=document.getElementById('eq-detalle-lista');
+  if(!eqArr.length){
+    el.innerHTML='<div style="color:#aaa;font-size:13px;padding:8px 0">Sin equipos asignados.</div>';
+  } else {
+    el.innerHTML=eqArr.map(function(e){
+      var icon=eqIcons[e.tipo]||'🔧';
+      return '<div class="equipo-card"><div class="equipo-icon">'+icon+'</div>'+
+        '<div class="equipo-datos">'+
+        '<div class="equipo-modelo">'+esc(e.tipo||'')+(e.modelo?' — '+esc(e.modelo):'')+'</div>'+
+        (e.serie?'<div class="equipo-serie">'+esc(e.serie)+'</div>':'')+
+        '</div></div>';
+    }).join('');
+  }
   document.getElementById('overlayDetalle').classList.add('activo');
 }
 
@@ -617,19 +626,24 @@ function abrirForm(id) {
   document.getElementById('f-gm-pass').value  = u?u.gmailPass:'';
   document.getElementById('f-mag-user').value = u?u.magayaUser:'';
   document.getElementById('f-mag-pass').value = u?u.magayaPass:'';
-  document.getElementById('f-lap-mod').value  = u?u.laptopModelo:'';
-  document.getElementById('f-lap-ser').value  = u?u.laptopSerie:'';
-  document.getElementById('f-mon-mod').value  = u?u.monitorModelo:'';
-  document.getElementById('f-mon-ser').value  = u?u.monitorSerie:'';
-  document.getElementById('f-cel-mod').value  = u?u.celularModelo:'';
-  document.getElementById('f-cel-ser').value  = u?u.celularImei:'';
-  document.getElementById('f-tab-mod').value  = u?u.tabletModelo:'';
-  document.getElementById('f-tab-ser').value  = u?u.tabletImei:'';
 
-  // reset equipment selects
-  ['f-lap-sel','f-mon-sel','f-cel-sel','f-tab-sel'].forEach(function(id){
-    var s=document.getElementById(id); if(s) s.value='';
-  });
+  // init equipment list
+  if(u){
+    var eq=Array.isArray(u.equipos)&&u.equipos.length?u.equipos:[];
+    if(!eq.length){
+      if(u.laptopModelo)  eq=[{tipo:'Laptop', modelo:u.laptopModelo,  serie:u.laptopSerie||''}];
+      if(u.monitorModelo) eq=eq.concat([{tipo:'Monitor',modelo:u.monitorModelo,serie:u.monitorSerie||''}]);
+      if(u.celularModelo) eq=eq.concat([{tipo:'Celular',modelo:u.celularModelo, serie:u.celularImei||''}]);
+      if(u.tabletModelo)  eq=eq.concat([{tipo:'Tablet', modelo:u.tabletModelo,  serie:u.tabletImei||''}]);
+    }
+    _equiposForm=eq.map(function(e){ return {tipo:e.tipo||'Otro',modelo:e.modelo||'',serie:e.serie||'',invId:e.invId||''}; });
+  } else {
+    _equiposForm=[];
+  }
+  document.getElementById('eq-man-mod').value='';
+  document.getElementById('eq-man-ser').value='';
+  document.getElementById('eq-inv-sel').value='';
+  renderEqFormLista();
 
   document.getElementById('overlayForm').classList.add('activo');
 }
@@ -655,14 +669,7 @@ async function guardar() {
     gmailPass:     document.getElementById('f-gm-pass').value.trim(),
     magayaUser:    document.getElementById('f-mag-user').value.trim(),
     magayaPass:    document.getElementById('f-mag-pass').value.trim(),
-    laptopModelo:  document.getElementById('f-lap-mod').value.trim(),
-    laptopSerie:   document.getElementById('f-lap-ser').value.trim(),
-    monitorModelo: document.getElementById('f-mon-mod').value.trim(),
-    monitorSerie:  document.getElementById('f-mon-ser').value.trim(),
-    celularModelo: document.getElementById('f-cel-mod').value.trim(),
-    celularImei:   document.getElementById('f-cel-ser').value.trim(),
-    tabletModelo:  document.getElementById('f-tab-mod').value.trim(),
-    tabletImei:    document.getElementById('f-tab-ser').value.trim()
+    equipos:       _equiposForm
   };
   try {
     var res, item;
@@ -759,6 +766,7 @@ function seleccionarColab() {
    EQUIPOS
    ══════════════════════════ */
 var equipos=[], equiposCargados=false, _eqEditId=null, _equiposDatos=false;
+var _equiposForm=[];
 
 async function cargarEquiposData() {
   if (_equiposDatos) return;
@@ -766,39 +774,61 @@ async function cargarEquiposData() {
     var res=await fetch('/api/inventario');
     equipos=await res.json();
     _equiposDatos=true;
-    poblarSelectEquipos();
+    poblarEqInvSel();
   } catch(e) { /* will retry when tab opens */ }
 }
 
-function poblarSelectEquipos() {
-  var tipos=[
-    {tipo:'Laptop',  id:'f-lap-sel', vacio:'— Sin laptop asignada —'},
-    {tipo:'Monitor', id:'f-mon-sel', vacio:'— Sin monitor asignado —'},
-    {tipo:'Celular', id:'f-cel-sel', vacio:'— Sin celular asignado —'},
-    {tipo:'Tablet',  id:'f-tab-sel', vacio:'— Sin tablet asignada —'}
-  ];
-  tipos.forEach(function(t){
-    var sel=document.getElementById(t.id);
-    if (!sel) return;
-    var items=equipos.filter(function(e){ return e.tipo===t.tipo; });
-    sel.innerHTML='<option value="">'+t.vacio+'</option>'+
-      items.map(function(e){
-        var label=((e.marca||'')+' '+(e.modelo||'')).trim();
-        var asig=e.usuarioActual?' ('+e.usuarioActual+')':'';
-        return '<option value="'+e.id+'">'+esc(label)+' · '+esc(e.serial)+esc(asig)+'</option>';
-      }).join('');
-  });
+function poblarEqInvSel() {
+  var sel=document.getElementById('eq-inv-sel');
+  if (!sel) return;
+  sel.innerHTML='<option value="">— Seleccionar del inventario —</option>'+
+    equipos.map(function(e){
+      var icon=({Laptop:'💻',Monitor:'🖥️',Celular:'📱',Tablet:'📲',Teclado:'⌨️',Mouse:'🖱️',Impresora:'🖨️'})[e.tipo]||'🔧';
+      var label=((e.marca||'')+' '+(e.modelo||'')).trim()||e.tipo;
+      var asig=e.usuarioActual?' — '+e.usuarioActual:'';
+      return '<option value="'+e.id+'">'+icon+' '+esc(e.tipo)+': '+esc(label)+' ('+esc(e.serial||'s/n')+')'+esc(asig)+'</option>';
+    }).join('');
 }
 
-function selEqDrop(tipo, modId, serId) {
-  var key={Laptop:'f-lap-sel',Monitor:'f-mon-sel',Celular:'f-cel-sel',Tablet:'f-tab-sel'}[tipo];
-  var eqId=document.getElementById(key).value;
-  if (!eqId) { document.getElementById(modId).value=''; document.getElementById(serId).value=''; return; }
-  var eq=equipos.find(function(e){return e.id===eqId;});
-  if (eq) {
-    document.getElementById(modId).value=((eq.marca||'')+' '+(eq.modelo||'')).trim();
-    document.getElementById(serId).value=eq.serial||'';
+function renderEqFormLista() {
+  var eqIcons={Laptop:'💻',Monitor:'🖥️',Celular:'📱',Tablet:'📲',Teclado:'⌨️',Mouse:'🖱️',Impresora:'🖨️',Otro:'🔧'};
+  var el=document.getElementById('eq-form-lista');
+  if(!_equiposForm.length){
+    el.innerHTML='<span style="color:#aaa;font-size:12px;padding:6px 0">Sin equipos asignados aún.</span>';
+    return;
   }
+  el.innerHTML=_equiposForm.map(function(e,i){
+    var icon=eqIcons[e.tipo]||'🔧';
+    var label=icon+' <strong>'+esc(e.tipo)+'</strong>'+(e.modelo?' — '+esc(e.modelo):'')+(e.serie?' <span style="font-size:11px;color:#778">('+esc(e.serie)+')</span>':'');
+    return '<span class="eq-chip">'+label+'<button class="eq-chip-del" title="Quitar" onclick="quitarEq('+i+')">×</button></span>';
+  }).join('');
+}
+
+function agregarEqDeInv() {
+  var sel=document.getElementById('eq-inv-sel');
+  var id=sel.value;
+  if (!id) return;
+  var eq=equipos.find(function(e){return e.id===id;});
+  if (!eq) return;
+  _equiposForm.push({tipo:eq.tipo, modelo:((eq.marca||'')+' '+(eq.modelo||'')).trim(), serie:eq.serial||'', invId:eq.id});
+  sel.value='';
+  renderEqFormLista();
+}
+
+function agregarEqManual() {
+  var tipo=document.getElementById('eq-man-tipo').value;
+  var mod=document.getElementById('eq-man-mod').value.trim();
+  var ser=document.getElementById('eq-man-ser').value.trim();
+  if (!mod) { alert('Ingrese el modelo o marca del equipo.'); return; }
+  _equiposForm.push({tipo:tipo, modelo:mod, serie:ser, invId:''});
+  document.getElementById('eq-man-mod').value='';
+  document.getElementById('eq-man-ser').value='';
+  renderEqFormLista();
+}
+
+function quitarEq(i) {
+  _equiposForm.splice(i,1);
+  renderEqFormLista();
 }
 
 async function cargarEquipos() {
