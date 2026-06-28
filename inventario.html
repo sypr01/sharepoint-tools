@@ -722,7 +722,7 @@ function buscarDir() {
     return '<div class="dir-item" onclick="seleccionarColaborador('+i+')">'+
       '<div class="dir-item-av" style="background:'+col+'">'+iniciales(c.nombre)+'</div>'+
       '<div><div class="dir-item-nombre">'+esc(c.nombre)+'</div>'+
-      '<div class="dir-item-info">'+esc(c.puesto||'')+(c.oficina?' · '+esc(c.oficina):'')+'</div></div></div>';
+      '<div class="dir-item-info">'+esc(c.cargo||'')+(c.oficina?' · '+esc(c.oficina):'')+'</div></div></div>';
   }).join('');
   lista.style.display='';
 }
@@ -739,10 +739,10 @@ function seleccionarColaborador(i) {
   var c=_dirResultados[i];
   document.getElementById('f-nombre').value   = c.nombre||'';
   document.getElementById('f-division').value = DIV_MAP[(c.oficina||'').toUpperCase()]||'';
-  document.getElementById('f-area').value     = c.area||'';
-  document.getElementById('f-puesto').value   = c.puesto||'';
+  document.getElementById('f-area').value     = c.departamento||'';
+  document.getElementById('f-puesto').value   = c.cargo||'';
   document.getElementById('f-tel').value      = c.telefono||'';
-  document.getElementById('f-ms-email').value = c.mail||'';
+  document.getElementById('f-ms-email').value = c.correo||'';
   document.getElementById('dir-sel-nombre').textContent = c.nombre;
   document.getElementById('dir-sel').style.display='';
   document.getElementById('dir-lista').style.display='none';
