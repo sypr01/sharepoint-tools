@@ -111,6 +111,128 @@
 
     .separador { border: none; border-top: 1px solid #f0f0f0; margin: 10px 0; }
 
+    /* Botón registrar */
+    .btn-registrar {
+      padding: 8px 18px;
+      background: #003366;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .btn-registrar:hover { background: #004a99; }
+
+    /* Botón evaluar en tarjeta */
+    .btn-evaluar {
+      margin-top: 12px;
+      width: 100%;
+      padding: 7px;
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #555;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+    .btn-evaluar:hover { background: #e8f0fe; border-color: #003366; color: #003366; }
+
+    /* Estrellas mostradas */
+    .estrellas-resumen { font-size: 13px; color: #666; margin-top: 8px; }
+    .estrella-llena { color: #f59e0b; }
+    .estrella-vacia { color: #ddd; }
+
+    /* Modal overlay */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.activo { display: flex; }
+
+    .modal {
+      background: white;
+      border-radius: 12px;
+      padding: 28px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .modal h2 { font-size: 18px; color: #003366; margin-bottom: 20px; }
+
+    .campo { margin-bottom: 14px; }
+    .campo label { display: block; font-size: 13px; font-weight: 600; color: #444; margin-bottom: 5px; }
+    .campo input, .campo select, .campo textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .campo input:focus, .campo select:focus, .campo textarea:focus {
+      outline: none;
+      border-color: #003366;
+    }
+    .campo textarea { resize: vertical; min-height: 70px; }
+
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+    .btn-cancelar {
+      padding: 9px 18px;
+      border: 1px solid #ccc;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .btn-guardar {
+      padding: 9px 18px;
+      background: #003366;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .btn-guardar:hover { background: #004a99; }
+    .btn-guardar:disabled { background: #999; cursor: not-allowed; }
+
+    /* Selector de estrellas interactivo */
+    .selector-estrellas { display: flex; gap: 6px; font-size: 28px; cursor: pointer; margin: 8px 0; }
+    .selector-estrellas span { color: #ddd; transition: color 0.1s; }
+    .selector-estrellas span.seleccionada,
+    .selector-estrellas span.hover-activa { color: #f59e0b; }
+
+    /* Lista evaluaciones dentro del modal */
+    .evaluacion-item { border-top: 1px solid #f0f0f0; padding: 10px 0; font-size: 13px; }
+    .evaluacion-item .ev-encabezado { display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .evaluacion-item .ev-evaluador { font-weight: 600; color: #333; }
+    .evaluacion-item .ev-fecha { color: #888; }
+    .evaluacion-item .ev-comentario { color: #555; }
+    .mensaje-ok { color: #065f46; background: #d1fae5; padding: 10px; border-radius: 6px; font-size: 13px; margin-top: 10px; }
+    .mensaje-err { color: #991b1b; background: #fee2e2; padding: 10px; border-radius: 6px; font-size: 13px; margin-top: 10px; }
+
     .sin-resultados {
       grid-column: 1/-1;
       text-align: center;
@@ -125,7 +247,7 @@
 <header>
   <div>
     <h1>Directorio de Proveedores</h1>
-    <p>PANAMERICAN LOGISTICS GROUP — Operaciones 2026 - Actualizado 26/06/2026 08:22</p>
+    <p>PANAMERICAN LOGISTICS GROUP — Operaciones 2026 - Actualizado 26/06/2026 08:30 v2</p>
   </div>
 </header>
 
@@ -141,14 +263,137 @@
     <button class="filtro" data-tipo="TRANSPORTE LOCAL" onclick="setFiltro(this)">Transporte</button>
   </div>
   <span class="contador" id="contador"></span>
+  <button class="btn-registrar" onclick="abrirModalRegistro()">+ Registrar Proveedor</button>
 </div>
 
 <div class="grid" id="grid"></div>
 
+<!-- Modal: Registrar Proveedor -->
+<div class="modal-overlay" id="modalRegistro">
+  <div class="modal">
+    <h2 id="r-titulo-modal">Registrar Nuevo Proveedor</h2>
+    <div class="campo">
+      <label>Empresa *</label>
+      <input type="text" id="r-empresa" placeholder="Nombre de la empresa">
+    </div>
+    <div class="campo">
+      <label>Tipo de Servicio *</label>
+      <select id="r-tipo">
+        <option value="">— Seleccionar —</option>
+        <option value="NAVIERA">Naviera</option>
+        <option value="AEROLINEA">Aerolínea</option>
+        <option value="AGENCIA ADUANAL">Agencia Aduanal</option>
+        <option value="CONSOLIDADOR">Consolidador</option>
+        <option value="PORTUARIA">Portuaria</option>
+        <option value="TRANSPORTE LOCAL">Transporte Local</option>
+      </select>
+    </div>
+    <div class="campo">
+      <label>Dirección</label>
+      <input type="text" id="r-direccion" placeholder="Dirección física">
+    </div>
+    <div class="campo">
+      <label>Sitio Web</label>
+      <input type="text" id="r-web" placeholder="https://...">
+    </div>
+    <div class="campo" style="margin-bottom:4px;">
+      <label>Contactos</label>
+    </div>
+    <div id="r-contactos-lista"></div>
+    <button type="button" onclick="agregarFilaContacto()" style="font-size:13px;color:#003366;background:none;border:1px dashed #003366;border-radius:6px;padding:6px 14px;cursor:pointer;margin-bottom:12px;width:100%;">+ Agregar contacto</button>
+    <div id="r-mensaje"></div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" onclick="cerrarModal('modalRegistro')">Cancelar</button>
+      <button class="btn-guardar" id="r-btn-guardar" onclick="guardarProveedor()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Evaluar Proveedor -->
+<div class="modal-overlay" id="modalEvaluar">
+  <div class="modal">
+    <h2 id="ev-titulo">Evaluar Proveedor</h2>
+
+    <div id="ev-historial" style="margin-bottom:16px;"></div>
+
+    <hr style="margin-bottom:16px;">
+    <p style="font-size:13px;font-weight:600;color:#444;margin-bottom:4px;">Nueva Evaluación</p>
+
+    <div class="campo">
+      <label>Calificación *</label>
+      <div class="selector-estrellas" id="ev-estrellas">
+        <span data-val="1">★</span>
+        <span data-val="2">★</span>
+        <span data-val="3">★</span>
+        <span data-val="4">★</span>
+        <span data-val="5">★</span>
+      </div>
+    </div>
+    <div class="campo">
+      <label>Comentario</label>
+      <textarea id="ev-comentario" placeholder="Describe la experiencia con este proveedor..."></textarea>
+    </div>
+    <div class="campo">
+      <label>Tu nombre *</label>
+      <input type="text" id="ev-evaluador" placeholder="Nombre del evaluador">
+    </div>
+    <div class="campo">
+      <label>Fecha del servicio *</label>
+      <input type="date" id="ev-fecha">
+    </div>
+    <div id="ev-mensaje"></div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" onclick="cerrarModal('modalEvaluar')">Cancelar</button>
+      <button class="btn-guardar" id="ev-btn-guardar" onclick="guardarEvaluacion()">Enviar Evaluación</button>
+    </div>
+  </div>
+</div>
+
 <script>
   let datos = [{"empresa":"CMA CGM EL SALVADOR, S.A. DE C.V.","tipo":"NAVIERA","contacto":"ALONDRA MORA","telefono":"","correo":"slv.service@cma-cgm.com","cargo":"SERVICIO AL CLIENTE","direccion":"Calle el Mirador, Torre Quattro, Piso 7,  Local #3, World Trade Center, Colonia Escalon.","web":"https://www.cma-cgm.com/ebusiness/tracking"},{"empresa":"CMA CGM EL SALVADOR, S.A. DE C.V.","tipo":"NAVIERA","contacto":"GRETTEL VALERIO","telefono":"+506 4106-7586","correo":"slv.service@cma-cgm.com","cargo":"SERVICIO AL CLIENTE","direccion":"Calle el Mirador, Torre Quattro, Piso 7,  Local #3, World Trade Center, Colonia Escalon.","web":"https://www.cma-cgm.com/ebusiness/tracking"},{"empresa":"CMA CGM EL SALVADOR, S.A. DE C.V.","tipo":"NAVIERA","contacto":"ANA DIAZ","telefono":"+503 2254-8203  / +503 7286-1298","correo":"svr.adiaz@cma-cgm.com","cargo":"ASESOR COMERCIAL","direccion":"Calle el Mirador, Torre Quattro, Piso 7,  Local #3, World Trade Center, Colonia Escalon.","web":"https://www.cma-cgm.com/ebusiness/tracking"},{"empresa":"AMERIJET EL SALVADOR, S.A. DE C.V.","tipo":"AEROLINEA","contacto":"PAOLA MARTINEZ","telefono":"","correo":"pamartinez@amerijet.com","cargo":"SERVICIO AL CLIENTE","direccion":"77Av. Norte # 217, Col. Escalón, San Salvador, El Salvador","web":"https://amerijet.com/air-waybill-tracking/"},{"empresa":"SEALES, S.A. DE C.V.","tipo":"AGENCIA ADUANAL","contacto":"ROBERTO ALEGRIA","telefono":"+503 2261-3300","correo":"roberto@gvillatoro.com","cargo":"GERENTE COMERCIAL","direccion":"CALLE LOS CASTAÑOS Y AVENIDA LAS CAMELIAS N° 7,  COLONIA SAN FRANCISCO, SAN SALVADOR","web":"N/A"},{"empresa":"TRANSPOTES CAROLINA","tipo":"TRANSPORTE LOCAL","contacto":"ROSA EVELYN CRUZ DE PORTILLO","telefono":"+503 6177-6500","correo":"evelyncruz.transporte@gmail.com","cargo":"GERENTE GENERAL","direccion":"5 CALLE OTE POLIG. 1 PSJ. LAS FLORES, BO. CONCEPCION LOTIF. SAN BARTOLOME, # 9 SAN B PERULAPIA CUSCATLAN","web":"N/A"},{"empresa":"MSC EL SALVADOR, S.A. DE C.V.","tipo":"","contacto":"","telefono":"","correo":"","cargo":"","direccion":"","web":"https://www.msc.com/en/track-a-shipment"},{"empresa":"UNION PORTUARIA DEL PACIFICO (UPDP, S.E.M. DE C.V.)","tipo":"PORTUARIA","contacto":"","telefono":"+503 2405-3350","correo":"tarjas.contenedores@updp-sem.com","cargo":"ASISTENTES ADMINISTRATIVOS","direccion":"Zona Industrial, Edificio Administrativo Unión Portuaria del Pacífico Puerto de Acajutla, Sonsonate, El Salvador","web":"https://online.yilport.com/"},{"empresa":"AVIANCA","tipo":"AEROLINEA","contacto":"Kimberly Delgado","telefono":"+503 7658 6198","correo":"silvia.delgado@avianca.com","cargo":"SERVICIO AL CLIENTE","direccion":"","web":""},{"empresa":"AVIANCA","tipo":"AEROLINEA","contacto":"Sem Melendez","telefono":"+503 2366 7510","correo":"sem.melendez@avianca.com","cargo":"SERVICIO AL CLIENTE","direccion":"","web":""},{"empresa":"PIER 17","tipo":"CONSOLIDADOR","contacto":"Abigail Alfaro","telefono":"503 2525-0000 | Cel: +503 6987-8404","correo":"mport5@sv.pier17group.com","cargo":"Logistics Services Coordinator  i","direccion":"","web":""},{"empresa":"PIER 17","tipo":"CONSOLIDADOR","contacto":"MAYRA CABRERA","telefono":"Tel+503 2525-0018  Cel:+503 7748-2630","correo":"facturacion@sv.pier17group.com","cargo":"FACTURACION","direccion":"","web":""},{"empresa":"PIER 17","tipo":"CONSOLIDADOR","contacto":"Orlando Quintanilla","telefono":"Tel: +503 2525-0000 Cel: +503 7039-9682","correo":"import1@sv.pier17group.com","cargo":"Operations Coordinator","direccion":"","web":""},{"empresa":"PIER 17","tipo":"CONSOLIDADOR","contacto":"Yamileth Flores","telefono":"Tel. 2525-0020","correo":"recepcion@sv.pier|7group.com","cargo":"RECEPCION","direccion":"","web":""},{"empresa":"PIER 17","tipo":"CONSOLIDADOR","contacto":"Adela Ramirez","telefono":"Tel: +503 2525-0000  Cel: +503 7856-2107","correo":"import2@sv.pier17group.com","cargo":"Customer Service","direccion":"","web":""},{"empresa":"PCS CENTRAL AMERICA S.A DE C.V.","tipo":"CONSOLIDADOR","contacto":"Ana Arteaga","telefono":"Phone:        (+503) 2218-8511 / Mobile:        (+503) 7645-1873","correo":"efm@sv.pcscentralamerica.com","cargo":"Operaciones","direccion":"PCS Central America S.A. de C.V. Av. Las Magnolias, Edificio Insigne nivel 7 oficina No. 2. San Salvador, El Salvador.","web":""},{"empresa":"PCS CENTRAL AMERICA S.A DE C.V.","tipo":"CONSOLIDADOR","contacto":"Kelly Miranda","telefono":"Phone:        (+503) 2218 8500 / Mobile:        (+503) 7645-3554","correo":"efm@sv.pcscentralamerica.com","cargo":"Customer Service \u0026 Traffic","direccion":"PCS Central America S.A. de C.V. Av. Las Magnolias, Edificio Insigne nivel 7 oficina No. 2. San Salvador, El Salvador.","web":""},{"empresa":"PCS CENTRAL AMERICA S.A DE C.V.","tipo":"CONSOLIDADOR","contacto":"Daysi Durán","telefono":"Phone:        (+503) 2218-8513  / Mobile:        (+503) 7645-0674","correo":"wme@sv.pcscentralamerica.com","cargo":"Accounting Assistant","direccion":"PCS Central America S.A. de C.V. Av. Las Magnolias, Edificio Insigne nivel 7 oficina No. 2. San Salvador, El Salvador.","web":""},{"empresa":"Ecu Worldwide El Salvador.","tipo":"CONSOLIDADOR","contacto":"Nicole Hernández","telefono":"M:503 7039-4684 D:503 2556-1359 Ext. 6912","correo":"NicoleHernandez@ecuworldwide.com","cargo":"Operations Executive","direccion":"59 Ave Sur, Alam Roosevelt Edificio La Centro Americana 3107 6to nivel, N°602, San Salvador, El Salvador. Centro","web":""},{"empresa":"Ecu Worldwide El Salvador.","tipo":"CONSOLIDADOR","contacto":"Gabriela Lara","telefono":"M: +503 7748 4180 | D: +503 2556 1359 Ext. 6904","correo":"GabrielaLara@ecuworldwide.com","cargo":"Operations Manager","direccion":"59 Ave Sur, Alam Roosevelt Edificio La Centro Americana 3107 6to nivel, N°602, San Salvador, El Salvador. Centro","web":""},{"empresa":"CHARTER LINK LOGISTICS EL SALVADOR SA DE CV","tipo":"CONSOLIDADOR","contacto":"Veronica Zamora","telefono":"7632-3330","correo":"veronica.zamora@ctl-latam.com","cargo":"Operations Team Leader","direccion":"CALLE EL CARMEN Y 17 AV NORTE LOCAL 16 URB MIRAFLORES SANTA TECLA LI 1101","web":""},{"empresa":"CHARTER LINK LOGISTICS EL SALVADOR SA DE CV","tipo":"CONSOLIDADOR","contacto":"Abigail Ramirez","telefono":"","correo":"\u003ccomunicaciones@ctl-latam.com","cargo":"","direccion":"CALLE EL CARMEN Y 17 AV NORTE LOCAL 16 URB MIRAFLORES SANTA TECLA LI 1101","web":""},{"empresa":"CHARTER LINK LOGISTICS EL SALVADOR SA DE CV","tipo":"CONSOLIDADOR","contacto":"Ruth Delgado","telefono":"503 6062 9296","correo":"ruth.delgado@ctl-latam.com","cargo":"Administrative Assistant","direccion":"CALLE EL CARMEN Y 17 AV NORTE LOCAL 16 URB MIRAFLORES SANTA TECLA LI 1101","web":""}];
+  // Agrupar por empresa
+  const empresasMap = {};
+  datos.forEach(p => {
+    const key = p.empresa || '—';
+    if (!empresasMap[key]) {
+      empresasMap[key] = { empresa: p.empresa, tipo: p.tipo, direccion: p.direccion, web: p.web, contactos: [] };
+    }
+    if (p.contacto || p.telefono || p.correo) {
+      empresasMap[key].contactos.push({ contacto: p.contacto, cargo: p.cargo, telefono: p.telefono, correo: p.correo });
+    }
+  });
+  const empresas = Object.values(empresasMap);
+
+  const iconPersona = '<svg width="14" height="14" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+  const iconTel    = '<svg width="14" height="14" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.8a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
+  const iconMail   = '<svg width="14" height="14" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>';
+  const iconWeb    = '<svg width="14" height="14" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"/></svg>';
+
   let tipoActivo = '';
   filtrar();
+
+  async function cargarDesdeAPI() {
+    try {
+      const res = await fetch('/api/proveedores');
+      if (!res.ok) return;
+      const items = await res.json();
+      if (!Array.isArray(items) || items.length === 0) return;
+      const mapaTemp = {};
+      items.forEach(p => {
+        const key = p.empresa || '—';
+        if (!mapaTemp[key]) {
+          mapaTemp[key] = { empresa: p.empresa, tipo: p.tipo, direccion: p.direccion, web: p.web, contactos: [] };
+        }
+        if (p.contacto || p.telefono || p.correo) {
+          mapaTemp[key].contactos.push({ contacto: p.contacto, cargo: p.cargo, telefono: p.telefono, correo: p.correo });
+        }
+      });
+      empresas.length = 0;
+      Object.values(mapaTemp).forEach(e => empresas.push(e));
+      filtrar();
+    } catch (e) { /* usar datos embebidos */ }
+  }
+  cargarDesdeAPI();
 
   function setFiltro(btn) {
     document.querySelectorAll('.filtro').forEach(b => b.classList.remove('activo'));
@@ -159,9 +404,10 @@
 
   function filtrar() {
     const q = document.querySelector('.buscar').value.toLowerCase();
-    const resultado = datos.filter(p => {
+    const resultado = empresas.filter(p => {
       const matchTipo = !tipoActivo || p.tipo === tipoActivo;
-      const matchQ = !q || [p.empresa, p.contacto, p.correo, p.cargo].some(v => v && v.toLowerCase().includes(q));
+      const matchQ = !q || [p.empresa, p.direccion, p.web].some(v => v && v.toLowerCase().includes(q))
+        || p.contactos.some(c => [c.contacto, c.correo, c.cargo].some(v => v && v.toLowerCase().includes(q)));
       return matchTipo && matchQ;
     });
     renderizar(resultado);
@@ -180,31 +426,258 @@
       <div class="tarjeta">
         <div class="tarjeta-header">
           <div class="empresa">${p.empresa || '—'}</div>
-          <span class="badge badge-${p.tipo}">${p.tipo || ''}</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="badge badge-${p.tipo}">${p.tipo || ''}</span>
+            <button class="btn-editar" data-empresa="${(p.empresa||'').replace(/"/g,'&quot;')}" onclick="abrirModalEdicion(this.dataset.empresa)" title="Editar empresa" style="background:none;border:none;cursor:pointer;font-size:15px;padding:2px 4px;color:#555;border-radius:4px;">✏️</button>
+          </div>
         </div>
-        <hr class="separador">
-        ${p.contacto ? `<div class="dato">
-          <svg width="14" height="14" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          ${p.contacto}${p.cargo ? ` · <em>${p.cargo}</em>` : ''}
-        </div>` : ''}
-        ${p.telefono ? `<div class="dato">
-          <svg width="14" height="14" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.8a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-          ${p.telefono}
-        </div>` : ''}
-        ${p.correo ? `<div class="dato">
-          <svg width="14" height="14" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          <a href="mailto:${p.correo}">${p.correo}</a>
-        </div>` : ''}
-        ${p.web ? `<div class="dato">
-          <svg width="14" height="14" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-          <a href="${p.web}" target="_blank">${p.web}</a>
-        </div>` : ''}
+        ${p.web ? `<div class="dato">${iconWeb}<a href="${p.web}" target="_blank">${p.web}</a></div>` : ''}
+        ${p.direccion ? `<div class="dato" style="color:#888;font-size:12px;">${p.direccion}</div>` : ''}
+        ${p.contactos.length ? `
+          <hr class="separador">
+          <div style="font-size:11px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Contactos</div>
+          ${p.contactos.map(c => `
+            <div style="margin-bottom:10px;padding:8px;background:#f8f9fa;border-radius:6px;">
+              ${c.contacto ? `<div class="dato">${iconPersona}<strong>${c.contacto}</strong>${c.cargo ? ` · <em style="color:#888">${c.cargo}</em>` : ''}</div>` : ''}
+              ${c.telefono ? `<div class="dato">${iconTel}${c.telefono}</div>` : ''}
+              ${c.correo ? `<div class="dato">${iconMail}<a href="mailto:${c.correo}">${c.correo}</a></div>` : ''}
+            </div>
+          `).join('')}
+        ` : ''}
+        <button class="btn-evaluar" data-empresa="${(p.empresa||'').replace(/"/g,'&quot;')}" onclick="abrirModalEvaluar(this.dataset.empresa)">
+          ★ Ver evaluaciones / Evaluar
+        </button>
       </div>
     `).join('');
+  }
+
+  // ── Modal helpers ──────────────────────────────────────────────
+  function cerrarModal(id) {
+    document.getElementById(id).classList.remove('activo');
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.activo').forEach(m => m.classList.remove('activo'));
+    }
+  });
+
+  // ── Registrar / Editar Proveedor ──────────────────────────────
+  let modoEdicion = false;
+  let empresaEditando = '';
+
+  function abrirModalRegistro() {
+    modoEdicion = false;
+    empresaEditando = '';
+    ['r-empresa','r-tipo','r-direccion','r-web'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    document.getElementById('r-contactos-lista').innerHTML = '';
+    agregarFilaContacto();
+    document.getElementById('r-mensaje').innerHTML = '';
+    document.getElementById('r-btn-guardar').disabled = false;
+    document.getElementById('r-btn-guardar').textContent = 'Guardar';
+    document.getElementById('r-titulo-modal').textContent = 'Registrar Nuevo Proveedor';
+    document.getElementById('modalRegistro').classList.add('activo');
+  }
+
+  function agregarFilaContacto(data) {
+    const d = data || {};
+    const div = document.createElement('div');
+    div.className = 'fila-contacto';
+    div.style.cssText = 'background:#f8f9fa;border-radius:8px;padding:10px;margin-bottom:8px;position:relative;';
+    div.innerHTML = `
+      <button type="button" onclick="this.parentElement.remove()" title="Quitar" style="position:absolute;top:6px;right:8px;background:none;border:none;cursor:pointer;color:#aaa;font-size:18px;line-height:1;">×</button>
+      <input type="text" placeholder="Nombre del contacto" class="rc-contacto" value="${(d.contacto||'').replace(/"/g,'&quot;')}" style="width:100%;margin-bottom:6px;padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:13px;box-sizing:border-box;">
+      <input type="text" placeholder="Cargo" class="rc-cargo" value="${(d.cargo||'').replace(/"/g,'&quot;')}" style="width:100%;margin-bottom:6px;padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:13px;box-sizing:border-box;">
+      <input type="text" placeholder="Teléfono" class="rc-telefono" value="${(d.telefono||'').replace(/"/g,'&quot;')}" style="width:100%;margin-bottom:6px;padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:13px;box-sizing:border-box;">
+      <input type="email" placeholder="Correo" class="rc-correo" value="${(d.correo||'').replace(/"/g,'&quot;')}" style="width:100%;padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:13px;box-sizing:border-box;">
+    `;
+    document.getElementById('r-contactos-lista').appendChild(div);
+  }
+
+  function abrirModalEdicion(empresa) {
+    const p = empresas.find(e => e.empresa === empresa);
+    if (!p) return;
+    modoEdicion = true;
+    empresaEditando = empresa;
+    document.getElementById('r-empresa').value = p.empresa || '';
+    document.getElementById('r-tipo').value = p.tipo || '';
+    document.getElementById('r-direccion').value = p.direccion || '';
+    document.getElementById('r-web').value = p.web || '';
+    document.getElementById('r-contactos-lista').innerHTML = '';
+    if (p.contactos.length > 0) {
+      p.contactos.forEach(c => agregarFilaContacto(c));
+    } else {
+      agregarFilaContacto();
+    }
+    document.getElementById('r-mensaje').innerHTML = '';
+    document.getElementById('r-btn-guardar').disabled = false;
+    document.getElementById('r-btn-guardar').textContent = 'Guardar Cambios';
+    document.getElementById('r-titulo-modal').textContent = 'Editar Proveedor';
+    document.getElementById('modalRegistro').classList.add('activo');
+  }
+
+  async function guardarProveedor() {
+    const empresa = document.getElementById('r-empresa').value.trim();
+    const tipo    = document.getElementById('r-tipo').value;
+    if (!empresa || !tipo) {
+      document.getElementById('r-mensaje').innerHTML = '<div class="mensaje-err">Empresa y Tipo de Servicio son obligatorios.</div>';
+      return;
+    }
+    const filas = document.querySelectorAll('#r-contactos-lista .fila-contacto');
+    const contactos = Array.from(filas).map(f => ({
+      contacto: f.querySelector('.rc-contacto').value.trim(),
+      cargo:    f.querySelector('.rc-cargo').value.trim(),
+      telefono: f.querySelector('.rc-telefono').value.trim(),
+      correo:   f.querySelector('.rc-correo').value.trim()
+    })).filter(c => c.contacto || c.telefono || c.correo);
+
+    const btn = document.getElementById('r-btn-guardar');
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+    const body = {
+      empresa,
+      tipo,
+      direccion: document.getElementById('r-direccion').value.trim(),
+      web:       document.getElementById('r-web').value.trim(),
+      contactos: contactos.length > 0 ? contactos : [{}]
+    };
+    try {
+      const method   = modoEdicion ? 'PUT' : 'POST';
+      const urlParam = modoEdicion ? '?empresa=' + encodeURIComponent(empresaEditando) : '';
+      const res = await fetch('/api/proveedores' + urlParam, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) {
+        const accion = modoEdicion ? 'actualizado' : 'registrado';
+        document.getElementById('r-mensaje').innerHTML = `<div class="mensaje-ok">Proveedor ${accion} correctamente. Actualizando directorio...</div>`;
+        btn.textContent = 'Guardado ✓';
+        const cancelBtn = document.querySelector('#modalRegistro .btn-cancelar');
+        if (cancelBtn) { cancelBtn.textContent = 'Cerrar'; cancelBtn.style.background = '#003366'; cancelBtn.style.color = 'white'; cancelBtn.style.borderColor = '#003366'; }
+        await cargarDesdeAPI();
+      } else {
+        throw new Error('Error ' + res.status);
+      }
+    } catch (e) {
+      document.getElementById('r-mensaje').innerHTML = `<div class="mensaje-err">Error al guardar: ${e.message}</div>`;
+      btn.disabled = false;
+      btn.textContent = modoEdicion ? 'Guardar Cambios' : 'Guardar';
+    }
+  }
+
+  // ── Evaluar Proveedor ──────────────────────────────────────────
+  let evEmpresaActual = '';
+  let evEstrellas = 0;
+
+  function abrirModalEvaluar(empresa) {
+    evEmpresaActual = empresa;
+    evEstrellas = 0;
+    document.getElementById('ev-titulo').textContent = 'Evaluar: ' + empresa;
+    document.getElementById('ev-comentario').value = '';
+    document.getElementById('ev-evaluador').value = '';
+    document.getElementById('ev-fecha').value = '';
+    document.getElementById('ev-mensaje').innerHTML = '';
+    document.getElementById('ev-btn-guardar').disabled = false;
+    document.getElementById('ev-btn-guardar').textContent = 'Enviar Evaluación';
+    actualizarEstrellas(0);
+    cargarEvaluaciones(empresa);
+    document.getElementById('modalEvaluar').classList.add('activo');
+  }
+
+  function actualizarEstrellas(n) {
+    document.querySelectorAll('#ev-estrellas span').forEach((s, i) => {
+      s.classList.toggle('seleccionada', i < n);
+    });
+  }
+
+  document.querySelectorAll('#ev-estrellas span').forEach(s => {
+    s.addEventListener('click', () => {
+      evEstrellas = parseInt(s.dataset.val);
+      actualizarEstrellas(evEstrellas);
+    });
+    s.addEventListener('mouseenter', () => actualizarEstrellas(parseInt(s.dataset.val)));
+    s.addEventListener('mouseleave', () => actualizarEstrellas(evEstrellas));
+  });
+
+  async function cargarEvaluaciones(empresa) {
+    const div = document.getElementById('ev-historial');
+    div.innerHTML = '<p style="font-size:13px;color:#888">Cargando evaluaciones...</p>';
+    try {
+      const res = await fetch('/api/evaluaciones?empresa=' + encodeURIComponent(empresa));
+      const lista = await res.json();
+      if (!lista.length) {
+        div.innerHTML = '<p style="font-size:13px;color:#888">Sin evaluaciones aún.</p>';
+        return;
+      }
+      div.innerHTML = lista.map(e => {
+        const stars = '★'.repeat(e.estrellas) + '☆'.repeat(5 - e.estrellas);
+        return `<div class="evaluacion-item">
+          <div class="ev-encabezado">
+            <span class="ev-evaluador">${e.evaluador || 'Anónimo'}</span>
+            <span class="ev-fecha">${e.fecha || ''}</span>
+          </div>
+          <div style="color:#f59e0b;font-size:15px;">${stars}</div>
+          ${e.comentario ? `<div class="ev-comentario">${e.comentario}</div>` : ''}
+        </div>`;
+      }).join('');
+    } catch {
+      div.innerHTML = '<p style="font-size:13px;color:#888">No se pudieron cargar evaluaciones.</p>';
+    }
+  }
+
+  async function guardarEvaluacion() {
+    if (!evEstrellas) {
+      document.getElementById('ev-mensaje').innerHTML = '<div class="mensaje-err">Selecciona una calificación de 1 a 5 estrellas.</div>';
+      return;
+    }
+    const evaluador = document.getElementById('ev-evaluador').value.trim();
+    const fecha     = document.getElementById('ev-fecha').value;
+    if (!evaluador || !fecha) {
+      document.getElementById('ev-mensaje').innerHTML = '<div class="mensaje-err">Tu nombre y la fecha del servicio son obligatorios.</div>';
+      return;
+    }
+    const btn = document.getElementById('ev-btn-guardar');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    const body = {
+      empresa:      evEmpresaActual,
+      estrellas:    evEstrellas,
+      comentario:   document.getElementById('ev-comentario').value.trim(),
+      evaluador,
+      fechaServicio: fecha
+    };
+    try {
+      const res = await fetch('/api/evaluaciones', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) {
+        document.getElementById('ev-mensaje').innerHTML = '<div class="mensaje-ok">Evaluación enviada. ¡Gracias!</div>';
+        btn.textContent = 'Enviado ✓';
+        await cargarEvaluaciones(evEmpresaActual);
+        // Scroll al historial para ver la evaluación recién guardada
+        document.getElementById('ev-historial').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // Cambiar botón Cancelar a Cerrar
+        const cancelBtn = document.querySelector('#modalEvaluar .btn-cancelar');
+        if (cancelBtn) { cancelBtn.textContent = 'Cerrar'; cancelBtn.style.background = '#003366'; cancelBtn.style.color = 'white'; cancelBtn.style.borderColor = '#003366'; }
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error('Error ' + res.status + ': ' + (errData.error?.message || errData.error || JSON.stringify(errData)));
+      }
+    } catch (e) {
+      document.getElementById('ev-mensaje').innerHTML = `<div class="mensaje-err">Error al enviar: ${e.message}</div>`;
+      btn.disabled = false;
+      btn.textContent = 'Enviar Evaluación';
+    }
   }
 </script>
 </body>
 </html>
+
 
 
 
