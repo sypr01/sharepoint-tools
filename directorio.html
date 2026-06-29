@@ -3,65 +3,91 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directorio de Proveedores - PLG</title>
+  <title>Portal PLG - Directorio</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; }
+    :root {
+      --plg-navy:  #1B3A6B;
+      --plg-blue:  #2F5AA8;
+      --plg-light: #5C83C1;
+      --plg-red:   #CC1F2A;
+      --plg-bg:    #F0F4F9;
+    }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--plg-bg); color: #333; }
+
+    /* ── Header ── */
     header {
-      background: #003366;
+      background: linear-gradient(135deg, var(--plg-navy) 0%, var(--plg-blue) 100%);
       color: white;
-      padding: 20px 32px;
+      border-bottom: 4px solid var(--plg-red);
+    }
+    .header-inner {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 20px;
+      padding: 14px 32px;
     }
-    header h1 { font-size: 22px; font-weight: 600; }
-    header p { font-size: 13px; opacity: 0.8; }
+    .header-logo-wrap {
+      background: white;
+      border-radius: 8px;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header-logo { height: 52px; width: auto; display: block; }
+    .header-divider {
+      width: 1px;
+      height: 40px;
+      background: rgba(255,255,255,0.25);
+    }
+    header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.2px; }
+    header p  { font-size: 12px; opacity: 0.7; margin-top: 3px; }
 
+    /* ── Controles ── */
     .controles {
       background: white;
-      padding: 16px 32px;
+      padding: 14px 32px;
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
       align-items: center;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid #dde3ed;
       position: sticky;
       top: 0;
       z-index: 10;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 8px rgba(27,58,107,0.08);
     }
 
     .buscar {
       flex: 1;
       min-width: 220px;
       padding: 9px 14px;
-      border: 1px solid #ccc;
+      border: 1px solid #c5cedb;
       border-radius: 6px;
       font-size: 14px;
+      transition: border-color 0.2s;
     }
-    .buscar:focus { outline: none; border-color: #003366; }
+    .buscar:focus { outline: none; border-color: var(--plg-blue); box-shadow: 0 0 0 3px rgba(47,90,168,0.1); }
 
     .filtros { display: flex; gap: 8px; flex-wrap: wrap; }
     .filtro {
-      padding: 7px 14px;
-      border: 1px solid #ccc;
+      padding: 6px 14px;
+      border: 1px solid #c5cedb;
       border-radius: 20px;
       background: white;
       cursor: pointer;
       font-size: 13px;
+      color: #555;
       transition: all 0.2s;
     }
-    .filtro:hover { border-color: #003366; color: #003366; }
-    .filtro.activo { background: #003366; color: white; border-color: #003366; }
+    .filtro:hover { border-color: var(--plg-blue); color: var(--plg-blue); }
+    .filtro.activo { background: var(--plg-navy); color: white; border-color: var(--plg-navy); }
 
-    .contador {
-      font-size: 13px;
-      color: #666;
-      margin-left: auto;
-    }
+    .contador { font-size: 13px; color: #778; margin-left: auto; }
 
+    /* ── Grid ── */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -69,15 +95,16 @@
       padding: 24px 32px;
     }
 
+    /* ── Tarjeta ── */
     .tarjeta {
       background: white;
       border-radius: 10px;
       padding: 20px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-      border-left: 4px solid #003366;
-      transition: box-shadow 0.2s;
+      box-shadow: 0 1px 4px rgba(27,58,107,0.07);
+      border-left: 4px solid var(--plg-navy);
+      transition: box-shadow 0.2s, border-color 0.2s;
     }
-    .tarjeta:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+    .tarjeta:hover { box-shadow: 0 6px 20px rgba(27,58,107,0.13); border-left-color: var(--plg-red); }
 
     .tarjeta-header {
       display: flex;
@@ -86,35 +113,35 @@
       margin-bottom: 12px;
     }
 
-    .empresa { font-size: 15px; font-weight: 600; color: #003366; line-height: 1.3; }
+    .empresa { font-size: 15px; font-weight: 700; color: var(--plg-navy); line-height: 1.3; }
 
     .badge {
       font-size: 10px;
-      font-weight: 600;
+      font-weight: 700;
       padding: 3px 8px;
       border-radius: 12px;
       white-space: nowrap;
-      margin-left: 8px;
+      text-transform: uppercase;
+      letter-spacing: .3px;
     }
-
-    .badge-NAVIERA        { background: #dbeafe; color: #1d4ed8; }
-    .badge-AEROLINEA      { background: #fce7f3; color: #9d174d; }
-    .badge-AGENCIA\ ADUANAL { background: #d1fae5; color: #065f46; }
-    .badge-CONSOLIDADOR   { background: #fef3c7; color: #92400e; }
-    .badge-PORTUARIA      { background: #ede9fe; color: #5b21b6; }
+    .badge-NAVIERA           { background: #dbeafe; color: #1d4ed8; }
+    .badge-AEROLINEA         { background: #fce7f3; color: #9d174d; }
+    .badge-AGENCIA\ ADUANAL  { background: #d1fae5; color: #065f46; }
+    .badge-CONSOLIDADOR      { background: #fef3c7; color: #92400e; }
+    .badge-PORTUARIA         { background: #ede9fe; color: #5b21b6; }
     .badge-TRANSPORTE\ LOCAL { background: #ffedd5; color: #9a3412; }
 
     .dato { font-size: 13px; color: #555; margin-bottom: 6px; display: flex; gap: 6px; align-items: flex-start; }
     .dato svg { flex-shrink: 0; margin-top: 1px; }
-    .dato a { color: #003366; text-decoration: none; }
-    .dato a:hover { text-decoration: underline; }
+    .dato a { color: var(--plg-blue); text-decoration: none; }
+    .dato a:hover { text-decoration: underline; color: var(--plg-navy); }
 
-    .separador { border: none; border-top: 1px solid #f0f0f0; margin: 10px 0; }
+    .separador { border: none; border-top: 1px solid #edf0f5; margin: 10px 0; }
 
-    /* Botón registrar */
+    /* ── Botón registrar ── */
     .btn-registrar {
       padding: 8px 18px;
-      background: #003366;
+      background: var(--plg-navy);
       color: white;
       border: none;
       border-radius: 6px;
@@ -124,18 +151,18 @@
       white-space: nowrap;
       transition: background 0.2s;
     }
-    .btn-registrar:hover { background: #004a99; }
+    .btn-registrar:hover { background: var(--plg-blue); }
 
-    /* Botón evaluar en tarjeta */
+    /* ── Botón evaluar ── */
     .btn-evaluar {
       margin-top: 12px;
       width: 100%;
-      padding: 7px;
-      background: #f8f9fa;
-      border: 1px solid #ddd;
+      padding: 8px;
+      background: var(--plg-bg);
+      border: 1px solid #dde3ed;
       border-radius: 6px;
       font-size: 12px;
-      color: #555;
+      color: #667;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -143,19 +170,18 @@
       gap: 5px;
       transition: all 0.2s;
     }
-    .btn-evaluar:hover { background: #e8f0fe; border-color: #003366; color: #003366; }
+    .btn-evaluar:hover { background: #e4ecf7; border-color: var(--plg-blue); color: var(--plg-navy); }
 
-    /* Estrellas mostradas */
     .estrellas-resumen { font-size: 13px; color: #666; margin-top: 8px; }
     .estrella-llena { color: #f59e0b; }
     .estrella-vacia { color: #ddd; }
 
-    /* Modal overlay */
+    /* ── Modal ── */
     .modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(10,20,50,0.55);
       z-index: 100;
       align-items: center;
       justify-content: center;
@@ -166,28 +192,40 @@
     .modal {
       background: white;
       border-radius: 12px;
-      padding: 28px;
+      padding: 0;
       width: 100%;
       max-width: 520px;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      box-shadow: 0 24px 64px rgba(10,20,50,0.3);
     }
-    .modal h2 { font-size: 18px; color: #003366; margin-bottom: 20px; }
+    .modal-header {
+      background: linear-gradient(135deg, var(--plg-navy) 0%, var(--plg-blue) 100%);
+      border-radius: 12px 12px 0 0;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .modal-header img { height: 36px; background: white; border-radius: 5px; padding: 3px 6px; }
+    .modal h2 { font-size: 17px; color: white; font-weight: 700; margin: 0; }
+    .modal-body { padding: 24px; }
 
     .campo { margin-bottom: 14px; }
     .campo label { display: block; font-size: 13px; font-weight: 600; color: #444; margin-bottom: 5px; }
     .campo input, .campo select, .campo textarea {
       width: 100%;
       padding: 9px 12px;
-      border: 1px solid #ccc;
+      border: 1px solid #c5cedb;
       border-radius: 6px;
       font-size: 14px;
       font-family: inherit;
+      transition: border-color 0.2s;
     }
     .campo input:focus, .campo select:focus, .campo textarea:focus {
       outline: none;
-      border-color: #003366;
+      border-color: var(--plg-blue);
+      box-shadow: 0 0 0 3px rgba(47,90,168,0.1);
     }
     .campo textarea { resize: vertical; min-height: 70px; }
 
@@ -199,38 +237,41 @@
     }
     .btn-cancelar {
       padding: 9px 18px;
-      border: 1px solid #ccc;
+      border: 1px solid #c5cedb;
       background: white;
       border-radius: 6px;
       cursor: pointer;
       font-size: 14px;
+      color: #555;
+      transition: border-color 0.2s;
     }
+    .btn-cancelar:hover { border-color: var(--plg-navy); color: var(--plg-navy); }
     .btn-guardar {
       padding: 9px 18px;
-      background: #003366;
+      background: var(--plg-navy);
       color: white;
       border: none;
       border-radius: 6px;
       cursor: pointer;
       font-size: 14px;
       font-weight: 600;
+      transition: background 0.2s;
     }
-    .btn-guardar:hover { background: #004a99; }
-    .btn-guardar:disabled { background: #999; cursor: not-allowed; }
+    .btn-guardar:hover { background: var(--plg-blue); }
+    .btn-guardar:disabled { background: #aab; cursor: not-allowed; }
 
-    /* Selector de estrellas interactivo */
     .selector-estrellas { display: flex; gap: 6px; font-size: 28px; cursor: pointer; margin: 8px 0; }
     .selector-estrellas span { color: #ddd; transition: color 0.1s; }
     .selector-estrellas span.seleccionada,
     .selector-estrellas span.hover-activa { color: #f59e0b; }
 
-    /* Lista evaluaciones dentro del modal */
-    .evaluacion-item { border-top: 1px solid #f0f0f0; padding: 10px 0; font-size: 13px; }
+    .evaluacion-item { border-top: 1px solid #edf0f5; padding: 10px 0; font-size: 13px; }
     .evaluacion-item .ev-encabezado { display: flex; justify-content: space-between; margin-bottom: 4px; }
     .evaluacion-item .ev-evaluador { font-weight: 600; color: #333; }
     .evaluacion-item .ev-fecha { color: #888; }
     .evaluacion-item .ev-comentario { color: #555; }
-    .mensaje-ok { color: #065f46; background: #d1fae5; padding: 10px; border-radius: 6px; font-size: 13px; margin-top: 10px; }
+
+    .mensaje-ok  { color: #065f46; background: #d1fae5; padding: 10px; border-radius: 6px; font-size: 13px; margin-top: 10px; }
     .mensaje-err { color: #991b1b; background: #fee2e2; padding: 10px; border-radius: 6px; font-size: 13px; margin-top: 10px; }
 
     .sin-resultados {
@@ -240,17 +281,149 @@
       color: #888;
       font-size: 15px;
     }
+
+    /* ── Reporte imprimible ── */
+    #reporte-contenido { font-family: 'Segoe UI', sans-serif; }
+    .reporte-empresa {
+      margin-bottom: 28px;
+      border: 1px solid #dde3ed;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .reporte-empresa-header {
+      background: var(--plg-navy);
+      color: white;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .reporte-empresa-nombre { font-size: 14px; font-weight: 700; }
+    .reporte-empresa-meta { font-size: 12px; opacity: 0.8; }
+    .reporte-promedio { font-size: 18px; color: #f59e0b; letter-spacing: 2px; }
+    .reporte-fila {
+      display: grid;
+      grid-template-columns: 1fr 120px 100px;
+      gap: 12px;
+      padding: 10px 16px;
+      border-bottom: 1px solid #f0f4f9;
+      font-size: 13px;
+      align-items: start;
+    }
+    .reporte-fila:last-child { border-bottom: none; }
+    .reporte-fila:nth-child(even) { background: #fafbfd; }
+    .reporte-comentario { color: #333; }
+    .reporte-evaluador { color: #555; font-size: 12px; }
+    .reporte-fecha { color: #888; font-size: 12px; text-align: right; }
+    .reporte-stars { color: #f59e0b; font-size: 13px; }
+
+    @media print {
+      body > *:not(#modal-reporte-print) { display: none !important; }
+      #modal-reporte-print { display: block !important; position: static !important;
+        background: white !important; padding: 0 !important; }
+      .no-print { display: none !important; }
+      .reporte-empresa { page-break-inside: avoid; }
+    }
+
+    /* ── Tabs de navegación ── */
+    .nav-tabs {
+      background: var(--plg-navy);
+      display: flex;
+      gap: 0;
+      padding: 0 32px;
+    }
+    .nav-tab {
+      padding: 10px 22px;
+      color: rgba(255,255,255,0.65);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: none;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      letter-spacing: .2px;
+    }
+    .nav-tab:hover { color: white; }
+    .nav-tab.activo { color: white; border-bottom-color: var(--plg-red); }
+
+    /* ── Tarjeta colaborador ── */
+    .tarjeta-colab {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(27,58,107,0.07);
+      border-top: 4px solid var(--plg-navy);
+      transition: box-shadow 0.2s, border-color 0.2s;
+      text-align: center;
+    }
+    .tarjeta-colab:hover { box-shadow: 0 6px 20px rgba(27,58,107,0.13); border-top-color: var(--plg-red); }
+
+    .avatar-colab {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      margin: 0 auto 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; font-weight: 700; color: white;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .avatar-colab img { width: 100%; height: 100%; object-fit: cover; }
+    .nombre-colab { font-size: 15px; font-weight: 700; color: var(--plg-navy); margin-bottom: 4px; }
+    .cargo-colab  { font-size: 12px; color: #666; margin-bottom: 10px; }
+    .badge-depto {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      padding: 3px 10px; border-radius: 12px;
+      background: #e4ecf7; color: var(--plg-navy);
+      margin-bottom: 12px; text-transform: uppercase; letter-spacing: .3px;
+    }
+    .dato-colab {
+      font-size: 12px; color: #555; margin-bottom: 5px;
+      display: flex; gap: 6px; align-items: center; justify-content: center;
+    }
+    .dato-colab a { color: var(--plg-blue); text-decoration: none; }
+    .dato-colab a:hover { text-decoration: underline; }
+    .badge-oficina {
+      display: inline-block; font-size: 10px; padding: 2px 8px;
+      border-radius: 10px; background: #f0f4f9; color: #667;
+      margin-top: 8px; border: 1px solid #dde3ed;
+    }
+    .select-filtro {
+      padding: 7px 12px; border: 1px solid #c5cedb;
+      border-radius: 6px; font-size: 13px; color: #555;
+      background: white; cursor: pointer;
+    }
+    .select-filtro:focus { outline: none; border-color: var(--plg-blue); }
+    .cargando-colab { grid-column:1/-1; text-align:center; padding:60px; color:#888; }
+    .spinner { width:36px;height:36px;border:4px solid #dde3ed;border-top-color:var(--plg-blue);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
 <header>
-  <div>
-    <h1>Directorio de Proveedores</h1>
-    <p>PANAMERICAN LOGISTICS GROUP — Operaciones 2026 - Actualizado 26/06/2026 08:30 v2</p>
+  <div class="header-inner">
+    <div class="header-logo-wrap">
+      <img src="log PLG.png" alt="PLG" class="header-logo">
+    </div>
+    <div class="header-divider"></div>
+    <div style="flex:1;">
+      <h1 id="header-titulo">Directorio de Proveedores</h1>
+      <p>PANAMERICAN LOGISTICS GROUP — Operaciones 2026</p>
+    </div>
+    <button onclick="abrirAdminLogin()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:6px;white-space:nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+      🔐 Admin
+    </button>
   </div>
+  <nav class="nav-tabs">
+    <button class="nav-tab activo" onclick="switchTab('proveedores')">🏢 Proveedores</button>
+    <button class="nav-tab" onclick="switchTab('colaboradores')">👥 Colaboradores</button>
+    <a href="soporte.html" class="nav-tab">🎫 Soporte IT</a>
+    <a href="inventario.html" class="nav-tab">💻 Inventario IT</a>
+    <button class="nav-tab" style="margin-left:auto;color:rgba(255,255,255,.55);" onclick="sessionStorage.removeItem('plg_session');location.href='/login.html'">🔒 Cerrar sesión</button>
+  </nav>
 </header>
 
+<div id="seccion-proveedores">
 <div class="controles">
   <input class="buscar" type="text" placeholder="Buscar por empresa, contacto, correo..." oninput="filtrar()">
   <div class="filtros">
@@ -263,15 +436,39 @@
     <button class="filtro" data-tipo="TRANSPORTE LOCAL" onclick="setFiltro(this)">Transporte</button>
   </div>
   <span class="contador" id="contador"></span>
+  <button class="btn-registrar" style="background:white;color:var(--plg-navy);border:1px solid var(--plg-navy);" onclick="abrirReporte()">📊 Reporte</button>
   <button class="btn-registrar" onclick="abrirModalRegistro()">+ Registrar Proveedor</button>
 </div>
-
 <div class="grid" id="grid"></div>
+</div>
+
+<div id="seccion-colaboradores" style="display:none;">
+<div class="controles">
+  <input class="buscar" id="colab-buscar" type="text" placeholder="Buscar por nombre, cargo, correo..." oninput="filtrarColab()">
+  <div class="filtros" id="colab-filtros-oficina">
+    <button class="filtro activo" data-val="" onclick="setFiltroOficina(this)">Todas las divisiones</button>
+  </div>
+  <select class="select-filtro" id="colab-select-depto" onchange="filtrarColab()">
+    <option value="">Todos los departamentos</option>
+  </select>
+  <span class="contador" id="colab-contador"></span>
+</div>
+<div class="grid" id="colab-grid">
+  <div class="cargando-colab">
+    <div class="spinner"></div>
+    <p>Cargando colaboradores...</p>
+  </div>
+</div>
+</div>
 
 <!-- Modal: Registrar Proveedor -->
 <div class="modal-overlay" id="modalRegistro">
   <div class="modal">
-    <h2 id="r-titulo-modal">Registrar Nuevo Proveedor</h2>
+    <div class="modal-header">
+      <img src="log PLG.png" alt="PLG">
+      <h2 id="r-titulo-modal">Registrar Nuevo Proveedor</h2>
+    </div>
+    <div class="modal-body">
     <div class="campo">
       <label>Empresa *</label>
       <input type="text" id="r-empresa" placeholder="Nombre de la empresa">
@@ -306,17 +503,21 @@
       <button class="btn-cancelar" onclick="cerrarModal('modalRegistro')">Cancelar</button>
       <button class="btn-guardar" id="r-btn-guardar" onclick="guardarProveedor()">Guardar</button>
     </div>
+    </div><!-- /modal-body -->
   </div>
 </div>
 
 <!-- Modal: Evaluar Proveedor -->
 <div class="modal-overlay" id="modalEvaluar">
   <div class="modal">
-    <h2 id="ev-titulo">Evaluar Proveedor</h2>
-
+    <div class="modal-header">
+      <img src="log PLG.png" alt="PLG">
+      <h2 id="ev-titulo">Evaluar Proveedor</h2>
+    </div>
+    <div class="modal-body">
     <div id="ev-historial" style="margin-bottom:16px;"></div>
 
-    <hr style="margin-bottom:16px;">
+    <hr style="margin-bottom:16px;border:none;border-top:1px solid #edf0f5;">
     <p style="font-size:13px;font-weight:600;color:#444;margin-bottom:4px;">Nueva Evaluación</p>
 
     <div class="campo">
@@ -345,6 +546,59 @@
     <div class="modal-footer">
       <button class="btn-cancelar" onclick="cerrarModal('modalEvaluar')">Cancelar</button>
       <button class="btn-guardar" id="ev-btn-guardar" onclick="guardarEvaluacion()">Enviar Evaluación</button>
+    </div>
+    </div><!-- /modal-body -->
+  </div>
+</div>
+
+<!-- Modal: Reporte Gerencia -->
+<div id="modal-reporte-print" style="display:none;position:fixed;inset:0;background:white;z-index:200;overflow-y:auto;padding:32px;">
+  <div class="no-print" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #edf0f5;">
+    <span style="font-size:14px;color:#666;">Vista previa del reporte</span>
+    <div style="display:flex;gap:10px;">
+      <button onclick="window.print()" style="background:var(--plg-navy);color:white;border:none;padding:9px 20px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600;">🖨️ Imprimir / Guardar PDF</button>
+      <button onclick="cerrarReporte()" style="background:#f0f4f9;border:1px solid #dde3ed;padding:9px 16px;border-radius:6px;cursor:pointer;font-size:14px;">✕ Cerrar</button>
+    </div>
+  </div>
+  <div id="reporte-contenido"></div>
+</div>
+
+<!-- Modal: Admin Login -->
+<div class="modal-overlay" id="modalAdminLogin">
+  <div class="modal" style="max-width:360px;">
+    <div class="modal-header">
+      <img src="log PLG.png" alt="PLG">
+      <h2>Acceso Administrador</h2>
+    </div>
+    <div class="modal-body">
+      <div class="campo">
+        <label>Contraseña</label>
+        <input type="password" id="admin-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter') verificarAdmin()">
+      </div>
+      <div id="admin-login-msg"></div>
+      <div class="modal-footer">
+        <button class="btn-cancelar" onclick="cerrarModal('modalAdminLogin')">Cancelar</button>
+        <button class="btn-guardar" onclick="verificarAdmin()">Ingresar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Panel Admin Evaluaciones -->
+<div class="modal-overlay" id="modalAdmin">
+  <div class="modal" style="max-width:800px;">
+    <div class="modal-header" style="justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <img src="log PLG.png" alt="PLG">
+        <h2>Administración de Evaluaciones</h2>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button onclick="abrirReporte()" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);color:white;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">📊 Ver Reporte</button>
+        <button onclick="cerrarModal('modalAdmin')" style="background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;cursor:pointer;border-radius:4px;padding:2px 8px;">×</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div id="admin-tabla" style="overflow-x:auto;"></div>
     </div>
   </div>
 </div>
@@ -378,18 +632,23 @@
       if (!res.ok) return;
       const items = await res.json();
       if (!Array.isArray(items) || items.length === 0) return;
-      const mapaTemp = {};
+      // Construir mapa desde SharePoint
+      const mapaAPI = {};
       items.forEach(p => {
         const key = p.empresa || '—';
-        if (!mapaTemp[key]) {
-          mapaTemp[key] = { empresa: p.empresa, tipo: p.tipo, direccion: p.direccion, web: p.web, contactos: [] };
+        if (!mapaAPI[key]) {
+          mapaAPI[key] = { empresa: p.empresa, tipo: p.tipo, direccion: p.direccion, web: p.web, contactos: [] };
         }
         if (p.contacto || p.telefono || p.correo) {
-          mapaTemp[key].contactos.push({ contacto: p.contacto, cargo: p.cargo, telefono: p.telefono, correo: p.correo });
+          mapaAPI[key].contactos.push({ contacto: p.contacto, cargo: p.cargo, telefono: p.telefono, correo: p.correo });
         }
       });
+      // Merge: datos embebidos como base, SharePoint sobreescribe los que ya existen allí
+      const mapaFinal = {};
+      empresas.forEach(e => { mapaFinal[e.empresa] = e; });
+      Object.values(mapaAPI).forEach(e => { mapaFinal[e.empresa] = e; });
       empresas.length = 0;
-      Object.values(mapaTemp).forEach(e => empresas.push(e));
+      Object.values(mapaFinal).forEach(e => empresas.push(e));
       filtrar();
     } catch (e) { /* usar datos embebidos */ }
   }
@@ -674,9 +933,276 @@
       btn.textContent = 'Enviar Evaluación';
     }
   }
+
+  // ── Administración de Evaluaciones ────────────────────────────
+  const ADMIN_PASS = 'Barraza1983';
+
+  function abrirAdminLogin() {
+    document.getElementById('admin-pass').value = '';
+    document.getElementById('admin-login-msg').innerHTML = '';
+    document.getElementById('modalAdminLogin').classList.add('activo');
+    setTimeout(() => document.getElementById('admin-pass').focus(), 100);
+  }
+
+  function verificarAdmin() {
+    const pass = document.getElementById('admin-pass').value;
+    if (pass === ADMIN_PASS) {
+      cerrarModal('modalAdminLogin');
+      abrirPanelAdmin();
+    } else {
+      document.getElementById('admin-login-msg').innerHTML = '<div class="mensaje-err">Contraseña incorrecta.</div>';
+    }
+  }
+
+  async function abrirPanelAdmin() {
+    document.getElementById('admin-tabla').innerHTML = '<p style="color:#888;font-size:13px;padding:20px 0;">Cargando evaluaciones...</p>';
+    document.getElementById('modalAdmin').classList.add('activo');
+    try {
+      const res = await fetch('/api/evaluaciones');
+      if (!res.ok) throw new Error('Error ' + res.status);
+      const lista = await res.json();
+      if (!lista.length) {
+        document.getElementById('admin-tabla').innerHTML = '<p style="color:#888;font-size:13px;padding:20px 0;">No hay evaluaciones registradas.</p>';
+        return;
+      }
+      const filas = lista.map(e => {
+        const stars = '★'.repeat(e.estrellas || 0) + '☆'.repeat(5 - (e.estrellas || 0));
+        const fecha = e.fecha ? e.fecha.substring(0, 10) : '—';
+        return `<tr style="border-bottom:1px solid #edf0f5;">
+          <td style="padding:10px 8px;font-size:13px;font-weight:600;color:#1B3A6B;">${e.empresa || '—'}</td>
+          <td style="padding:10px 8px;font-size:13px;">${e.evaluador || '—'}</td>
+          <td style="padding:10px 8px;color:#f59e0b;font-size:14px;">${stars}</td>
+          <td style="padding:10px 8px;font-size:12px;color:#666;">${fecha}</td>
+          <td style="padding:10px 8px;font-size:12px;color:#555;max-width:200px;">${e.comentario || ''}</td>
+          <td style="padding:10px 8px;text-align:center;">
+            <button onclick="eliminarEvaluacion('${e.id}', this)" style="background:#fee2e2;border:none;color:#991b1b;padding:5px 10px;border-radius:5px;cursor:pointer;font-size:12px;font-weight:600;" title="Eliminar">🗑️ Eliminar</button>
+          </td>
+        </tr>`;
+      }).join('');
+      document.getElementById('admin-tabla').innerHTML = `
+        <p style="font-size:13px;color:#666;margin-bottom:12px;">${lista.length} evaluación${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}</p>
+        <table style="width:100%;border-collapse:collapse;font-family:inherit;">
+          <thead>
+            <tr style="background:#f0f4f9;">
+              <th style="padding:10px 8px;text-align:left;font-size:12px;color:#555;font-weight:600;">Empresa</th>
+              <th style="padding:10px 8px;text-align:left;font-size:12px;color:#555;font-weight:600;">Evaluador</th>
+              <th style="padding:10px 8px;text-align:left;font-size:12px;color:#555;font-weight:600;">Calificación</th>
+              <th style="padding:10px 8px;text-align:left;font-size:12px;color:#555;font-weight:600;">Fecha</th>
+              <th style="padding:10px 8px;text-align:left;font-size:12px;color:#555;font-weight:600;">Comentario</th>
+              <th style="padding:10px 8px;text-align:center;font-size:12px;color:#555;font-weight:600;">Acción</th>
+            </tr>
+          </thead>
+          <tbody>${filas}</tbody>
+        </table>`;
+    } catch (e) {
+      document.getElementById('admin-tabla').innerHTML = `<div class="mensaje-err">Error al cargar: ${e.message}</div>`;
+    }
+  }
+
+  async function abrirReporte() {
+    const contenido = document.getElementById('reporte-contenido');
+    document.getElementById('modal-reporte-print').style.display = 'block';
+    contenido.innerHTML = '<p style="color:#888;font-size:13px;">Generando reporte...</p>';
+    try {
+      const res = await fetch('/api/evaluaciones');
+      if (!res.ok) throw new Error('Error ' + res.status);
+      const lista = await res.json();
+      if (!lista.length) {
+        contenido.innerHTML = '<p style="color:#888;">No hay evaluaciones registradas.</p>';
+        return;
+      }
+      // Agrupar por empresa
+      const mapa = {};
+      lista.forEach(e => {
+        const k = e.empresa || '—';
+        if (!mapa[k]) mapa[k] = [];
+        mapa[k].push(e);
+      });
+      const hoy = new Date().toLocaleDateString('es-SV', { year:'numeric', month:'long', day:'numeric' });
+      let html = `
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:28px;">
+          <img src="log PLG.png" style="height:60px;background:white;border-radius:6px;padding:4px 8px;border:1px solid #dde3ed;">
+          <div>
+            <h1 style="font-size:20px;color:var(--plg-navy);font-weight:700;margin:0;">Reporte de Evaluaciones de Proveedores</h1>
+            <p style="font-size:13px;color:#666;margin:4px 0 0;">PANAMERICAN LOGISTICS GROUP &mdash; Generado el ${hoy}</p>
+            <p style="font-size:12px;color:#888;margin:2px 0 0;">${lista.length} evaluación${lista.length!==1?'es':''} · ${Object.keys(mapa).length} proveedor${Object.keys(mapa).length!==1?'es':''}</p>
+          </div>
+        </div>`;
+      Object.entries(mapa).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([empresa, evals]) => {
+        const prom = evals.reduce((s,e) => s + (e.estrellas||0), 0) / evals.length;
+        const promStr = prom.toFixed(1);
+        const starsLlenas = Math.round(prom);
+        const stars = '★'.repeat(starsLlenas) + '☆'.repeat(5-starsLlenas);
+        const filas = evals.map(e => {
+          const fecha = e.fecha ? e.fecha.substring(0,10) : '—';
+          const estrellaEv = '★'.repeat(e.estrellas||0) + '☆'.repeat(5-(e.estrellas||0));
+          return `<div class="reporte-fila">
+            <div>
+              <div class="reporte-comentario">${e.comentario || '<em style="color:#aaa">Sin comentario</em>'}</div>
+              <div class="reporte-evaluador">— ${e.evaluador || 'Anónimo'}</div>
+            </div>
+            <div class="reporte-stars">${estrellaEv}</div>
+            <div class="reporte-fecha">${fecha}</div>
+          </div>`;
+        }).join('');
+        html += `<div class="reporte-empresa">
+          <div class="reporte-empresa-header">
+            <div>
+              <div class="reporte-empresa-nombre">${empresa}</div>
+              <div class="reporte-empresa-meta">${evals.length} evaluación${evals.length!==1?'es':''}</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="reporte-promedio">${stars}</div>
+              <div style="font-size:12px;color:rgba(255,255,255,0.7);">Promedio: ${promStr} / 5</div>
+            </div>
+          </div>
+          <div style="background:#fff8ed;padding:8px 16px;font-size:11px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.5px;">
+            Comentarios
+          </div>
+          ${filas}
+        </div>`;
+      });
+      contenido.innerHTML = html;
+    } catch (e) {
+      contenido.innerHTML = `<div class="mensaje-err">Error: ${e.message}</div>`;
+    }
+  }
+
+  function cerrarReporte() {
+    document.getElementById('modal-reporte-print').style.display = 'none';
+  }
+
+  async function eliminarEvaluacion(id, btn) {
+    if (!confirm('¿Eliminar esta evaluación? Esta acción no se puede deshacer.')) return;
+    btn.disabled = true;
+    btn.textContent = '...';
+    try {
+      const res = await fetch('/api/evaluaciones?id=' + encodeURIComponent(id), { method: 'DELETE' });
+      if (res.ok) {
+        btn.closest('tr').remove();
+      } else {
+        throw new Error('Error ' + res.status);
+      }
+    } catch (e) {
+      alert('Error al eliminar: ' + e.message);
+      btn.disabled = false;
+      btn.textContent = '🗑️ Eliminar';
+    }
+  }
+
+  // ── Tabs de navegación ─────────────────────────────────────────
+  function switchTab(tab) {
+    const esColab = tab === 'colaboradores';
+    document.getElementById('seccion-proveedores').style.display = esColab ? 'none' : '';
+    document.getElementById('seccion-colaboradores').style.display = esColab ? '' : 'none';
+    document.getElementById('header-titulo').textContent = esColab ? 'Directorio de Colaboradores' : 'Directorio de Proveedores';
+    document.querySelectorAll('.nav-tab').forEach((btn, i) => {
+      btn.classList.toggle('activo', (i === 0 && !esColab) || (i === 1 && esColab));
+    });
+    if (esColab && !colabCargado) cargarColaboradores();
+  }
+
+  // ── Directorio de Colaboradores ────────────────────────────────
+  let colaboradores = [];
+  let filtroOficina = '';
+  let colabCargado = false;
+
+  const coloresAvatar = ['#1B3A6B','#2F5AA8','#CC1F2A','#065f46','#92400e','#5b21b6','#9d174d','#9a3412'];
+  function colorAvatar(nombre) {
+    var s = 0;
+    for (var i = 0; i < nombre.length; i++) s += nombre.charCodeAt(i);
+    return coloresAvatar[s % coloresAvatar.length];
+  }
+  function iniciales(nombre) {
+    return nombre.split(' ').filter(Boolean).slice(0,2).map(p => p[0]).join('').toUpperCase();
+  }
+
+  async function cargarColaboradores() {
+    colabCargado = true;
+    try {
+      const res = await fetch('/api/colaboradores');
+      if (!res.ok) throw new Error('Error ' + res.status);
+      colaboradores = await res.json();
+      construirFiltrosColab();
+      filtrarColab();
+    } catch (e) {
+      document.getElementById('colab-grid').innerHTML =
+        '<div class="cargando-colab" style="color:#c00;">Error al cargar colaboradores: ' + e.message + '</div>';
+    }
+  }
+
+  function construirFiltrosColab() {
+    const oficinas = [...new Set(colaboradores.map(c => c.oficina).filter(Boolean))].sort();
+    const deptos   = [...new Set(colaboradores.map(c => c.departamento).filter(Boolean))].sort();
+    const filtrosDiv = document.getElementById('colab-filtros-oficina');
+    oficinas.forEach(o => {
+      const btn = document.createElement('button');
+      btn.className = 'filtro';
+      btn.dataset.val = o;
+      btn.textContent = o.replace('PLG ', '').replace('DIVISION ', 'Div. ');
+      btn.onclick = function() { setFiltroOficina(this); };
+      filtrosDiv.appendChild(btn);
+    });
+    const sel = document.getElementById('colab-select-depto');
+    deptos.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d;
+      opt.textContent = d.replace('DEPARTAMENTO DE ', '');
+      sel.appendChild(opt);
+    });
+  }
+
+  function setFiltroOficina(btn) {
+    document.querySelectorAll('#colab-filtros-oficina .filtro').forEach(b => b.classList.remove('activo'));
+    btn.classList.add('activo');
+    filtroOficina = btn.dataset.val;
+    filtrarColab();
+  }
+
+  function filtrarColab() {
+    const q     = (document.getElementById('colab-buscar').value || '').toLowerCase();
+    const depto = document.getElementById('colab-select-depto').value;
+    const resultado = colaboradores.filter(c => {
+      const mOf  = !filtroOficina || c.oficina === filtroOficina;
+      const mDep = !depto || c.departamento === depto;
+      const mQ   = !q || [c.nombre, c.cargo, c.correo, c.departamento].some(v => v && v.toLowerCase().includes(q));
+      return mOf && mDep && mQ;
+    });
+    renderizarColab(resultado);
+  }
+
+  function renderizarColab(lista) {
+    const grid = document.getElementById('colab-grid');
+    document.getElementById('colab-contador').textContent =
+      lista.length + ' colaborador' + (lista.length !== 1 ? 'es' : '');
+    if (!lista.length) {
+      grid.innerHTML = '<div class="sin-resultados">No se encontraron colaboradores.</div>';
+      return;
+    }
+    const svgMail = '<svg width="13" height="13" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>';
+    const svgTel  = '<svg width="13" height="13" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.8a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
+    grid.innerHTML = lista.map(c => {
+      const avatarHtml = c.foto
+        ? '<img src="' + c.foto + '" alt="' + c.nombre + '">'
+        : iniciales(c.nombre || '?');
+      const color = colorAvatar(c.nombre || '');
+      return '<div class="tarjeta-colab">'
+        + '<div class="avatar-colab" style="background:' + color + ';">' + avatarHtml + '</div>'
+        + '<div class="nombre-colab">' + (c.nombre || '—') + '</div>'
+        + '<div class="cargo-colab">'  + (c.cargo  || '')  + '</div>'
+        + (c.departamento ? '<div class="badge-depto">' + c.departamento.replace('DEPARTAMENTO DE ','') + '</div>' : '')
+        + '<div style="margin-top:4px;">'
+        + (c.correo  ? '<div class="dato-colab">' + svgMail + '<a href="mailto:' + c.correo  + '">' + c.correo  + '</a></div>' : '')
+        + (c.telefono ? '<div class="dato-colab">' + svgTel  + c.telefono + '</div>' : '')
+        + '</div>'
+        + (c.oficina ? '<div class="badge-oficina">📍 ' + c.oficina + '</div>' : '')
+        + '</div>';
+    }).join('');
+  }
 </script>
 </body>
 </html>
+
 
 
 
