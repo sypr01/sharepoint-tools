@@ -325,28 +325,6 @@
       .reporte-empresa { page-break-inside: avoid; }
     }
 
-    /* ── Tabs de navegación ── */
-    .nav-tabs {
-      background: var(--plg-navy);
-      display: flex;
-      gap: 0;
-      padding: 0 32px;
-    }
-    .nav-tab {
-      padding: 10px 22px;
-      color: rgba(255,255,255,0.65);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      background: none;
-      border-bottom: 3px solid transparent;
-      transition: all 0.2s;
-      letter-spacing: .2px;
-    }
-    .nav-tab:hover { color: white; }
-    .nav-tab.activo { color: white; border-bottom-color: var(--plg-red); }
-
     /* ── Tarjeta colaborador ── */
     .tarjeta-colab {
       background: white;
@@ -407,23 +385,12 @@
     </div>
     <div class="header-divider"></div>
     <div style="flex:1;">
-      <h1 id="header-titulo">Directorio de Proveedores</h1>
+      <h1>Directorio de Proveedores</h1>
       <p>PANAMERICAN LOGISTICS GROUP — Operaciones 2026</p>
     </div>
-    <button onclick="abrirAdminLogin()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:6px;white-space:nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
-      🔐 Admin
-    </button>
   </div>
-  <nav class="nav-tabs">
-    <button class="nav-tab activo" onclick="switchTab('proveedores')">🏢 Proveedores</button>
-    <button class="nav-tab" onclick="switchTab('colaboradores')">👥 Colaboradores</button>
-    <a href="soporte.html" class="nav-tab">🎫 Soporte IT</a>
-    <a href="inventario.html" class="nav-tab">💻 Inventario IT</a>
-    <button class="nav-tab" style="margin-left:auto;color:rgba(255,255,255,.55);" onclick="sessionStorage.removeItem('plg_session');location.href='/login.html'">🔒 Cerrar sesión</button>
-  </nav>
 </header>
 
-<div id="seccion-proveedores">
 <div class="controles">
   <input class="buscar" type="text" placeholder="Buscar por empresa, contacto, correo..." oninput="filtrar()">
   <div class="filtros">
@@ -440,26 +407,6 @@
   <button class="btn-registrar" onclick="abrirModalRegistro()">+ Registrar Proveedor</button>
 </div>
 <div class="grid" id="grid"></div>
-</div>
-
-<div id="seccion-colaboradores" style="display:none;">
-<div class="controles">
-  <input class="buscar" id="colab-buscar" type="text" placeholder="Buscar por nombre, cargo, correo..." oninput="filtrarColab()">
-  <div class="filtros" id="colab-filtros-oficina">
-    <button class="filtro activo" data-val="" onclick="setFiltroOficina(this)">Todas las divisiones</button>
-  </div>
-  <select class="select-filtro" id="colab-select-depto" onchange="filtrarColab()">
-    <option value="">Todos los departamentos</option>
-  </select>
-  <span class="contador" id="colab-contador"></span>
-</div>
-<div class="grid" id="colab-grid">
-  <div class="cargando-colab">
-    <div class="spinner"></div>
-    <p>Cargando colaboradores...</p>
-  </div>
-</div>
-</div>
 
 <!-- Modal: Registrar Proveedor -->
 <div class="modal-overlay" id="modalRegistro">
@@ -1090,115 +1037,6 @@
     }
   }
 
-  // ── Tabs de navegación ─────────────────────────────────────────
-  function switchTab(tab) {
-    const esColab = tab === 'colaboradores';
-    document.getElementById('seccion-proveedores').style.display = esColab ? 'none' : '';
-    document.getElementById('seccion-colaboradores').style.display = esColab ? '' : 'none';
-    document.getElementById('header-titulo').textContent = esColab ? 'Directorio de Colaboradores' : 'Directorio de Proveedores';
-    document.querySelectorAll('.nav-tab').forEach((btn, i) => {
-      btn.classList.toggle('activo', (i === 0 && !esColab) || (i === 1 && esColab));
-    });
-    if (esColab && !colabCargado) cargarColaboradores();
-  }
-
-  // ── Directorio de Colaboradores ────────────────────────────────
-  let colaboradores = [];
-  let filtroOficina = '';
-  let colabCargado = false;
-
-  const coloresAvatar = ['#1B3A6B','#2F5AA8','#CC1F2A','#065f46','#92400e','#5b21b6','#9d174d','#9a3412'];
-  function colorAvatar(nombre) {
-    var s = 0;
-    for (var i = 0; i < nombre.length; i++) s += nombre.charCodeAt(i);
-    return coloresAvatar[s % coloresAvatar.length];
-  }
-  function iniciales(nombre) {
-    return nombre.split(' ').filter(Boolean).slice(0,2).map(p => p[0]).join('').toUpperCase();
-  }
-
-  async function cargarColaboradores() {
-    colabCargado = true;
-    try {
-      const res = await fetch('/api/colaboradores');
-      if (!res.ok) throw new Error('Error ' + res.status);
-      colaboradores = await res.json();
-      construirFiltrosColab();
-      filtrarColab();
-    } catch (e) {
-      document.getElementById('colab-grid').innerHTML =
-        '<div class="cargando-colab" style="color:#c00;">Error al cargar colaboradores: ' + e.message + '</div>';
-    }
-  }
-
-  function construirFiltrosColab() {
-    const oficinas = [...new Set(colaboradores.map(c => c.oficina).filter(Boolean))].sort();
-    const deptos   = [...new Set(colaboradores.map(c => c.departamento).filter(Boolean))].sort();
-    const filtrosDiv = document.getElementById('colab-filtros-oficina');
-    oficinas.forEach(o => {
-      const btn = document.createElement('button');
-      btn.className = 'filtro';
-      btn.dataset.val = o;
-      btn.textContent = o.replace('PLG ', '').replace('DIVISION ', 'Div. ');
-      btn.onclick = function() { setFiltroOficina(this); };
-      filtrosDiv.appendChild(btn);
-    });
-    const sel = document.getElementById('colab-select-depto');
-    deptos.forEach(d => {
-      const opt = document.createElement('option');
-      opt.value = d;
-      opt.textContent = d.replace('DEPARTAMENTO DE ', '');
-      sel.appendChild(opt);
-    });
-  }
-
-  function setFiltroOficina(btn) {
-    document.querySelectorAll('#colab-filtros-oficina .filtro').forEach(b => b.classList.remove('activo'));
-    btn.classList.add('activo');
-    filtroOficina = btn.dataset.val;
-    filtrarColab();
-  }
-
-  function filtrarColab() {
-    const q     = (document.getElementById('colab-buscar').value || '').toLowerCase();
-    const depto = document.getElementById('colab-select-depto').value;
-    const resultado = colaboradores.filter(c => {
-      const mOf  = !filtroOficina || c.oficina === filtroOficina;
-      const mDep = !depto || c.departamento === depto;
-      const mQ   = !q || [c.nombre, c.cargo, c.correo, c.departamento].some(v => v && v.toLowerCase().includes(q));
-      return mOf && mDep && mQ;
-    });
-    renderizarColab(resultado);
-  }
-
-  function renderizarColab(lista) {
-    const grid = document.getElementById('colab-grid');
-    document.getElementById('colab-contador').textContent =
-      lista.length + ' colaborador' + (lista.length !== 1 ? 'es' : '');
-    if (!lista.length) {
-      grid.innerHTML = '<div class="sin-resultados">No se encontraron colaboradores.</div>';
-      return;
-    }
-    const svgMail = '<svg width="13" height="13" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>';
-    const svgTel  = '<svg width="13" height="13" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.8a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
-    grid.innerHTML = lista.map(c => {
-      const avatarHtml = c.foto
-        ? '<img src="' + c.foto + '" alt="' + c.nombre + '">'
-        : iniciales(c.nombre || '?');
-      const color = colorAvatar(c.nombre || '');
-      return '<div class="tarjeta-colab">'
-        + '<div class="avatar-colab" style="background:' + color + ';">' + avatarHtml + '</div>'
-        + '<div class="nombre-colab">' + (c.nombre || '—') + '</div>'
-        + '<div class="cargo-colab">'  + (c.cargo  || '')  + '</div>'
-        + (c.departamento ? '<div class="badge-depto">' + c.departamento.replace('DEPARTAMENTO DE ','') + '</div>' : '')
-        + '<div style="margin-top:4px;">'
-        + (c.correo  ? '<div class="dato-colab">' + svgMail + '<a href="mailto:' + c.correo  + '">' + c.correo  + '</a></div>' : '')
-        + (c.telefono ? '<div class="dato-colab">' + svgTel  + c.telefono + '</div>' : '')
-        + '</div>'
-        + (c.oficina ? '<div class="badge-oficina">📍 ' + c.oficina + '</div>' : '')
-        + '</div>';
-    }).join('');
-  }
 </script>
 </body>
 </html>
