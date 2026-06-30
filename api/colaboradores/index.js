@@ -56,7 +56,7 @@ module.exports = async function (context, req) {
     var authH = { Authorization: 'Bearer ' + token };
 
     try {
-        var fields = 'id,displayName,jobTitle,department,mail,businessPhones,officeLocation,companyName,accountEnabled';
+        var fields = 'id,displayName,jobTitle,department,mail,businessPhones,mobilePhone,officeLocation,companyName,accountEnabled';
         var graphUrl = 'https://graph.microsoft.com/v1.0/users?$select=' + fields + '&$top=999&$filter=accountEnabled eq true';
 
         var r = await request(graphUrl, { headers: authH });
@@ -78,6 +78,7 @@ module.exports = async function (context, req) {
                     departamento: u.department  || '',
                     correo:      u.mail        || '',
                     telefono:    tel,
+                    movil:        u.mobilePhone   || '',
                     oficina:     u.officeLocation || u.companyName || ''
                 };
             });
