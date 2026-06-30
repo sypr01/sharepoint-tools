@@ -213,6 +213,26 @@
       color: #888;
       font-size: 15px;
     }
+
+    /* ── SKELETON ── */
+    @keyframes shimmer {
+      0%   { background-position: -600px 0; }
+      100% { background-position:  600px 0; }
+    }
+    .skeleton {
+      background: linear-gradient(90deg, #e8edf5 25%, #f5f7fb 50%, #e8edf5 75%);
+      background-size: 600px 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 6px;
+    }
+    .sk-avatar  { width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 12px; }
+    .sk-line    { height: 12px; margin: 6px auto; }
+    .sk-w80     { width: 80%; }
+    .sk-w60     { width: 60%; }
+    .sk-w40     { width: 40%; }
+    .sk-bar     { height: 34px; border-radius: 6px; margin: 6px 0; }
+
+    /* ── ESTADO CARGA ── */
     .cargando {
       grid-column: 1/-1;
       text-align: center;
@@ -228,6 +248,17 @@
       margin: 0 auto 12px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── BADGE CACHÉ ── */
+    .cache-badge {
+      font-size: 11px;
+      color: #107c10;
+      background: #e8f5e9;
+      border: 1px solid #c8e6c9;
+      border-radius: 10px;
+      padding: 2px 8px;
+      margin-left: 8px;
+    }
   </style>
 </head>
 <body>
@@ -264,6 +295,10 @@
 </div>
 
 <script>
+  const CACHE_KEY = 'plg_colaboradores';
+  const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
+  const LOTE_INICIAL = 20;
+
   let colaboradores = [];
   let filtroOficina = '';
 
@@ -277,15 +312,33 @@
     return nombre.split(' ').filter(Boolean).slice(0,2).map(function(p){ return p[0]; }).join('').toUpperCase();
   }
 
+  // ── SKELETON ────────────────────────────────────────────────────────────
+  function mostrarSkeletons(n) {
+    var html = '';
+    for (var i = 0; i < n; i++) {
+      html += '<div class="tarjeta">'
+        + '<div class="skeleton sk-avatar"></div>'
+        + '<div class="skeleton sk-line sk-w80"></div>'
+        + '<div class="skeleton sk-line sk-w60"></div>'
+        + '<div class="skeleton sk-line sk-w40" style="margin-bottom:10px"></div>'
+        + '<div class="skeleton sk-bar"></div>'
+        + '<div class="skeleton sk-bar"></div>'
+        + '<div class="skeleton sk-line sk-w80" style="margin-top:8px"></div>'
+        + '</div>';
+    }
+    document.getElementById('grid').innerHTML = html;
+    document.getElementById('contador').textContent = 'Cargando...';
+  }
+
+  // ── TELÉFONOS ────────────────────────────────────────────────────────────
   function renderBarraMovil(val) {
     return '<div class="phone-bar movil">'
       + '<span class="phone-bar-icon">📱</span>'
       + '<div class="phone-bar-content">'
       + '<span class="phone-bar-lbl">Móvil</span>'
       + '<div class="phone-bar-val">'
-      + (val
-          ? '<a href="tel:' + val.replace(/\s/g,'') + '" class="phone-link-movil">' + val + '</a>'
-          : '<span class="phone-empty">—</span>')
+      + (val ? '<a href="tel:' + val.replace(/\s/g,'') + '" class="phone-link-movil">' + val + '</a>'
+             : '<span class="phone-empty">—</span>')
       + '</div></div></div>';
   }
 
@@ -295,30 +348,87 @@
       + '<div class="phone-bar-content">'
       + '<span class="phone-bar-lbl">Tel. oficina</span>'
       + '<div class="phone-bar-val">'
-      + (val
-          ? '<a href="tel:' + val.replace(/\s/g,'') + '" class="phone-link-fijo">' + val + '</a>'
-          : '<span class="phone-empty">—</span>')
+      + (val ? '<a href="tel:' + val.replace(/\s/g,'') + '" class="phone-link-fijo">' + val + '</a>'
+             : '<span class="phone-empty">—</span>')
       + '</div></div></div>';
   }
 
+  // ── CACHÉ ────────────────────────────────────────────────────────────────
+  function guardarCache(data) {
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: data }));
+    } catch(e) {}
+  }
+
+  function leerCache() {
+    try {
+      var raw = sessionStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      var obj = JSON.parse(raw);
+      if (Date.now() - obj.ts > CACHE_TTL) { sessionStorage.removeItem(CACHE_KEY); return null; }
+      return obj.data;
+    } catch(e) { return null; }
+  }
+
+  // ── CARGA ────────────────────────────────────────────────────────────────
   async function cargarColaboradores() {
+    mostrarSkeletons(LOTE_INICIAL);
+
+    var cached = leerCache();
+    if (cached) {
+      colaboradores = cached;
+      mostrarBadgeCache();
+      construirFiltros();
+      filtrar();
+      return;
+    }
+
     try {
       const res = await fetch('/api/colaboradores');
       if (!res.ok) throw new Error('Error ' + res.status);
-      colaboradores = await res.json();
+      const todos = await res.json();
+
+      // Renderiza primer lote de inmediato
+      colaboradores = todos.slice(0, LOTE_INICIAL);
       construirFiltros();
       filtrar();
+
+      // Carga el resto sin bloquear
+      if (todos.length > LOTE_INICIAL) {
+        setTimeout(function() {
+          colaboradores = todos;
+          guardarCache(todos);
+          construirFiltros();
+          filtrar();
+        }, 0);
+      } else {
+        guardarCache(todos);
+      }
     } catch (e) {
       document.getElementById('grid').innerHTML =
         '<div class="sin-resultados">Error al cargar colaboradores: ' + e.message + '</div>';
     }
   }
 
-  function construirFiltros() {
-    const oficinas = [...new Set(colaboradores.map(c => c.oficina).filter(Boolean))].sort();
-    const deptos   = [...new Set(colaboradores.map(c => c.departamento).filter(Boolean))].sort();
+  function mostrarBadgeCache() {
+    var contador = document.getElementById('contador');
+    if (!contador.querySelector('.cache-badge')) {
+      var badge = document.createElement('span');
+      badge.className = 'cache-badge';
+      badge.title = 'Datos en caché — recarga la página para actualizar';
+      badge.textContent = '⚡ caché';
+      contador.appendChild(badge);
+    }
+  }
 
-    const filtrosDiv = document.getElementById('filtros-oficina');
+  // ── FILTROS ───────────────────────────────────────────────────────────────
+  function construirFiltros() {
+    var oficinas = [...new Set(colaboradores.map(c => c.oficina).filter(Boolean))].sort();
+    var deptos   = [...new Set(colaboradores.map(c => c.departamento).filter(Boolean))].sort();
+
+    var filtrosDiv = document.getElementById('filtros-oficina');
+    // Conserva solo el botón "Todas"
+    filtrosDiv.querySelectorAll('.filtro:not([data-val=""])').forEach(b => b.remove());
     oficinas.forEach(function(o) {
       var btn = document.createElement('button');
       btn.className = 'filtro';
@@ -328,13 +438,16 @@
       filtrosDiv.appendChild(btn);
     });
 
-    const sel = document.getElementById('select-depto');
+    var sel = document.getElementById('select-depto');
+    var currentVal = sel.value;
+    Array.from(sel.options).slice(1).forEach(o => o.remove());
     deptos.forEach(function(d) {
       var opt = document.createElement('option');
       opt.value = d;
       opt.textContent = d.replace('DEPARTAMENTO DE ', '');
       sel.appendChild(opt);
     });
+    sel.value = currentVal;
   }
 
   function setFiltroOficina(btn) {
@@ -345,13 +458,14 @@
   }
 
   function filtrar() {
-    const q     = document.querySelector('.buscar').value.toLowerCase();
-    const depto = document.getElementById('select-depto').value;
+    var q     = document.querySelector('.buscar').value.toLowerCase();
+    var depto = document.getElementById('select-depto').value;
 
-    const resultado = colaboradores.filter(function(c) {
-      const matchOficina = !filtroOficina || c.oficina === filtroOficina;
-      const matchDepto   = !depto || c.departamento === depto;
-      const matchQ       = !q || [c.nombre, c.cargo, c.correo, c.departamento, c.telefono, c.telefonoMovil, c.movil].some(
+    var resultado = colaboradores.filter(function(c) {
+      var matchOficina = !filtroOficina || c.oficina === filtroOficina;
+      var matchDepto   = !depto || c.departamento === depto;
+      var matchQ       = !q || [c.nombre, c.cargo, c.correo, c.departamento,
+                                 c.telefono, c.telefonoMovil, c.movil, c.mobilePhone].some(
         function(v) { return v && v.toLowerCase().includes(q); }
       );
       return matchOficina && matchDepto && matchQ;
@@ -360,8 +474,31 @@
     renderizar(resultado);
   }
 
+  // ── RENDER ────────────────────────────────────────────────────────────────
+  function tarjetaHTML(c) {
+    var avatarHtml = c.foto
+      ? '<img src="' + c.foto + '" alt="' + c.nombre + '" loading="lazy">'
+      : iniciales(c.nombre || '?');
+    var color = colorAvatar(c.nombre || '');
+    var movil = c.telefonoMovil || c.movil || c.mobilePhone || null;
+    var fijo  = c.telefono || c.telefonoOficina || c.businessPhone || null;
+
+    return '<div class="tarjeta">'
+      + '<div class="avatar" style="background:' + color + ';">' + avatarHtml + '</div>'
+      + '<div class="nombre">' + (c.nombre || '—') + '</div>'
+      + '<div class="cargo">' + (c.cargo || '') + '</div>'
+      + (c.departamento ? '<div class="badge-depto">' + c.departamento.replace('DEPARTAMENTO DE ','') + '</div>' : '')
+      + '<div class="phone-bars">'
+      + renderBarraMovil(movil)
+      + renderBarraFijo(fijo)
+      + '</div>'
+      + (c.correo ? '<div class="dato"><svg width="13" height="13" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><a href="mailto:' + c.correo + '">' + c.correo + '</a></div>' : '')
+      + (c.oficina ? '<div class="badge-oficina">📍 ' + c.oficina + '</div>' : '')
+      + '</div>';
+  }
+
   function renderizar(lista) {
-    const grid = document.getElementById('grid');
+    var grid = document.getElementById('grid');
     document.getElementById('contador').textContent =
       lista.length + ' colaborador' + (lista.length !== 1 ? 'es' : '');
 
@@ -369,32 +506,7 @@
       grid.innerHTML = '<div class="sin-resultados">No se encontraron colaboradores.</div>';
       return;
     }
-
-    grid.innerHTML = lista.map(function(c) {
-      var avatarHtml = c.foto
-        ? '<img src="' + c.foto + '" alt="' + c.nombre + '">'
-        : iniciales(c.nombre || '?');
-      var color = colorAvatar(c.nombre || '');
-
-      // Acepta telefonoMovil o movil según lo que devuelva la API
-      var movil = c.telefonoMovil || c.movil || c.mobilePhone || null;
-      var fijo  = c.telefono || c.telefonoOficina || c.businessPhone || null;
-
-      return '<div class="tarjeta">'
-        + '<div class="avatar" style="background:' + color + ';">' + avatarHtml + '</div>'
-        + '<div class="nombre">' + (c.nombre || '—') + '</div>'
-        + '<div class="cargo">' + (c.cargo || '') + '</div>'
-        + (c.departamento ? '<div class="badge-depto">' + c.departamento.replace('DEPARTAMENTO DE ', '') + '</div>' : '')
-        // Barras de teléfono destacadas
-        + '<div class="phone-bars">'
-        + renderBarraMovil(movil)
-        + renderBarraFijo(fijo)
-        + '</div>'
-        // Correo
-        + (c.correo ? '<div class="dato"><svg width="13" height="13" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><a href="mailto:' + c.correo + '">' + c.correo + '</a></div>' : '')
-        + (c.oficina ? '<div class="badge-oficina">📍 ' + c.oficina + '</div>' : '')
-        + '</div>';
-    }).join('');
+    grid.innerHTML = lista.map(tarjetaHTML).join('');
   }
 
   cargarColaboradores();
