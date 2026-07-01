@@ -4,7 +4,6 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Portal PLG</title>
-<script src="https://unpkg.com/@azure/msal-browser@2.38.3/dist/msal-browser.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#1B3A6B;min-height:100vh}
@@ -298,17 +297,6 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#1B3A6B;min-heig
 // ─── MODO DEMO (localhost sin auth) ────────────────────────
 const IS_DEMO = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
-// ─── CONFIG MSAL ───────────────────────────────────────────
-const msalConfig = {
-  auth: {
-    clientId: "fa3f52ca-277a-4eae-ad71-cb248934def6",
-    authority: "https://login.microsoftonline.com/ddfac243-a888-4ed6-8fb0-bc8557897b74",
-    redirectUri: window.location.origin + window.location.pathname
-  },
-  cache: { cacheLocation: "sessionStorage" }
-};
-const msalInstance = new msal.PublicClientApplication(msalConfig);
-
 // ─── DEPARTAMENTOS POR DIVISIÓN ─────────────────────────────
 const DIVISION_DEPTS = {
   "PLG DE EL SALVADOR":     ["Operaciones","Comercial","Finanzas","RRHH","Informática","Administración"],
@@ -345,46 +333,38 @@ async function init() {
   // Mes cumpleaños
   document.getElementById("cumple-mes").textContent = meses[d.getMonth()].charAt(0).toUpperCase() + meses[d.getMonth()].slice(1) + " " + d.getFullYear();
 
-  if (IS_DEMO) {
-    cargarPortalDemo();
-    return;
-  }
+  if (IS_DEMO) { cargarPortalDemo(); return; }
 
+  // ── Auth via SWA built-in (sin MSAL) ──────────────────────
   try {
-    await msalInstance.initialize();
+    const authResp = await fetch('/.auth/me');
+    const authData = await authResp.json();
 
-    const redirectResp = await msalInstance.handleRedirectPromise();
-    if (redirectResp && redirectResp.accessToken) {
-      await cargarPortal(redirectResp.accessToken);
+    if (!authData.clientPrincipal) {
+      // No logueado → redirigir a login AAD
+      window.location.href = '/.auth/login/aad?post_login_redirect_uri=/portal-plg.html';
       return;
     }
 
-    const accounts = msalInstance.getAllAccounts();
-    if (accounts.length > 0) {
-      try {
-        const tokenResp = await msalInstance.acquireTokenSilent({
-          scopes: ["User.Read", "User.ReadBasic.All"],
-          account: accounts[0]
-        });
-        await cargarPortal(tokenResp.accessToken);
-      } catch(e) {
-        await msalInstance.loginRedirect({ scopes: ["User.Read","User.ReadBasic.All"] });
-      }
+    // Obtener perfil completo desde nuestra API
+    const apiResp = await fetch('/api/me');
+    const data = await apiResp.json();
+
+    if (data.user) {
+      await cargarPortal(data.user, data.colegas || []);
     } else {
-      await msalInstance.loginRedirect({ scopes: ["User.Read","User.ReadBasic.All"] });
+      throw new Error(data.error || 'Error al obtener perfil');
     }
   } catch(e) {
-    console.error("Auth error:", e);
-    document.getElementById("user-nombre").textContent = "—";
-    document.getElementById("user-division").textContent = "";
-    // Mostrar botón de login manual como fallback
+    console.error("Error:", e);
+    document.getElementById("user-nombre").textContent = "Error";
     const hdr = document.querySelector('.header-right');
-    if(hdr) hdr.innerHTML = `<div style="color:#fff;font-size:.85rem;">
-      <div style="opacity:.75;margin-bottom:4px;">Error: ${e.message||e}</div>
-      <button onclick="msalInstance.loginRedirect({scopes:['User.Read','User.ReadBasic.All']})"
-        style="background:#CC1F2A;color:#fff;border:none;border-radius:6px;padding:6px 16px;cursor:pointer;font-weight:600;">
-        Iniciar sesión
-      </button></div>`;
+    if(hdr) hdr.innerHTML = `<div style="color:#fff;font-size:.82rem;">
+      <div style="opacity:.75;margin-bottom:6px;">${e.message}</div>
+      <a href="/.auth/login/aad?post_login_redirect_uri=/portal-plg.html"
+         style="background:#CC1F2A;color:#fff;border-radius:6px;padding:6px 14px;text-decoration:none;font-weight:600;">
+         Iniciar sesión
+      </a></div>`;
   }
 }
 
@@ -419,32 +399,16 @@ function cargarPortalDemo() {
     </div>`;
 }
 
-async function graphGet(token, url) {
-  const r = await fetch("https://graph.microsoft.com/v1.0/" + url, {
-    headers: { Authorization: "Bearer " + token }
-  });
-  return r.json();
-}
-
-async function cargarPortal(token) {
-  // Perfil del usuario
-  const me = await graphGet(token, "me?$select=displayName,jobTitle,department,officeLocation,mobilePhone,businessPhones,mail");
+async function cargarPortal(me, colegas) {
   currentUser = me;
-
-  // Nombre (solo primer nombre)
   const firstName = me.displayName ? me.displayName.split(" ")[0] : me.displayName;
   document.getElementById("user-nombre").textContent = firstName;
   document.getElementById("user-division").textContent = me.officeLocation || "PLG GROUP";
   document.getElementById("user-dept").textContent = me.department || "";
-
-  // Departamentos de la división del usuario
   renderDepartamentos(me.officeLocation, me.department);
-
-  // Directorio mini
-  await cargarDirectorioMini(token, me.officeLocation);
-
-  // Cumpleaños
-  await cargarCumpleanos(token);
+  allColleagues = colegas;
+  renderDirectorioMini(colegas);
+  document.getElementById("cumple-list").innerHTML = '<div style="color:#6b7fa3;font-size:.8rem;padding:8px 0;">Próximamente desde Microsoft 365.</div>';
 }
 
 function renderDepartamentos(division, miDept) {
@@ -469,20 +433,6 @@ function renderDepartamentos(division, miDept) {
   });
 }
 
-async function cargarDirectorioMini(token, division) {
-  const filter = division ? `$filter=officeLocation eq '${encodeURIComponent(division)}'` : "";
-  const url = `users?$select=id,displayName,jobTitle,department,officeLocation,mobilePhone,businessPhones&$top=8&${filter}&$orderby=displayName`;
-  try {
-    const data = await graphGet(token, url);
-    allColleagues = data.value || [];
-    renderDirectorioMini(allColleagues);
-  } catch(e) {
-    // Fallback sin filtro
-    const data = await graphGet(token, "users?$select=id,displayName,jobTitle,department,officeLocation,mobilePhone,businessPhones&$top=8&$orderby=displayName");
-    allColleagues = data.value || [];
-    renderDirectorioMini(allColleagues);
-  }
-}
 
 function renderDirectorioMini(lista) {
   const el = document.getElementById("dir-mini-list");
@@ -516,11 +466,7 @@ function filtrarDirectorioMini(q) {
   ));
 }
 
-function globalSearch(q) {
-  if(q.length < 2) return;
-  // Redirige al directorio completo con el query
-  // (futuro: búsqueda en tiempo real)
-}
+function globalSearch(q) {}
 
 async function cargarCumpleanos(token) {
   // Intenta obtener cumpleaños de Azure AD (campo birthday)

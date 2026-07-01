@@ -1,5 +1,20 @@
 {
+  "auth": {
+    "identityProviders": {
+      "azureActiveDirectory": {
+        "registration": {
+          "openIdIssuer": "https://login.microsoftonline.com/ddfac243-a888-4ed6-8fb0-bc8557897b74/v2.0",
+          "clientIdSettingName": "CLIENT_ID",
+          "clientSecretSettingName": "CLIENT_SECRET"
+        }
+      }
+    }
+  },
   "routes": [
+    {
+      "route": "/portal-plg.html",
+      "allowedRoles": ["authenticated"]
+    },
     {
       "route": "/login",
       "rewrite": "/login.html"
@@ -32,5 +47,11 @@
   "navigationFallback": {
     "rewrite": "/index.html",
     "exclude": ["/api/*", "/*.html", "/*.js", "/*.css", "/*.png", "/*.jpg", "/*.svg", "/*.ico", "/*.json"]
+  },
+  "responseOverrides": {
+    "401": {
+      "redirect": "/.auth/login/aad?post_login_redirect_uri=/portal-plg.html",
+      "statusCode": 302
+    }
   }
 }
