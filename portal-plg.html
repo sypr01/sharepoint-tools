@@ -353,7 +353,6 @@ async function init() {
   try {
     await msalInstance.initialize();
 
-    // Manejar respuesta de redirect si venimos de login
     const redirectResp = await msalInstance.handleRedirectPromise();
     if (redirectResp && redirectResp.accessToken) {
       await cargarPortal(redirectResp.accessToken);
@@ -369,16 +368,23 @@ async function init() {
         });
         await cargarPortal(tokenResp.accessToken);
       } catch(e) {
-        // Silent falló → redirect login
         await msalInstance.loginRedirect({ scopes: ["User.Read","User.ReadBasic.All"] });
       }
     } else {
-      // Sin sesión → redirect login
       await msalInstance.loginRedirect({ scopes: ["User.Read","User.ReadBasic.All"] });
     }
   } catch(e) {
     console.error("Auth error:", e);
-    document.getElementById("user-nombre").textContent = "Error de autenticación";
+    document.getElementById("user-nombre").textContent = "—";
+    document.getElementById("user-division").textContent = "";
+    // Mostrar botón de login manual como fallback
+    const hdr = document.querySelector('.header-right');
+    if(hdr) hdr.innerHTML = `<div style="color:#fff;font-size:.85rem;">
+      <div style="opacity:.75;margin-bottom:4px;">Error: ${e.message||e}</div>
+      <button onclick="msalInstance.loginRedirect({scopes:['User.Read','User.ReadBasic.All']})"
+        style="background:#CC1F2A;color:#fff;border:none;border-radius:6px;padding:6px 16px;cursor:pointer;font-weight:600;">
+        Iniciar sesión
+      </button></div>`;
   }
 }
 
