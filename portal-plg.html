@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Portal PLG</title>
+<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#1B3A6B;min-height:100vh}
+
+/* HEADER */
+.header{background:#1B3A6B;padding:0 28px;display:flex;align-items:center;justify-content:space-between;min-height:64px;border-bottom:4px solid #CC1F2A}
+.header-left{display:flex;align-items:center;gap:14px}
+.logo-box{background:#fff;border-radius:8px;padding:5px 10px;font-weight:900;font-size:1.1rem;color:#1B3A6B;letter-spacing:1px}
+.site-title{color:#fff}
+.site-title h1{font-size:1.2rem;font-weight:700;line-height:1.1}
+.site-title p{font-size:.75rem;opacity:.75;font-weight:400}
+.header-right{text-align:right;color:#fff}
+.header-right .bienvenida{font-size:.8rem;opacity:.75}
+.header-right .nombre{font-weight:700;font-size:1rem}
+.header-right .badges{display:flex;gap:6px;justify-content:flex-end;margin-top:4px;flex-wrap:wrap}
+.badge{background:rgba(255,255,255,.18);border-radius:20px;padding:2px 10px;font-size:.72rem;font-weight:600}
+.header-right .fecha{font-size:.72rem;opacity:.65;margin-top:3px}
+
+/* SEARCH BAR */
+.searchbar{background:#2F5AA8;padding:12px 28px;display:flex;align-items:center;gap:10px}
+.search-input-wrap{flex:1;display:flex;align-items:center;background:rgba(255,255,255,.15);border-radius:24px;padding:8px 16px;gap:8px;max-width:700px}
+.search-input-wrap input{border:none;background:transparent;color:#fff;font-size:.95rem;flex:1;outline:none}
+.search-input-wrap input::placeholder{color:rgba(255,255,255,.65)}
+.search-input-wrap svg{opacity:.7}
+.search-btns{display:flex;gap:8px;margin-left:auto}
+.search-btns a{background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:6px 16px;font-size:.82rem;text-decoration:none;font-weight:600;transition:background .2s}
+.search-btns a:hover{background:rgba(255,255,255,.35)}
+
+/* MAIN */
+.main{display:grid;grid-template-columns:1fr 340px;gap:20px;padding:20px 28px;max-width:1300px;margin:0 auto}
+@media(max-width:900px){.main{grid-template-columns:1fr}}
+
+/* CARD */
+.card{background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.07);padding:20px;margin-bottom:20px}
+.card-title{font-size:.78rem;font-weight:700;color:#1B3A6B;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+
+/* ACCESOS RAPIDOS */
+.quick-links{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.ql-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border:1.5px solid #e8edf5;border-radius:8px;text-decoration:none;color:#1B3A6B;font-size:.78rem;font-weight:600;transition:all .2s}
+.ql-item:hover{border-color:#2F5AA8;background:#f0f4ff;transform:translateY(-2px)}
+.ql-icon{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+
+/* DEPARTAMENTOS */
+.dept-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dept-tile{border-radius:8px;padding:16px 14px;position:relative;overflow:hidden;min-height:80px;display:flex;flex-direction:column;justify-content:flex-end;cursor:pointer;text-decoration:none}
+.dept-tile.accessible{background:#1B3A6B}
+.dept-tile.locked{background:#9aa5b4;cursor:default}
+.dept-tile .dept-name{color:#fff;font-weight:700;font-size:.95rem;position:relative;z-index:2}
+.dept-tile .dept-sub{color:rgba(255,255,255,.75);font-size:.72rem;position:relative;z-index:2}
+.dept-tile .lock-badge{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.25);color:#fff;border-radius:12px;padding:2px 8px;font-size:.7rem;display:flex;align-items:center;gap:4px}
+.dept-tile .circle{position:absolute;bottom:-18px;right:-14px;width:70px;height:70px;border-radius:50%;background:#CC1F2A;opacity:.85;z-index:1}
+
+/* DIRECTORIO MINI */
+.dir-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.dir-title{font-size:.78rem;font-weight:700;color:#1B3A6B;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:7px}
+.dir-link{font-size:.78rem;color:#2F5AA8;text-decoration:none;font-weight:600}
+.dir-link:hover{text-decoration:underline}
+.dir-search{border:1.5px solid #dde3ef;border-radius:20px;padding:7px 14px;font-size:.82rem;width:100%;margin-bottom:10px;outline:none;color:#1B3A6B}
+.dir-search:focus{border-color:#2F5AA8}
+.collab-card{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0f2f5}
+.collab-card:last-child{border-bottom:none}
+.avatar{width:38px;height:38px;border-radius:50%;background:#1B3A6B;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.collab-info{flex:1;min-width:0}
+.collab-name{font-weight:600;font-size:.85rem;color:#1B3A6B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.collab-role{font-size:.72rem;color:#6b7fa3}
+.phone-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+.ph{border-radius:12px;padding:2px 8px;font-size:.68rem;font-weight:600;display:flex;align-items:center;gap:3px}
+.ph.mobile{background:#e8f5e9;color:#2e7d32}
+.ph.office{background:#e3f0ff;color:#1B3A6B}
+
+/* ANUNCIOS */
+.anuncio{padding:10px 0;border-bottom:1px solid #f0f2f5;cursor:pointer}
+.anuncio:last-child{border-bottom:none}
+.anuncio-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.anuncio-row{display:flex;gap:10px}
+.anuncio-text{font-size:.85rem;color:#1B3A6B;font-weight:600;line-height:1.3}
+.anuncio-meta{font-size:.7rem;color:#6b7fa3;margin-top:3px}
+
+/* CUMPLEANOS */
+.cumple-mes{color:#CC1F2A;font-weight:700;font-size:.85rem;margin-bottom:10px}
+.cumple-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f0f2f5}
+.cumple-item:last-child{border-bottom:none}
+.cumple-info{flex:1}
+.cumple-name{font-weight:600;font-size:.83rem;color:#1B3A6B}
+.cumple-date{font-size:.7rem;color:#6b7fa3}
+.cumple-dias{font-size:.75rem;font-weight:700;color:#CC1F2A}
+
+/* DOCUMENTOS */
+.doc-list{display:flex;flex-direction:column;gap:7px}
+.doc-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1.5px solid #e8edf5;border-radius:7px;text-decoration:none;color:#1B3A6B;font-size:.82rem;font-weight:600;transition:all .2s}
+.doc-item:hover{border-color:#2F5AA8;background:#f0f4ff}
+.doc-icon{font-size:1.1rem;flex-shrink:0}
+
+/* LOADING */
+.loading{text-align:center;padding:40px;color:#6b7fa3;font-size:.9rem}
+.skeleton{background:linear-gradient(90deg,#e8edf5 25%,#f5f7fa 50%,#e8edf5 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px;height:14px;margin:6px 0}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo-box">plg</div>
+    <div class="site-title">
+      <h1>Portal PLG</h1>
+      <p>Panamerican Logistics Group</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="bienvenida">Bienvenida,</div>
+    <div class="nombre" id="user-nombre">Cargando...</div>
+    <div class="badges">
+      <span class="badge" id="user-division">—</span>
+      <span class="badge" id="user-dept">—</span>
+    </div>
+    <div class="fecha" id="fecha-hoy"></div>
+  </div>
+</div>
+
+<!-- SEARCH BAR -->
+<div class="searchbar">
+  <div class="search-input-wrap">
+    <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke="#fff" stroke-width="2"/><path d="m21 21-4.35-4.35" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+    <input type="text" placeholder="Buscar colaboradores, documentos, herramientas..." id="global-search" oninput="globalSearch(this.value)"/>
+  </div>
+  <div class="search-btns">
+    <a href="https://nice-mud-0d1acad10.7.azurestaticapps.net/directorio-colaboradores.html" target="_blank">Directorio</a>
+    <a href="https://plggroup.sharepoint.com/sites/PortalPLG/Documentos%20compartidos" target="_blank">Documentos</a>
+    <a href="https://plggroup.sharepoint.com/sites/PortalPLG/SitePages/Help-Center.aspx" target="_blank">Tickets TI</a>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <!-- COLUMNA IZQUIERDA -->
+  <div>
+
+    <!-- ACCESOS RÁPIDOS -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#1B3A6B" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#1B3A6B" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#1B3A6B" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="#1B3A6B" stroke-width="2"/></svg>
+        Accesos Rápidos
+      </div>
+      <div class="quick-links">
+        <a class="ql-item" href="https://outlook.office.com" target="_blank">
+          <div class="ql-icon" style="background:#e3f0ff"><img src="https://img.icons8.com/color/40/ms-outlook.png" alt=""/></div>
+          Outlook
+        </a>
+        <a class="ql-item" href="https://teams.microsoft.com" target="_blank">
+          <div class="ql-icon" style="background:#ede9f8"><img src="https://img.icons8.com/color/40/microsoft-teams.png" alt=""/></div>
+          Teams
+        </a>
+        <a class="ql-item" href="https://magaya.com" target="_blank">
+          <div class="ql-icon" style="background:#fff3e0"><img src="https://img.icons8.com/color/40/cargo-ship.png" alt=""/></div>
+          Sistema
+        </a>
+        <a class="ql-item" href="https://app.powerbi.com" target="_blank">
+          <div class="ql-icon" style="background:#fff8e1"><img src="https://img.icons8.com/color/40/power-bi.png" alt=""/></div>
+          Power BI
+        </a>
+        <a class="ql-item" href="#" target="_blank">
+          <div class="ql-icon" style="background:#e8f5e9"><img src="https://img.icons8.com/color/40/marker.png" alt=""/></div>
+          Tracking
+        </a>
+      </div>
+    </div>
+
+    <!-- DEPARTAMENTOS -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" stroke="#1B3A6B" stroke-width="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" stroke="#1B3A6B" stroke-width="2"/></svg>
+        Acceso a Departamentos
+      </div>
+      <div class="dept-grid" id="dept-grid">
+        <div class="skeleton" style="height:80px;border-radius:8px"></div>
+        <div class="skeleton" style="height:80px;border-radius:8px"></div>
+        <div class="skeleton" style="height:80px;border-radius:8px"></div>
+        <div class="skeleton" style="height:80px;border-radius:8px"></div>
+      </div>
+    </div>
+
+    <!-- DIRECTORIO MINI -->
+    <div class="card">
+      <div class="dir-header">
+        <div class="dir-title">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4" stroke="#1B3A6B" stroke-width="2"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" stroke="#1B3A6B" stroke-width="2"/><path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.87" stroke="#1B3A6B" stroke-width="2" stroke-linecap="round"/></svg>
+          Directorio de Colaboradores
+        </div>
+        <a href="https://nice-mud-0d1acad10.7.azurestaticapps.net/directorio-colaboradores.html" target="_blank" class="dir-link">Ver directorio completo →</a>
+      </div>
+      <input type="text" class="dir-search" placeholder="Buscar por nombre, cargo, división..." id="dir-mini-search" oninput="filtrarDirectorioMini(this.value)"/>
+      <div id="dir-mini-list">
+        <div class="skeleton"></div>
+        <div class="skeleton" style="width:70%"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton" style="width:85%"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- COLUMNA DERECHA -->
+  <div>
+
+    <!-- ANUNCIOS -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="#1B3A6B" stroke-width="2"/><path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="#1B3A6B" stroke-width="2"/></svg>
+        Anuncios
+      </div>
+      <div id="anuncios-list">
+        <div class="anuncio">
+          <div class="anuncio-row">
+            <div class="anuncio-dot" style="background:#CC1F2A"></div>
+            <div>
+              <div class="anuncio-text">Actualización del sistema Magaya programada para el 5 de julio.</div>
+              <div class="anuncio-meta">Hace 2 horas · TI</div>
+            </div>
+          </div>
+        </div>
+        <div class="anuncio">
+          <div class="anuncio-row">
+            <div class="anuncio-dot" style="background:#1B3A6B"></div>
+            <div>
+              <div class="anuncio-text">Reunión general de operaciones — jueves 3 julio a las 9:00 AM.</div>
+              <div class="anuncio-meta">Ayer · Operaciones</div>
+            </div>
+          </div>
+        </div>
+        <div class="anuncio">
+          <div class="anuncio-row">
+            <div class="anuncio-dot" style="background:#2F5AA8"></div>
+            <div>
+              <div class="anuncio-text">Nuevas políticas de seguridad informática disponibles en documentos.</div>
+              <div class="anuncio-meta">29 jun · TI</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUMPLEANOS -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#1B3A6B" stroke-width="2"/><circle cx="12" cy="7" r="4" stroke="#1B3A6B" stroke-width="2"/></svg>
+        Cumpleaños del Mes
+      </div>
+      <div class="cumple-mes" id="cumple-mes">Julio 2026</div>
+      <div id="cumple-list">
+        <div class="skeleton"></div>
+        <div class="skeleton" style="width:80%"></div>
+        <div class="skeleton"></div>
+      </div>
+    </div>
+
+    <!-- DOCUMENTOS IMPORTANTES -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#1B3A6B" stroke-width="2"/><polyline points="14 2 14 8 20 8" stroke="#1B3A6B" stroke-width="2"/></svg>
+        Documentos Importantes
+      </div>
+      <div class="doc-list">
+        <a class="doc-item" href="https://plggroup.sharepoint.com/sites/PortalPLG/Documentos%20compartidos" target="_blank">
+          <span class="doc-icon">👥</span> RR.HH.
+        </a>
+        <a class="doc-item" href="https://plggroup.sharepoint.com/sites/PortalPLG/Documentos%20compartidos" target="_blank">
+          <span class="doc-icon">📖</span> Manual del empleado
+        </a>
+        <a class="doc-item" href="https://plggroup.sharepoint.com/sites/PortalPLG/Documentos%20compartidos" target="_blank">
+          <span class="doc-icon">📋</span> Formatos corporativos
+        </a>
+        <a class="doc-item" href="https://plggroup.sharepoint.com/sites/PortalPLG/Documentos%20compartidos" target="_blank">
+          <span class="doc-icon">📘</span> Procedimientos generales
+        </a>
+        <a class="doc-item" href="https://plggroup.sharepoint.com/sites/PortalPLG/Documentos%20compartidos" target="_blank">
+          <span class="doc-icon">💻</span> Documentación TI
+        </a>
+        <a class="doc-item" href="https://plggroup.sharepoint.com/sites/PortalPLG/Documentos%20compartidos" target="_blank">
+          <span class="doc-icon">📜</span> Políticas internas
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ─── MODO DEMO (localhost sin auth) ────────────────────────
+const IS_DEMO = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+// ─── CONFIG MSAL ───────────────────────────────────────────
+const msalConfig = {
+  auth: {
+    clientId: "fa3f52ca-277a-4eae-ad71-cb248934def6",
+    authority: "https://login.microsoftonline.com/ddfac243-a888-4ed6-8fb0-bc8557897b74",
+    redirectUri: window.location.origin + window.location.pathname
+  },
+  cache: { cacheLocation: "sessionStorage" }
+};
+const msalInstance = new msal.PublicClientApplication(msalConfig);
+
+// ─── DEPARTAMENTOS POR DIVISIÓN ─────────────────────────────
+const DIVISION_DEPTS = {
+  "PLG DE EL SALVADOR":     ["Operaciones","Comercial","Finanzas","RRHH","Informática","Administración"],
+  "PLG DIVISION ADUANAS":   ["Operaciones","Comercial","Finanzas","Pricing","Coordinación"],
+  "PLG DIVISION TERRESTRE":  ["Operaciones","Comercial","Finanzas","Administración"],
+  "PLG DOMINICANA":          ["Operaciones","Comercial","Finanzas"]
+};
+
+const DEPT_URLS = {
+  "Operaciones":   "/sites/PortalPLG/SitePages/Operaciones.aspx",
+  "Comercial":     "/sites/PortalPLG/SitePages/Comercial.aspx",
+  "Finanzas":      "/sites/PortalPLG/SitePages/Contabilidad.aspx",
+  "RRHH":          "/sites/PortalPLG/SitePages/Operaciones.aspx",
+  "Informática":   "/sites/PortalPLG/SitePages/Operaciones.aspx",
+  "Administración":"/sites/PortalPLG/SitePages/Operaciones.aspx",
+  "Pricing":       "/sites/PortalPLG/SitePages/Pricing.aspx",
+  "Coordinación":  "/sites/PortalPLG/SitePages/Operaciones.aspx"
+};
+
+// ─── DATOS GLOBALES ─────────────────────────────────────────
+let currentUser = null;
+let allColleagues = [];
+
+// ─── INICIO ─────────────────────────────────────────────────
+async function init() {
+  // Fecha
+  const d = new Date();
+  const dias = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+  const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  document.getElementById("fecha-hoy").textContent =
+    dias[d.getDay()].charAt(0).toUpperCase() + dias[d.getDay()].slice(1) +
+    " " + d.getDate() + " de " + meses[d.getMonth()] + ", " + d.getFullYear();
+
+  // Mes cumpleaños
+  document.getElementById("cumple-mes").textContent = meses[d.getMonth()].charAt(0).toUpperCase() + meses[d.getMonth()].slice(1) + " " + d.getFullYear();
+
+  if (IS_DEMO) {
+    cargarPortalDemo();
+    return;
+  }
+
+  try {
+    await msalInstance.initialize();
+    let tokenResp;
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length > 0) {
+      try {
+        tokenResp = await msalInstance.acquireTokenSilent({
+          scopes: ["User.Read", "User.ReadBasic.All"],
+          account: accounts[0]
+        });
+      } catch(e) {
+        tokenResp = await msalInstance.acquireTokenPopup({ scopes: ["User.Read","User.ReadBasic.All"] });
+      }
+    } else {
+      tokenResp = await msalInstance.acquireTokenPopup({ scopes: ["User.Read","User.ReadBasic.All"] });
+    }
+    await cargarPortal(tokenResp.accessToken);
+  } catch(e) {
+    console.error("Auth error:", e);
+    document.getElementById("user-nombre").textContent = "Error de autenticación";
+  }
+}
+
+function cargarPortalDemo() {
+  document.getElementById("user-nombre").textContent = "Susana";
+  document.getElementById("user-division").textContent = "PLG DE EL SALVADOR";
+  document.getElementById("user-dept").textContent = "Informática";
+  renderDepartamentos("PLG DE EL SALVADOR", "Informática");
+  allColleagues = [
+    { displayName:"Adalberto Beltran", jobTitle:"Coordinador", department:"Operaciones", officeLocation:"PLG División Terrestre", mobilePhone:"7930 2082", businessPhones:["2234-5100"] },
+    { displayName:"Karen Sánchez",     jobTitle:"Analista",     department:"Comercial",   officeLocation:"PLG De El Salvador",   mobilePhone:"7812 3344", businessPhones:[] },
+    { displayName:"Valeria Estrada",   jobTitle:"Ejecutiva",    department:"Finanzas",    officeLocation:"PLG Division Aduanas", mobilePhone:"", businessPhones:["2255-8877"] },
+    { displayName:"Jonathan Flores",   jobTitle:"Operador",     department:"Operaciones", officeLocation:"PLG De El Salvador",   mobilePhone:"7654 9900", businessPhones:["2234-1122"] },
+    { displayName:"María López",       jobTitle:"Analista TI",  department:"Informática", officeLocation:"PLG De El Salvador",   mobilePhone:"7700 1234", businessPhones:[] }
+  ];
+  renderDirectorioMini(allColleagues);
+  document.getElementById("cumple-list").innerHTML = `
+    <div class="cumple-item">
+      <div class="avatar" style="background:#1B3A6B;font-size:.78rem">KS</div>
+      <div class="cumple-info"><div class="cumple-name">Karen Sánchez</div><div class="cumple-date">3 de julio</div></div>
+      <div class="cumple-dias">En 3 días</div>
+    </div>
+    <div class="cumple-item">
+      <div class="avatar" style="background:#2F5AA8;font-size:.78rem">VE</div>
+      <div class="cumple-info"><div class="cumple-name">Valeria Estrada</div><div class="cumple-date">11 de julio</div></div>
+      <div class="cumple-dias">11 días</div>
+    </div>
+    <div class="cumple-item">
+      <div class="avatar" style="background:#CC1F2A;font-size:.78rem">JF</div>
+      <div class="cumple-info"><div class="cumple-name">Jonathan Flores</div><div class="cumple-date">18 de julio</div></div>
+      <div class="cumple-dias">18 días</div>
+    </div>`;
+}
+
+async function graphGet(token, url) {
+  const r = await fetch("https://graph.microsoft.com/v1.0/" + url, {
+    headers: { Authorization: "Bearer " + token }
+  });
+  return r.json();
+}
+
+async function cargarPortal(token) {
+  // Perfil del usuario
+  const me = await graphGet(token, "me?$select=displayName,jobTitle,department,officeLocation,mobilePhone,businessPhones,mail");
+  currentUser = me;
+
+  // Nombre (solo primer nombre)
+  const firstName = me.displayName ? me.displayName.split(" ")[0] : me.displayName;
+  document.getElementById("user-nombre").textContent = firstName;
+  document.getElementById("user-division").textContent = me.officeLocation || "PLG GROUP";
+  document.getElementById("user-dept").textContent = me.department || "";
+
+  // Departamentos de la división del usuario
+  renderDepartamentos(me.officeLocation, me.department);
+
+  // Directorio mini
+  await cargarDirectorioMini(token, me.officeLocation);
+
+  // Cumpleaños
+  await cargarCumpleanos(token);
+}
+
+function renderDepartamentos(division, miDept) {
+  const depts = DIVISION_DEPTS[division] || ["Operaciones","Comercial","Finanzas","Administración"];
+  const grid = document.getElementById("dept-grid");
+  grid.innerHTML = "";
+
+  depts.forEach(dept => {
+    const tieneAcceso = !miDept || miDept.toLowerCase().includes(dept.toLowerCase()) ||
+      dept === "Operaciones"; // Operaciones visible para todos en su división
+    const url = tieneAcceso ? "https://plggroup.sharepoint.com" + (DEPT_URLS[dept]||"#") : "#";
+    const tile = document.createElement(tieneAcceso ? "a" : "div");
+    tile.className = "dept-tile " + (tieneAcceso ? "accessible" : "locked");
+    if(tieneAcceso) { tile.href = url; tile.target = "_blank"; }
+    tile.innerHTML = `
+      ${!tieneAcceso ? '<div class="lock-badge">🔒 Sin acceso</div>' : ''}
+      <div class="circle"></div>
+      <div class="dept-name">${dept}</div>
+      <div class="dept-sub">${tieneAcceso ? (division||"PLG") : "Solo "+dept.toLowerCase()}</div>
+    `;
+    grid.appendChild(tile);
+  });
+}
+
+async function cargarDirectorioMini(token, division) {
+  const filter = division ? `$filter=officeLocation eq '${encodeURIComponent(division)}'` : "";
+  const url = `users?$select=id,displayName,jobTitle,department,officeLocation,mobilePhone,businessPhones&$top=8&${filter}&$orderby=displayName`;
+  try {
+    const data = await graphGet(token, url);
+    allColleagues = data.value || [];
+    renderDirectorioMini(allColleagues);
+  } catch(e) {
+    // Fallback sin filtro
+    const data = await graphGet(token, "users?$select=id,displayName,jobTitle,department,officeLocation,mobilePhone,businessPhones&$top=8&$orderby=displayName");
+    allColleagues = data.value || [];
+    renderDirectorioMini(allColleagues);
+  }
+}
+
+function renderDirectorioMini(lista) {
+  const el = document.getElementById("dir-mini-list");
+  if(!lista || lista.length === 0) {
+    el.innerHTML = '<div style="color:#6b7fa3;font-size:.82rem;padding:10px 0;">No se encontraron colaboradores.</div>';
+    return;
+  }
+  el.innerHTML = lista.map(u => {
+    const initials = (u.displayName||"??").split(" ").map(w=>w[0]).join("").substring(0,2).toUpperCase();
+    const mobile = u.mobilePhone ? `<span class="ph mobile">📱 ${u.mobilePhone}</span>` : "";
+    const biz = u.businessPhones && u.businessPhones[0] ? `<span class="ph office">☎️ ${u.businessPhones[0]}</span>` : "";
+    return `<div class="collab-card">
+      <div class="avatar">${initials}</div>
+      <div class="collab-info">
+        <div class="collab-name">${u.displayName||""}</div>
+        <div class="collab-role">${u.jobTitle||u.department||""} · ${u.officeLocation||""}</div>
+        ${(mobile||biz) ? `<div class="phone-tags">${mobile}${biz}</div>` : ""}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function filtrarDirectorioMini(q) {
+  if(!q) { renderDirectorioMini(allColleagues); return; }
+  const ql = q.toLowerCase();
+  renderDirectorioMini(allColleagues.filter(u =>
+    (u.displayName||"").toLowerCase().includes(ql) ||
+    (u.jobTitle||"").toLowerCase().includes(ql) ||
+    (u.department||"").toLowerCase().includes(ql) ||
+    (u.officeLocation||"").toLowerCase().includes(ql)
+  ));
+}
+
+function globalSearch(q) {
+  if(q.length < 2) return;
+  // Redirige al directorio completo con el query
+  // (futuro: búsqueda en tiempo real)
+}
+
+async function cargarCumpleanos(token) {
+  // Intenta obtener cumpleaños de Azure AD (campo birthday)
+  try {
+    const hoy = new Date();
+    const mes = hoy.getMonth() + 1;
+    // Graph no soporta filtro por mes de cumpleaños directamente en v1.0
+    // Mostramos placeholder por ahora
+    document.getElementById("cumple-list").innerHTML = `
+      <div style="color:#6b7fa3;font-size:.8rem;padding:8px 0;">
+        Próximamente: cumpleaños del mes desde Microsoft 365.
+      </div>`;
+  } catch(e) {}
+}
+
+init();
+</script>
+</body>
+</html>
