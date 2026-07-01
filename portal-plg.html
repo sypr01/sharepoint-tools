@@ -401,6 +401,20 @@ function cargarPortalDemo() {
 }
 
 async function cargarPortal(me, colegas) {
+  // Si no tiene división ni departamento configurado, bloquear acceso
+  if (!esAdmin(me) && (!me.officeLocation || !me.department)) {
+    document.body.innerHTML = `
+      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f0f2f7;">
+        <div style="background:#fff;border-radius:16px;padding:48px 40px;text-align:center;max-width:420px;box-shadow:0 4px 24px rgba(0,0,0,.1);">
+          <img src="log%20PLG.png" style="height:60px;margin-bottom:24px;"/>
+          <h2 style="color:#1B3A6B;margin:0 0 12px;">Acceso no autorizado</h2>
+          <p style="color:#6b7fa3;font-size:.95rem;margin:0 0 24px;">Tu usuario no tiene división ni departamento configurado en el sistema. Contacta a Informática para que configuren tu perfil.</p>
+          <a href="/.auth/logout?post_logout_redirect_uri=/.auth/login/aad" style="display:inline-block;background:#1B3A6B;color:#fff;padding:10px 28px;border-radius:8px;text-decoration:none;font-weight:600;">Cerrar sesión</a>
+        </div>
+      </div>`;
+    return;
+  }
+
   currentUser = me;
   const firstName = me.displayName ? me.displayName.split(" ")[0] : me.displayName;
   document.getElementById("user-nombre").textContent = firstName;
