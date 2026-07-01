@@ -352,21 +352,30 @@ async function init() {
 
   try {
     await msalInstance.initialize();
-    let tokenResp;
+
+    // Manejar respuesta de redirect si venimos de login
+    const redirectResp = await msalInstance.handleRedirectPromise();
+    if (redirectResp && redirectResp.accessToken) {
+      await cargarPortal(redirectResp.accessToken);
+      return;
+    }
+
     const accounts = msalInstance.getAllAccounts();
     if (accounts.length > 0) {
       try {
-        tokenResp = await msalInstance.acquireTokenSilent({
+        const tokenResp = await msalInstance.acquireTokenSilent({
           scopes: ["User.Read", "User.ReadBasic.All"],
           account: accounts[0]
         });
+        await cargarPortal(tokenResp.accessToken);
       } catch(e) {
-        tokenResp = await msalInstance.acquireTokenPopup({ scopes: ["User.Read","User.ReadBasic.All"] });
+        // Silent falló → redirect login
+        await msalInstance.loginRedirect({ scopes: ["User.Read","User.ReadBasic.All"] });
       }
     } else {
-      tokenResp = await msalInstance.acquireTokenPopup({ scopes: ["User.Read","User.ReadBasic.All"] });
+      // Sin sesión → redirect login
+      await msalInstance.loginRedirect({ scopes: ["User.Read","User.ReadBasic.All"] });
     }
-    await cargarPortal(tokenResp.accessToken);
   } catch(e) {
     console.error("Auth error:", e);
     document.getElementById("user-nombre").textContent = "Error de autenticación";
