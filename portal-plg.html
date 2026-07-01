@@ -412,14 +412,9 @@ async function cargarPortal(me, colegas) {
 }
 
 function esAdmin(user) {
-  // TI tiene acceso total a todo
-  const deptAdmin = (user.department||"").toLowerCase().includes("inform") ||
-                    (user.department||"").toLowerCase().includes("ti") ||
-                    (user.department||"").toLowerCase() === "it";
-  const emailAdmin = (user.mail||"").toLowerCase().includes("informatica") ||
-                     (user.mail||"").toLowerCase().includes("ti@") ||
-                     (user.mail||"").toLowerCase().includes("sistemas");
-  return deptAdmin || emailAdmin;
+  // Solo usuarios del departamento Informatica tienen acceso total
+  const dept = (user.department||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  return dept === "informatica";
 }
 
 function renderDepartamentos(division, miDept, user) {
