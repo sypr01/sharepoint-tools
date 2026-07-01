@@ -431,9 +431,10 @@ function renderDepartamentos(division, miDept, user) {
   divisionesVisibles.forEach(div => {
     const depts = DIVISION_DEPTS[div] || [];
     depts.forEach(dept => {
-      // Solo acceso al departamento exacto al que pertenece el usuario
+      // Acceso solo si el departamento del usuario contiene el nombre del tile
+      // Ej: "DEPARTAMENTO DE FINANZAS" incluye "finanzas" → acceso
       const tieneAcceso = admin ||
-        (miDept && miDept.toLowerCase() === dept.toLowerCase());
+        (miDept && dept && miDept.toLowerCase().includes(dept.toLowerCase()));
       const url = tieneAcceso ? "https://plggroup.sharepoint.com" + (DEPT_URLS[dept]||"#") : "#";
       const tile = document.createElement(tieneAcceso ? "a" : "div");
       tile.className = "dept-tile " + (tieneAcceso ? "accessible" : "locked");
