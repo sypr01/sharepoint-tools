@@ -372,7 +372,7 @@ function cargarPortalDemo() {
   document.getElementById("user-nombre").textContent = "Susana";
   document.getElementById("user-division").textContent = "PLG DE EL SALVADOR";
   document.getElementById("user-dept").textContent = "Informática";
-  renderDepartamentos("PLG DE EL SALVADOR", "Informática");
+  renderDepartamentos("PLG DE EL SALVADOR", "Informática", { department: "Informática", mail: "informatica@plg.com.sv" });
   allColleagues = [
     { displayName:"Adalberto Beltran", jobTitle:"Coordinador", department:"Operaciones", officeLocation:"PLG División Terrestre", mobilePhone:"7930 2082", businessPhones:["2234-5100"] },
     { displayName:"Karen Sánchez",     jobTitle:"Analista",     department:"Comercial",   officeLocation:"PLG De El Salvador",   mobilePhone:"7812 3344", businessPhones:[] },
@@ -405,32 +405,57 @@ async function cargarPortal(me, colegas) {
   document.getElementById("user-nombre").textContent = firstName;
   document.getElementById("user-division").textContent = me.officeLocation || "PLG GROUP";
   document.getElementById("user-dept").textContent = me.department || "";
-  renderDepartamentos(me.officeLocation, me.department);
+  renderDepartamentos(me.officeLocation, me.department, me);
   allColleagues = colegas;
   renderDirectorioMini(colegas);
   document.getElementById("cumple-list").innerHTML = '<div style="color:#6b7fa3;font-size:.8rem;padding:8px 0;">Próximamente desde Microsoft 365.</div>';
 }
 
-function renderDepartamentos(division, miDept) {
-  const depts = DIVISION_DEPTS[division] || ["Operaciones","Comercial","Finanzas","Administración"];
+function esAdmin(user) {
+  // TI tiene acceso total a todo
+  const deptAdmin = (user.department||"").toLowerCase().includes("inform") ||
+                    (user.department||"").toLowerCase().includes("ti") ||
+                    (user.department||"").toLowerCase() === "it";
+  const emailAdmin = (user.mail||"").toLowerCase().includes("informatica") ||
+                     (user.mail||"").toLowerCase().includes("ti@") ||
+                     (user.mail||"").toLowerCase().includes("sistemas");
+  return deptAdmin || emailAdmin;
+}
+
+function renderDepartamentos(division, miDept, user) {
+  const admin = esAdmin(user || {});
+  // Admin ve TODAS las divisiones; usuario normal solo ve su división
+  const divisionesVisibles = admin
+    ? Object.keys(DIVISION_DEPTS)
+    : [division].filter(Boolean);
+
   const grid = document.getElementById("dept-grid");
   grid.innerHTML = "";
 
-  depts.forEach(dept => {
-    const tieneAcceso = !miDept || miDept.toLowerCase().includes(dept.toLowerCase()) ||
-      dept === "Operaciones"; // Operaciones visible para todos en su división
-    const url = tieneAcceso ? "https://plggroup.sharepoint.com" + (DEPT_URLS[dept]||"#") : "#";
-    const tile = document.createElement(tieneAcceso ? "a" : "div");
-    tile.className = "dept-tile " + (tieneAcceso ? "accessible" : "locked");
-    if(tieneAcceso) { tile.href = url; tile.target = "_blank"; }
-    tile.innerHTML = `
-      ${!tieneAcceso ? '<div class="lock-badge">🔒 Sin acceso</div>' : ''}
-      <div class="circle"></div>
-      <div class="dept-name">${dept}</div>
-      <div class="dept-sub">${tieneAcceso ? (division||"PLG") : "Solo "+dept.toLowerCase()}</div>
-    `;
-    grid.appendChild(tile);
+  divisionesVisibles.forEach(div => {
+    const depts = DIVISION_DEPTS[div] || [];
+    depts.forEach(dept => {
+      const tieneAcceso = admin || !miDept ||
+        miDept.toLowerCase().includes(dept.toLowerCase()) ||
+        dept === "Operaciones";
+      const url = tieneAcceso ? "https://plggroup.sharepoint.com" + (DEPT_URLS[dept]||"#") : "#";
+      const tile = document.createElement(tieneAcceso ? "a" : "div");
+      tile.className = "dept-tile " + (tieneAcceso ? "accessible" : "locked");
+      if(tieneAcceso) { tile.href = url; tile.target = "_blank"; }
+      tile.innerHTML = `
+        ${!tieneAcceso ? '<div class="lock-badge">🔒 Sin acceso</div>' : ''}
+        <div class="circle"></div>
+        <div class="dept-name">${dept}</div>
+        <div class="dept-sub">${div}</div>
+      `;
+      grid.appendChild(tile);
+    });
   });
+
+  // Si no hay división definida y no es admin
+  if(!admin && !division) {
+    grid.innerHTML = '<div style="color:#6b7fa3;font-size:.85rem;padding:12px;">División no configurada en tu perfil.</div>';
+  }
 }
 
 
