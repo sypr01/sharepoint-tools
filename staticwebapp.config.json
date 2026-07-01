@@ -1,15 +1,4 @@
 {
-  "auth": {
-    "identityProviders": {
-      "azureActiveDirectory": {
-        "registration": {
-          "openIdIssuer": "https://login.microsoftonline.com/ddfac243-a888-4ed6-8fb0-bc8557897b74/v2.0",
-          "clientIdSettingName": "CLIENT_ID",
-          "clientSecretSettingName": "CLIENT_SECRET"
-        }
-      }
-    }
-  },
   "routes": [
     {
       "route": "/portal-plg.html",
