@@ -280,26 +280,7 @@
       </div>
       <div class="seccion">
         <div class="seccion-titulo">📧 Cuentas</div>
-        <div class="info-grid">
-          <div class="info-item">
-            <label>Microsoft / Office 365</label>
-            <div class="valor" id="d-ms-email"></div>
-            <div class="pass-wrap"><span class="pass-val" id="d-ms-pass"></span><button class="btn-eye" onclick="togglePass('d-ms-pass','d-ms-raw')">👁</button></div>
-            <span id="d-ms-raw" style="display:none"></span>
-          </div>
-          <div class="info-item">
-            <label>Gmail</label>
-            <div class="valor" id="d-gm-email"></div>
-            <div class="pass-wrap"><span class="pass-val" id="d-gm-pass"></span><button class="btn-eye" onclick="togglePass('d-gm-pass','d-gm-raw')">👁</button></div>
-            <span id="d-gm-raw" style="display:none"></span>
-          </div>
-          <div class="info-item">
-            <label>Magaya</label>
-            <div class="valor" id="d-mag-user"></div>
-            <div class="pass-wrap"><span class="pass-val" id="d-mag-pass"></span><button class="btn-eye" onclick="togglePass('d-mag-pass','d-mag-raw')">👁</button></div>
-            <span id="d-mag-raw" style="display:none"></span>
-          </div>
-        </div>
+        <div class="info-grid" id="d-cuentas-grid"></div>
       </div>
       <div class="seccion">
         <div class="seccion-titulo">💻 Equipos Asignados</div>
@@ -355,13 +336,16 @@
       </div>
 
       <div class="form-section">📧 Cuentas</div>
-      <div class="g2">
-        <div class="campo"><label>Correo Microsoft</label><input id="f-ms-email" type="text" placeholder="correo@plg.com.sv"></div>
-        <div class="campo"><label>Contraseña Microsoft</label><input id="f-ms-pass" type="text" placeholder="Contraseña"></div>
-        <div class="campo"><label>Correo Gmail</label><input id="f-gm-email" type="text" placeholder="correo@gmail.com"></div>
-        <div class="campo"><label>Contraseña Gmail</label><input id="f-gm-pass" type="text" placeholder="Contraseña"></div>
-        <div class="campo"><label>Usuario Magaya</label><input id="f-mag-user" type="text" placeholder="Usuario Magaya"></div>
-        <div class="campo"><label>Contraseña Magaya</label><input id="f-mag-pass" type="text" placeholder="Contraseña"></div>
+      <div id="cuentas-form-lista" style="display:flex;flex-wrap:wrap;gap:6px;min-height:32px;margin-bottom:10px;padding:4px 0"></div>
+      <div class="dir-box" style="margin-bottom:10px">
+        <div class="dir-box-label">➕ Agregar cuenta</div>
+        <div class="g2" style="margin-bottom:8px">
+          <div class="campo" style="margin-bottom:0"><label>Sistema *</label><input id="c-sistema" type="text" placeholder="Ej: Microsoft, Gmail, Magaya, VPN..."></div>
+          <div class="campo" style="margin-bottom:0"><label>Usuario / Correo *</label><input id="c-usuario" type="text" placeholder="usuario@ejemplo.com"></div>
+        </div>
+        <div class="campo" style="margin-bottom:8px"><label>Contraseña</label><input id="c-pass" type="text" placeholder="Contraseña"></div>
+        <div id="c-msg" style="font-size:12px;color:#c00;margin-bottom:4px;min-height:16px"></div>
+        <button type="button" onclick="agregarCuenta()" class="btn-save" style="width:100%;padding:8px 14px">+ Agregar cuenta</button>
       </div>
 
       <div class="form-section">💻 Equipos Asignados</div>
@@ -482,7 +466,8 @@ function filtrarUsuarios() {
   var res = usuarios.filter(function(u){
     var mD = !div || u.division===div;
     var eqTxt=(u.equipos||[]).map(function(e){return (e.tipo||'')+' '+(e.modelo||'')+' '+(e.serie||'');}).join(' ');
-    var mQ = !q  || [u.nombre,u.microsoftEmail,u.gmailEmail,u.puesto,u.area,u.hostname,eqTxt].some(function(v){return v&&v.toLowerCase().includes(q);});
+    var ctaTxt=(u.cuentas||[]).map(function(c){return (c.sistema||'')+' '+(c.usuario||'');}).join(' ');
+    var mQ = !q  || [u.nombre,u.microsoftEmail,u.gmailEmail,u.puesto,u.area,u.hostname,eqTxt,ctaTxt].some(function(v){return v&&v.toLowerCase().includes(q);});
     return mD && mQ;
   });
   renderizarUsuarios(res);
@@ -528,9 +513,21 @@ function verDetalle(id) {
   document.getElementById('d-tel').textContent=[u.telefono,u.extension?'Ext. '+u.extension:''].filter(Boolean).join(' / ')||'—';
   document.getElementById('d-host').textContent=u.hostname||'—';
   document.getElementById('d-anydesk').textContent=u.anydesk||'—';
-  setPass('d-ms',u.microsoftEmail,u.microsoftPass);
-  setPass('d-gm',u.gmailEmail,u.gmailPass);
-  setMag(u.magayaUser,u.magayaPass);
+  // render cuentas dinámicas con backward compat
+  var ctas=Array.isArray(u.cuentas)&&u.cuentas.length?u.cuentas:[];
+  if (!ctas.length) {
+    if (u.microsoftEmail) ctas.push({sistema:'Microsoft / Office 365',usuario:u.microsoftEmail,pass:u.microsoftPass||''});
+    if (u.gmailEmail)     ctas.push({sistema:'Gmail',                  usuario:u.gmailEmail,    pass:u.gmailPass||''});
+    if (u.magayaUser)     ctas.push({sistema:'Magaya',                 usuario:u.magayaUser,    pass:u.magayaPass||''});
+  }
+  document.getElementById('d-cuentas-grid').innerHTML=ctas.length?ctas.map(function(c,i){
+    var pid='d-cta-p'+i, rid='d-cta-r'+i;
+    return '<div class="info-item"><label>'+esc(c.sistema)+'</label>'
+      +'<div class="valor">'+esc(c.usuario)+'</div>'
+      +'<div class="pass-wrap"><span class="pass-val" id="'+pid+'">'+(c.pass?'••••••••':'—')+'</span>'
+      +(c.pass?'<button class="btn-eye" onclick="togglePass(\''+pid+'\',\''+rid+'\')">👁</button>':'')+'</div>'
+      +'<span id="'+rid+'" style="display:none">'+esc(c.pass||'')+'</span></div>';
+  }).join(''):'<span style="color:#aaa;font-size:13px">Sin cuentas registradas.</span>';
   // render dynamic equipment list
   var eqArr=Array.isArray(u.equipos)&&u.equipos.length?u.equipos:[];
   if(!eqArr.length){
@@ -604,12 +601,19 @@ function abrirForm(id) {
   document.getElementById('f-ext').value      = u?u.extension:'';
   document.getElementById('f-host').value     = u?u.hostname:'';
   document.getElementById('f-anydesk').value  = u?u.anydesk:'';
-  document.getElementById('f-ms-email').value = u?u.microsoftEmail:'';
-  document.getElementById('f-ms-pass').value  = u?u.microsoftPass:'';
-  document.getElementById('f-gm-email').value = u?u.gmailEmail:'';
-  document.getElementById('f-gm-pass').value  = u?u.gmailPass:'';
-  document.getElementById('f-mag-user').value = u?u.magayaUser:'';
-  document.getElementById('f-mag-pass').value = u?u.magayaPass:'';
+  // init cuentas con backward compat a campos planos
+  var ctas=Array.isArray(u&&u.cuentas)&&u.cuentas.length?u.cuentas:[];
+  if (!ctas.length&&u) {
+    if (u.microsoftEmail) ctas.push({sistema:'Microsoft / Office 365',usuario:u.microsoftEmail,pass:u.microsoftPass||''});
+    if (u.gmailEmail)     ctas.push({sistema:'Gmail',                  usuario:u.gmailEmail,    pass:u.gmailPass||''});
+    if (u.magayaUser)     ctas.push({sistema:'Magaya',                 usuario:u.magayaUser,    pass:u.magayaPass||''});
+  }
+  _cuentasForm=ctas;
+  document.getElementById('c-sistema').value='';
+  document.getElementById('c-usuario').value='';
+  document.getElementById('c-pass').value='';
+  document.getElementById('c-msg').textContent='';
+  renderCuentasFormLista();
 
   // init equipment list
   if(u){
@@ -645,12 +649,7 @@ async function guardar() {
     extension:     document.getElementById('f-ext').value.trim(),
     hostname:      document.getElementById('f-host').value.trim(),
     anydesk:       document.getElementById('f-anydesk').value.trim(),
-    microsoftEmail:document.getElementById('f-ms-email').value.trim(),
-    microsoftPass: document.getElementById('f-ms-pass').value.trim(),
-    gmailEmail:    document.getElementById('f-gm-email').value.trim(),
-    gmailPass:     document.getElementById('f-gm-pass').value.trim(),
-    magayaUser:    document.getElementById('f-mag-user').value.trim(),
-    magayaPass:    document.getElementById('f-mag-pass').value.trim(),
+    cuentas:       _cuentasForm,
     equipos:       _equiposForm
   };
   try {
@@ -773,7 +772,8 @@ function seleccionarColab() {
     document.getElementById('f-area').value='';
     document.getElementById('f-puesto').value='';
     document.getElementById('f-tel').value='';
-    document.getElementById('f-ms-email').value='';
+    _cuentasForm=[];
+    renderCuentasFormLista();
     return;
   }
   var c=_colabs[i];
@@ -782,14 +782,18 @@ function seleccionarColab() {
   document.getElementById('f-area').value     = c.departamento||'';
   document.getElementById('f-puesto').value   = c.cargo||'';
   document.getElementById('f-tel').value      = c.telefono||'';
-  document.getElementById('f-ms-email').value = c.correo||'';
+  // pre-cargar correo corporativo como cuenta Microsoft
+  if (c.correo) {
+    _cuentasForm=[{sistema:'Microsoft / Office 365', usuario:c.correo, pass:''}];
+    renderCuentasFormLista();
+  }
 }
 
 /* ══════════════════════════
    EQUIPOS
    ══════════════════════════ */
 var equipos=[], equiposCargados=false, _eqEditId=null, _equiposDatos=false;
-var _equiposForm=[], _equiposFormOriginal=[];
+var _equiposForm=[], _equiposFormOriginal=[], _cuentasForm=[];
 
 async function cargarEquiposData() {
   if (_equiposDatos) return;
@@ -837,6 +841,37 @@ function renderEqFormLista() {
 function quitarEq(i) {
   _equiposForm.splice(i,1);
   renderEqFormLista();
+}
+
+function renderCuentasFormLista() {
+  var el=document.getElementById('cuentas-form-lista');
+  if (!_cuentasForm.length) {
+    el.innerHTML='<span style="color:#aaa;font-size:12px;padding:6px 0">Sin cuentas registradas aún.</span>';
+    return;
+  }
+  el.innerHTML=_cuentasForm.map(function(c,i){
+    return '<span class="eq-chip"><strong>'+esc(c.sistema)+'</strong> — '+esc(c.usuario)
+      +'<button class="eq-chip-del" title="Quitar" onclick="quitarCuenta('+i+')">×</button></span>';
+  }).join('');
+}
+
+function agregarCuenta() {
+  var sistema=document.getElementById('c-sistema').value.trim();
+  var usuario=document.getElementById('c-usuario').value.trim();
+  var pass   =document.getElementById('c-pass').value.trim();
+  var msg    =document.getElementById('c-msg');
+  if (!sistema||!usuario) { msg.textContent='Sistema y usuario son obligatorios.'; return; }
+  msg.textContent='';
+  _cuentasForm.push({sistema:sistema, usuario:usuario, pass:pass});
+  document.getElementById('c-sistema').value='';
+  document.getElementById('c-usuario').value='';
+  document.getElementById('c-pass').value='';
+  renderCuentasFormLista();
+}
+
+function quitarCuenta(i) {
+  _cuentasForm.splice(i,1);
+  renderCuentasFormLista();
 }
 
 async function cargarEquipos() {
