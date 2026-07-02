@@ -372,6 +372,7 @@
       <!-- Desde inventario -->
       <div class="dir-box" style="margin-bottom:10px">
         <div class="dir-box-label">📦 Agregar del inventario</div>
+        <input type="text" id="eq-buscar" placeholder="🔍 Buscar por tipo, marca, modelo o serial..." oninput="filtrarEqSel()" style="width:100%;padding:7px 11px;border:1.5px solid #c5cedb;border-radius:6px;font-size:13px;font-family:inherit;margin-bottom:6px">
         <div style="display:flex;gap:8px;align-items:center">
           <select id="eq-inv-sel" style="flex:1;padding:8px 11px;border:1.5px solid #c5cedb;border-radius:6px;font-size:13px;font-family:inherit;background:white">
             <option value="">⏳ Cargando inventario...</option>
@@ -433,7 +434,12 @@
           </select>
         </div>
       </div>
-      <div class="campo"><label>Usuario Asignado</label><input id="f-eq-user" type="text" placeholder="Nombre del colaborador"></div>
+      <div class="campo"><label>Usuario Asignado</label>
+        <input type="text" id="f-eq-user-buscar" placeholder="🔍 Buscar usuario..." oninput="filtrarUserSel()" style="margin-bottom:5px;width:100%;padding:7px 11px;border:1.5px solid #c5cedb;border-radius:6px;font-size:13px;font-family:inherit">
+        <select id="f-eq-user" style="width:100%;padding:8px 11px;border:1.5px solid #c5cedb;border-radius:6px;font-size:13px;font-family:inherit;background:white">
+          <option value="">— Sin asignar —</option>
+        </select>
+      </div>
       <div class="campo"><label>Notas</label><textarea id="f-eq-notas" rows="2" placeholder="Observaciones, RAM, etc."></textarea></div>
       <div class="form-footer">
         <button class="btn-del-form" id="eq-btn-del" onclick="eliminarEq()" style="display:none">🗑 Eliminar</button>
@@ -625,7 +631,9 @@ function abrirForm(id) {
   } else {
     _equiposForm=[];
   }
+  document.getElementById('eq-buscar').value='';
   document.getElementById('eq-inv-sel').value='';
+  poblarEqInvSel();
   renderEqFormLista();
 
   document.getElementById('overlayForm').classList.add('activo');
@@ -777,17 +785,37 @@ async function cargarEquiposData() {
   } catch(e) { /* will retry when tab opens */ }
 }
 
-function poblarEqInvSel() {
+function poblarEqInvSel() { filtrarEqSel(); }
+
+function filtrarEqSel() {
+  var q=(document.getElementById('eq-buscar').value||'').toLowerCase();
   var sel=document.getElementById('eq-inv-sel');
   if (!sel) return;
+  var ICONS={Laptop:'💻',Monitor:'🖥️',Celular:'📱',Tablet:'📲',Teclado:'⌨️',Mouse:'🖱️',Impresora:'🖨️'};
   var disponibles=equipos.filter(function(e){ return e.estado==='Disponible'; });
+  var filtrados=q?disponibles.filter(function(e){
+    return [e.tipo,e.marca,e.modelo,e.serial,e.division].some(function(v){ return v&&v.toLowerCase().includes(q); });
+  }):disponibles;
   sel.innerHTML='<option value="">— Seleccionar del inventario —</option>'+
-    disponibles.map(function(e){
-      var icon=({Laptop:'💻',Monitor:'🖥️',Celular:'📱',Tablet:'📲',Teclado:'⌨️',Mouse:'🖱️',Impresora:'🖨️'})[e.tipo]||'🔧';
+    filtrados.map(function(e){
+      var ic=ICONS[e.tipo]||'🔧';
       var label=((e.marca||'')+' '+(e.modelo||'')).trim()||e.tipo;
-      return '<option value="'+e.id+'">'+icon+' '+esc(e.tipo)+': '+esc(label)+' ('+esc(e.serial||'s/n')+')</option>';
+      return '<option value="'+e.id+'">'+ic+' '+esc(e.tipo)+': '+esc(label)+' ('+esc(e.serial||'s/n')+')</option>';
     }).join('');
-  if (!disponibles.length) sel.innerHTML='<option value="">— Sin equipos disponibles —</option>';
+  if (!filtrados.length) sel.innerHTML='<option value="">— Sin resultados —</option>';
+}
+
+function filtrarUserSel(preselect) {
+  var q=(document.getElementById('f-eq-user-buscar').value||'').toLowerCase();
+  var sel=document.getElementById('f-eq-user');
+  if (!sel) return;
+  var filtrados=q?usuarios.filter(function(u){ return u.nombre&&u.nombre.toLowerCase().includes(q); }):usuarios.slice();
+  filtrados.sort(function(a,b){ return (a.nombre||'').localeCompare(b.nombre||''); });
+  sel.innerHTML='<option value="">— Sin asignar —</option>'+
+    filtrados.map(function(u){
+      return '<option value="'+esc(u.nombre)+'">'+esc(u.nombre)+(u.puesto?' — '+esc(u.puesto):'')+'</option>';
+    }).join('');
+  if (preselect!==undefined) sel.value=preselect;
 }
 
 function renderEqFormLista() {
@@ -894,7 +922,8 @@ function abrirFormEq(id) {
   document.getElementById('f-eq-modelo').value  = e?e.modelo:'';
   document.getElementById('f-eq-serial').value  = e?e.serial:'';
   document.getElementById('f-eq-div').value     = e?e.division:'';
-  document.getElementById('f-eq-user').value    = e?e.usuarioActual:'';
+  document.getElementById('f-eq-user-buscar').value = '';
+  filtrarUserSel(e?e.usuarioActual:'');
   document.getElementById('f-eq-notas').value   = e?e.notas:'';
   document.getElementById('overlayFormEq').classList.add('activo');
 }
