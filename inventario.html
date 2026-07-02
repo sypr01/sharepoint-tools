@@ -317,8 +317,45 @@
       </div>
     </div>
     <div class="modal-body" id="dpanel-accesos" style="display:none">
-      <div class="seccion-titulo" style="margin-bottom:12px">🔑 Accesos físicos asignados</div>
-      <div class="af-cb-grid" id="d-accesos-grid"></div>
+      <div class="seccion-titulo" style="margin-bottom:12px">🔑 Accesos físicos</div>
+      <div class="af-cb-grid" id="d-accesos-grid">
+        <div class="af-cb-item af-tarjeta-full" id="daf-tarjeta-wrap" onclick="toggleDAF('tarjeta')">
+          <div class="af-tarjeta-top">
+            <div class="af-cb-box"><span class="af-cb-tick">✓</span></div>
+            <span class="af-cb-label">Tarjeta de acceso</span>
+          </div>
+          <div class="af-tarjeta-num" id="daf-tarjeta-num-wrap" style="display:none" onclick="event.stopPropagation()">
+            <label>No. registro:</label>
+            <input id="daf-tarjeta-num" type="text" placeholder="Ej: AC-00247">
+          </div>
+        </div>
+        <div class="af-cb-item" id="daf-parqueo-wrap" onclick="toggleDAF('parqueo')">
+          <div class="af-cb-box"><span class="af-cb-tick">✓</span></div>
+          <span class="af-cb-label">Parqueo</span>
+        </div>
+        <div class="af-cb-item" id="daf-llaveOficina-wrap" onclick="toggleDAF('llaveOficina')">
+          <div class="af-cb-box"><span class="af-cb-tick">✓</span></div>
+          <span class="af-cb-label">Llave de oficina</span>
+        </div>
+        <div class="af-cb-item" id="daf-llaveArchivo-wrap" onclick="toggleDAF('llaveArchivo')">
+          <div class="af-cb-box"><span class="af-cb-tick">✓</span></div>
+          <span class="af-cb-label">Llave de archivo</span>
+        </div>
+        <div class="af-cb-item" id="daf-token-wrap" onclick="toggleDAF('token')">
+          <div class="af-cb-box"><span class="af-cb-tick">✓</span></div>
+          <span class="af-cb-label">Token</span>
+        </div>
+        <div class="af-cb-item" id="daf-llaveServidor-wrap" onclick="toggleDAF('llaveServidor')">
+          <div class="af-cb-box"><span class="af-cb-tick">✓</span></div>
+          <span class="af-cb-label">Llave de servidor</span>
+        </div>
+        <div class="af-cb-item" id="daf-carnet-wrap" onclick="toggleDAF('carnet')">
+          <div class="af-cb-box"><span class="af-cb-tick">✓</span></div>
+          <span class="af-cb-label">Carnet</span>
+        </div>
+      </div>
+      <div id="daf-msg" style="font-size:12px;min-height:16px;margin-top:10px"></div>
+      <button onclick="guardarAccesosFisicos()" class="btn-save" style="width:100%;margin-top:10px;padding:10px">💾 Guardar accesos físicos</button>
     </div>
     <div class="modal-body" id="dpanel-docs" style="display:none">
       <div style="display:flex;flex-direction:column;gap:10px">
@@ -385,44 +422,6 @@
         <div class="campo"><label>Extensión</label><input id="f-ext" type="text" placeholder="Ej: 110"></div>
         <div class="campo"><label>Hostname</label><input id="f-host" type="text" placeholder="Ej: SV-CO002"></div>
         <div class="campo"><label>AnyDesk ID</label><input id="f-anydesk" type="text" placeholder="Ej: 1173414536"></div>
-      </div>
-
-      <div class="form-section">🔑 Accesos Físicos</div>
-      <div class="af-cb-grid" style="margin-bottom:14px">
-        <div class="af-cb-item af-tarjeta-full" id="af-tarjeta-wrap" onclick="toggleAF('tarjeta')">
-          <div class="af-tarjeta-top">
-            <div class="af-cb-box"><span class="af-cb-tick">✓</span></div>
-            <span class="af-cb-label">Tarjeta de acceso</span>
-          </div>
-          <div class="af-tarjeta-num" id="af-tarjeta-num-wrap" style="display:none" onclick="event.stopPropagation()">
-            <label>No. registro:</label>
-            <input id="af-tarjeta-num" type="text" placeholder="Ej: AC-00247">
-          </div>
-        </div>
-        <div class="af-cb-item" id="af-parqueo-wrap" onclick="toggleAF('parqueo')">
-          <div class="af-cb-box"><span class="af-cb-tick">✓</span></div>
-          <span class="af-cb-label">Parqueo</span>
-        </div>
-        <div class="af-cb-item" id="af-llaveOficina-wrap" onclick="toggleAF('llaveOficina')">
-          <div class="af-cb-box"><span class="af-cb-tick">✓</span></div>
-          <span class="af-cb-label">Llave de oficina</span>
-        </div>
-        <div class="af-cb-item" id="af-llaveArchivo-wrap" onclick="toggleAF('llaveArchivo')">
-          <div class="af-cb-box"><span class="af-cb-tick">✓</span></div>
-          <span class="af-cb-label">Llave de archivo</span>
-        </div>
-        <div class="af-cb-item" id="af-token-wrap" onclick="toggleAF('token')">
-          <div class="af-cb-box"><span class="af-cb-tick">✓</span></div>
-          <span class="af-cb-label">Token</span>
-        </div>
-        <div class="af-cb-item" id="af-llaveServidor-wrap" onclick="toggleAF('llaveServidor')">
-          <div class="af-cb-box"><span class="af-cb-tick">✓</span></div>
-          <span class="af-cb-label">Llave de servidor</span>
-        </div>
-        <div class="af-cb-item" id="af-carnet-wrap" onclick="toggleAF('carnet')">
-          <div class="af-cb-box"><span class="af-cb-tick">✓</span></div>
-          <span class="af-cb-label">Carnet</span>
-        </div>
       </div>
 
       <div class="form-section">📧 Cuentas</div>
@@ -695,55 +694,57 @@ function switchDetalleTab(tab) {
 
 var AF_KEYS=['tarjeta','parqueo','llaveOficina','llaveArchivo','token','llaveServidor','carnet'];
 
-function toggleAF(key) {
-  var wrap=document.getElementById('af-'+key+'-wrap');
+function toggleDAF(key) {
+  var wrap=document.getElementById('daf-'+key+'-wrap');
   if(!wrap) return;
   var on=wrap.classList.toggle('af-on');
   if(key==='tarjeta') {
-    document.getElementById('af-tarjeta-num-wrap').style.display=on?'flex':'none';
-    if(!on) document.getElementById('af-tarjeta-num').value='';
+    document.getElementById('daf-tarjeta-num-wrap').style.display=on?'flex':'none';
+    if(!on) document.getElementById('daf-tarjeta-num').value='';
   }
 }
 
-function initAfForm(af) {
+function initDAfPanel(af) {
   AF_KEYS.forEach(function(k){
-    var wrap=document.getElementById('af-'+k+'-wrap');
+    var wrap=document.getElementById('daf-'+k+'-wrap');
     if(!wrap) return;
     var val=af&&af[k];
     wrap.classList.toggle('af-on', !!val);
     if(k==='tarjeta') {
-      document.getElementById('af-tarjeta-num-wrap').style.display=val?'flex':'none';
-      document.getElementById('af-tarjeta-num').value=(af&&af.tarjetaNum)||'';
+      document.getElementById('daf-tarjeta-num-wrap').style.display=val?'flex':'none';
+      document.getElementById('daf-tarjeta-num').value=(af&&af.tarjetaNum)||'';
     }
   });
+  var msg=document.getElementById('daf-msg');
+  if(msg) msg.textContent='';
 }
 
-function getAfPayload() {
+async function guardarAccesosFisicos() {
+  var u=usuarios.find(function(x){return x.id===detalleId;});
+  if(!u) return;
   var af={};
   AF_KEYS.forEach(function(k){
-    af[k]=document.getElementById('af-'+k+'-wrap').classList.contains('af-on');
+    af[k]=document.getElementById('daf-'+k+'-wrap').classList.contains('af-on');
   });
-  af.tarjetaNum=af.tarjeta?document.getElementById('af-tarjeta-num').value.trim():'';
-  return af;
+  af.tarjetaNum=af.tarjeta?document.getElementById('daf-tarjeta-num').value.trim():'';
+  var msg=document.getElementById('daf-msg');
+  msg.style.color='#888'; msg.textContent='Guardando...';
+  try {
+    var res=await fetch('/api/usuarios?id='+encodeURIComponent(u.id),{
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({accesosFisicos:af})
+    });
+    if(!res.ok) throw new Error('Error '+res.status);
+    u.accesosFisicos=af;
+    msg.style.color='#1a6b3c'; msg.textContent='✓ Accesos guardados correctamente.';
+    setTimeout(function(){ msg.textContent=''; },3000);
+  } catch(e) {
+    msg.style.color='#c00'; msg.textContent='Error al guardar. Intenta de nuevo.';
+  }
 }
 
 function renderAccesosDetalle(af) {
-  var labels={tarjeta:'Tarjeta de acceso',parqueo:'Parqueo',llaveOficina:'Llave de oficina',
-    llaveArchivo:'Llave de archivo',token:'Token',llaveServidor:'Llave de servidor',carnet:'Carnet'};
-  var grid=document.getElementById('d-accesos-grid');
-  var activos=AF_KEYS.filter(function(k){return af&&af[k];});
-  if(!activos.length){
-    grid.innerHTML='<span style="color:#aaa;font-size:13px;grid-column:1/-1;padding:8px 0">Sin accesos físicos registrados.</span>';
-    return;
-  }
-  grid.innerHTML=activos.map(function(k){
-    var extra=(k==='tarjeta'&&af.tarjetaNum)?' <span style="font-family:monospace;font-size:11px;color:#888">'+esc(af.tarjetaNum)+'</span>':'';
-    return '<div class="af-cb-item af-on'+(k==='tarjeta'?' af-tarjeta-full':'')+'" style="cursor:default">'
-      +(k==='tarjeta'
-        ?'<div class="af-tarjeta-top"><div class="af-cb-box"><span class="af-cb-tick">✓</span></div><span class="af-cb-label">'+labels[k]+extra+'</span></div>'
-        :'<div class="af-cb-box"><span class="af-cb-tick">✓</span></div><span class="af-cb-label">'+labels[k]+'</span>')
-      +'</div>';
-  }).join('');
+  initDAfPanel(af);
 }
 
 function _docUsuario() {
@@ -971,7 +972,6 @@ function abrirForm(id) {
   document.getElementById('f-ext').value      = u?u.extension:'';
   document.getElementById('f-host').value     = u?u.hostname:'';
   document.getElementById('f-anydesk').value  = u?u.anydesk:'';
-  initAfForm(u?u.accesosFisicos:null);
   // init cuentas con backward compat a campos planos
   var ctas=Array.isArray(u&&u.cuentas)&&u.cuentas.length?u.cuentas:[];
   if (!ctas.length&&u) {
@@ -1020,7 +1020,6 @@ async function guardar() {
     extension:     document.getElementById('f-ext').value.trim(),
     hostname:      document.getElementById('f-host').value.trim(),
     anydesk:       document.getElementById('f-anydesk').value.trim(),
-    accesosFisicos: getAfPayload(),
     cuentas:       _cuentasForm,
     equipos:       _equiposForm
   };
