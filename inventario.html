@@ -859,20 +859,33 @@ function generarFichaUsuario() {
 
 function generarHojaEntrega() {
   var d=_docUsuario(); if(!d) return;
-  var u=d.u, eqArr=d.eqArr;
-  if(!eqArr.length){ alert('Este usuario no tiene equipos asignados.'); return; }
+  var u=d.u, eqArr=d.eqArr, af=d.af;
+  var afLabels={tarjeta:'Tarjeta de acceso',parqueo:'Parqueo',llaveOficina:'Llave de oficina',
+    llaveArchivo:'Llave de archivo',token:'Token',llaveServidor:'Llave de servidor',carnet:'Carnet'};
+  var afActivos=AF_KEYS.filter(function(k){return af&&af[k];});
+  if(!eqArr.length&&!afActivos.length){ alert('Este usuario no tiene equipos ni accesos físicos asignados.'); return; }
   var icons={Laptop:'💻',Monitor:'🖥️',Celular:'📱',Tablet:'📲',Teclado:'⌨️',Mouse:'🖱️',Impresora:'🖨️'};
   var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Entrega — '+u.nombre+'</title>'+_docCSS()+'</head><body>';
   html+=_docHeader('HOJA DE ENTREGA DE EQUIPO');
   html+='<div style="margin-bottom:14px">'
     +'<div style="font-size:13px;font-weight:700;color:#1e3a6e;margin-bottom:8px">'+esc((u.nombre||'').toUpperCase())+'</div>'
     +'<p style="font-size:11px;color:#333;line-height:1.7">Por medio de la presente hago constar que recibí de: <strong>'+esc(u.division||'PLG')+'</strong><br>'
-    +'el siguiente equipo para uso exclusivo de mis actividades laborales:</p></div>';
-  eqArr.forEach(function(e){
-    html+='<div class="eq-row"><div class="eq-icon">'+(icons[e.tipo]||'🔧')+'</div>'
-      +'<div><div class="eq-modelo">'+esc(e.tipo||'')+(e.modelo?' — '+esc(e.modelo):'')+'</div>'
-      +(e.serie?'<div class="eq-serie">Serie: '+esc(e.serie)+'</div>':'')+'</div></div>';
-  });
+    +'el siguiente equipo y accesos para uso exclusivo de mis actividades laborales:</p></div>';
+  if(eqArr.length){
+    eqArr.forEach(function(e){
+      html+='<div class="eq-row"><div class="eq-icon">'+(icons[e.tipo]||'🔧')+'</div>'
+        +'<div><div class="eq-modelo">'+esc(e.tipo||'')+(e.modelo?' — '+esc(e.modelo):'')+'</div>'
+        +(e.serie?'<div class="eq-serie">Serie: '+esc(e.serie)+'</div>':'')+'</div></div>';
+    });
+  }
+  if(afActivos.length){
+    html+='<div style="margin-top:10px;margin-bottom:4px;font-size:9px;font-weight:700;color:#1e3a6e;text-transform:uppercase;letter-spacing:.5px">Accesos físicos entregados</div>';
+    afActivos.forEach(function(k){
+      var num=(k==='tarjeta'&&af.tarjetaNum)?'<span style="font-family:monospace;font-size:9px;color:#888;margin-left:6px">'+esc(af.tarjetaNum)+'</span>':'';
+      html+='<div class="eq-row"><div class="eq-icon">🔑</div>'
+        +'<div><div class="eq-modelo">'+afLabels[k]+num+'</div></div></div>';
+    });
+  }
   html+='<div style="margin-top:16px;padding:10px 12px;background:#f8fafc;border-radius:5px;font-size:11px;color:#333;line-height:1.7">'
     +'<strong>OBSERVACIÓN:</strong><br>'
     +'Al momento de recibir el equipo aquí especificado se realizaron las pruebas de funcionamiento y se encuentra en buen estado físico y de sistema.<br><br>'
