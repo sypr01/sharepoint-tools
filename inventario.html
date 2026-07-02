@@ -687,13 +687,26 @@ async function guardar() {
     await Promise.all(invUpdates.map(function(e){
       var eq=equipos.find(function(x){return x.id===e.invId;});
       if (!eq) return Promise.resolve();
+      var tareas=[];
+      // si estaba asignado a otro usuario, quitar de su ficha
+      if (eq.usuarioActual && eq.usuarioActual!==nombre) {
+        var uAnt=usuarios.find(function(u){return u.nombre===eq.usuarioActual;});
+        if (uAnt) {
+          var eqsFiltrados=(uAnt.equipos||[]).filter(function(x){return x.invId!==e.invId;});
+          uAnt.equipos=eqsFiltrados;
+          tareas.push(fetch('/api/usuarios?id='+encodeURIComponent(uAnt.id),{
+            method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({equipos:eqsFiltrados})
+          }));
+        }
+      }
       var upd=Object.assign({},eq,{usuarioActual:nombre,estado:'Asignado'});
-      return fetch('/api/inventario?id='+encodeURIComponent(e.invId),{
+      tareas.push(fetch('/api/inventario?id='+encodeURIComponent(e.invId),{
         method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(upd)
       }).then(function(){
         var i=equipos.findIndex(function(x){return x.id===e.invId;});
         if(i!==-1) equipos[i]=upd;
-      });
+      }));
+      return Promise.all(tareas);
     }).concat(quitados.map(function(e){
       var eq=equipos.find(function(x){return x.id===e.invId;});
       if (!eq) return Promise.resolve();
@@ -805,15 +818,17 @@ function filtrarEqSel() {
   var sel=document.getElementById('eq-inv-sel');
   if (!sel) return;
   var ICONS={Laptop:'💻',Monitor:'🖥️',Celular:'📱',Tablet:'📲',Teclado:'⌨️',Mouse:'🖱️',Impresora:'🖨️'};
-  var disponibles=equipos.filter(function(e){ return e.estado==='Disponible'; });
-  var filtrados=q?disponibles.filter(function(e){
-    return [e.tipo,e.marca,e.modelo,e.serial,e.division].some(function(v){ return v&&v.toLowerCase().includes(q); });
-  }):disponibles;
+  // Mostrar todos excepto Baja; el usuario puede reasignar equipos ya asignados
+  var activos=equipos.filter(function(e){ return e.estado!=='Baja'; });
+  var filtrados=q?activos.filter(function(e){
+    return [e.tipo,e.marca,e.modelo,e.serial,e.division,e.usuarioActual].some(function(v){ return v&&v.toLowerCase().includes(q); });
+  }):activos;
   sel.innerHTML='<option value="">— Seleccionar del inventario —</option>'+
     filtrados.map(function(e){
       var ic=ICONS[e.tipo]||'🔧';
       var label=((e.marca||'')+' '+(e.modelo||'')).trim()||e.tipo;
-      return '<option value="'+e.id+'">'+ic+' '+esc(e.tipo)+': '+esc(label)+' ('+esc(e.serial||'s/n')+')</option>';
+      var estado=e.estado==='Disponible'?'✅ Disponible':'⚠️ '+esc(e.estado||'')+(e.usuarioActual?' ('+esc(e.usuarioActual)+')':'');
+      return '<option value="'+e.id+'">'+ic+' '+esc(e.tipo)+': '+esc(label)+' – '+esc(e.serial||'s/n')+' ['+estado+']</option>';
     }).join('');
   if (!filtrados.length) sel.innerHTML='<option value="">— Sin resultados —</option>';
 }
