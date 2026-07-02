@@ -37,6 +37,7 @@ function toUser(e) {
     magayaPass:      e.magayaPass      || "",
     equipos:         (function(){ try { return e.equipos ? JSON.parse(e.equipos) : []; } catch(x){ return []; } })(),
     cuentas:         (function(){ try { return e.cuentas ? JSON.parse(e.cuentas) : []; } catch(x){ return []; } })(),
+    accesosFisicos:  (function(){ try { return e.accesosFisicos ? JSON.parse(e.accesosFisicos) : null; } catch(x){ return null; } })(),
     laptopModelo:    e.laptopModelo    || "",
     laptopSerie:     e.laptopSerie     || "",
     monitorModelo:   e.monitorModelo   || "",
@@ -71,6 +72,7 @@ module.exports = async function (context, req) {
       const entity = { partitionKey: PARTITION, rowKey, ...b,
         equipos: Array.isArray(b.equipos) ? JSON.stringify(b.equipos) : (b.equipos || ''),
         cuentas: Array.isArray(b.cuentas) ? JSON.stringify(b.cuentas) : (b.cuentas || ''),
+        accesosFisicos: b.accesosFisicos && typeof b.accesosFisicos==='object' ? JSON.stringify(b.accesosFisicos) : (b.accesosFisicos || ''),
         fechaActualizacion: now };
       await client.createEntity(entity);
       context.res = { status: 201, headers: CORS, body: JSON.stringify(toUser(entity)) };
@@ -86,6 +88,7 @@ module.exports = async function (context, req) {
       const entity = { partitionKey: PARTITION, rowKey: id, ...b, id: undefined,
         equipos: Array.isArray(b.equipos) ? JSON.stringify(b.equipos) : (b.equipos || ''),
         cuentas: Array.isArray(b.cuentas) ? JSON.stringify(b.cuentas) : (b.cuentas || ''),
+        accesosFisicos: b.accesosFisicos && typeof b.accesosFisicos==='object' ? JSON.stringify(b.accesosFisicos) : (b.accesosFisicos || ''),
         fechaActualizacion: now };
       delete entity.id;
       await client.updateEntity(entity, "Merge");
