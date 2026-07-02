@@ -369,17 +369,10 @@
       <!-- Lista dinámica -->
       <div id="eq-form-lista" style="display:flex;flex-wrap:wrap;gap:6px;min-height:34px;margin-bottom:10px;padding:4px 0"></div>
 
-      <!-- Desde inventario -->
-      <div class="dir-box" style="margin-bottom:10px">
-        <div class="dir-box-label">📦 Agregar del inventario</div>
-        <input type="text" id="eq-buscar" placeholder="🔍 Buscar por tipo, marca, modelo o serial..." autocomplete="off"
-          oninput="filtrarEqSel()" onfocus="abrirEqDrop()" onblur="setTimeout(cerrarEqDrop,200)"
-          style="width:100%;padding:7px 11px;border:1.5px solid #c5cedb;border-radius:6px 6px 0 0;font-size:13px;font-family:inherit">
-        <div id="eq-drop" style="display:none;background:white;border:1.5px solid #c5cedb;border-top:none;border-radius:0 0 6px 6px;max-height:200px;overflow-y:auto;box-shadow:0 4px 10px rgba(27,58,107,.12)"></div>
-        <input type="hidden" id="eq-inv-sel">
-        <div id="eq-sel-label" style="font-size:12px;color:#2F5AA8;margin:5px 0 6px;min-height:16px;font-weight:600"></div>
-        <button type="button" onclick="agregarEqDeInv()" class="btn-save" style="white-space:nowrap;padding:8px 14px;width:100%;margin-top:2px">+ Agregar al usuario</button>
-      </div>
+      <!-- Ir a inventario -->
+      <button type="button" onclick="irAInventario()" style="width:100%;padding:9px;background:#f0f4f9;border:1.5px dashed #c5cedb;border-radius:6px;font-size:13px;color:#2F5AA8;font-weight:600;cursor:pointer;margin-bottom:4px">
+        📦 Asignar equipo desde Inventario
+      </button>
 
 
       <div class="form-footer">
@@ -632,10 +625,6 @@ function abrirForm(id) {
     _equiposForm=[];
   }
   _equiposFormOriginal=_equiposForm.map(function(e){ return Object.assign({},e); });
-  document.getElementById('eq-buscar').value='';
-  document.getElementById('eq-inv-sel').value='';
-  document.getElementById('eq-sel-label').textContent='';
-  document.getElementById('eq-drop').style.display='none';
   renderEqFormLista();
 
   document.getElementById('overlayForm').classList.add('activo');
@@ -812,43 +801,9 @@ async function cargarEquiposData() {
   } catch(e) { /* will retry when tab opens */ }
 }
 
-function poblarEqInvSel() { /* noop — autocomplete maneja el estado inicial */ }
-
-function abrirEqDrop() { filtrarEqSel(); document.getElementById('eq-drop').style.display=''; }
-function cerrarEqDrop() { document.getElementById('eq-drop').style.display='none'; }
-
-function selEqDrop(el) {
-  document.getElementById('eq-inv-sel').value = el.dataset.id;
-  document.getElementById('eq-buscar').value  = el.dataset.txt;
-  document.getElementById('eq-sel-label').textContent = '';
-  document.getElementById('eq-drop').style.display = 'none';
-}
-
-function filtrarEqSel() {
-  var q=(document.getElementById('eq-buscar').value||'').toLowerCase();
-  var drop=document.getElementById('eq-drop');
-  if (!drop) return;
-  var ICONS={Laptop:'💻',Monitor:'🖥️',Celular:'📱',Tablet:'📲',Teclado:'⌨️',Mouse:'🖱️',Impresora:'🖨️'};
-  var activos=equipos.filter(function(e){ return e.estado!=='Baja'; });
-  var filtrados=q?activos.filter(function(e){
-    return [e.tipo,e.marca,e.modelo,e.serial,e.division,e.usuarioActual].some(function(v){ return v&&v.toLowerCase().includes(q); });
-  }):activos;
-  if (!filtrados.length) {
-    drop.innerHTML='<div style="padding:10px 12px;color:#999;font-size:13px">'+(equipos.length?'Sin resultados':'⏳ Cargando...')+'</div>';
-    drop.style.display=''; return;
-  }
-  drop.innerHTML=filtrados.map(function(e){
-    var ic=ICONS[e.tipo]||'🔧';
-    var label=((e.marca||'')+' '+(e.modelo||'')).trim()||e.tipo;
-    var txt=ic+' '+e.tipo+': '+label+' ('+( e.serial||'s/n')+')';
-    var badge=e.estado==='Disponible'
-      ?'<span style="color:#065f46;background:#d1fae5;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:700;white-space:nowrap">✅ Disponible</span>'
-      :'<span style="color:#92400e;background:#fef3c7;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:700;white-space:nowrap">⚠️ '+(e.usuarioActual?esc(e.usuarioActual):esc(e.estado||''))+'</span>';
-    return '<div data-id="'+esc(e.id)+'" data-txt="'+esc(txt)+'" onmousedown="selEqDrop(this)" style="padding:9px 12px;cursor:pointer;border-bottom:1px solid #f0f4f9;display:flex;justify-content:space-between;align-items:center;gap:8px" onmouseover="this.style.background=\'#f0f4f9\'" onmouseout="this.style.background=\'\'">'
-      +'<span style="font-size:13px">'+ic+' <strong>'+esc(e.tipo)+'</strong> '+esc(label)+' <span style="color:#889;font-size:11px">('+esc(e.serial||'s/n')+')</span></span>'
-      +badge+'</div>';
-  }).join('');
-  drop.style.display='';
+function irAInventario() {
+  cerrarForm();
+  cambiarTab('equipos');
 }
 
 function filtrarUserSel(preselect) {
@@ -876,23 +831,6 @@ function renderEqFormLista() {
     var label=icon+' <strong>'+esc(e.tipo)+'</strong>'+(e.modelo?' — '+esc(e.modelo):'')+(e.serie?' <span style="font-size:11px;color:#778">('+esc(e.serie)+')</span>':'');
     return '<span class="eq-chip">'+label+'<button class="eq-chip-del" title="Quitar" onclick="quitarEq('+i+')">×</button></span>';
   }).join('');
-}
-
-function agregarEqDeInv() {
-  var id=document.getElementById('eq-inv-sel').value;
-  if (!id) { document.getElementById('eq-sel-label').textContent=''; return; }
-  // evitar duplicado
-  if (_equiposForm.some(function(e){return e.invId===id;})) {
-    document.getElementById('eq-sel-label').textContent='⚠️ Este equipo ya está en la lista.';
-    return;
-  }
-  var eq=equipos.find(function(e){return e.id===id;});
-  if (!eq) return;
-  _equiposForm.push({tipo:eq.tipo, modelo:((eq.marca||'')+' '+(eq.modelo||'')).trim(), serie:eq.serial||'', invId:eq.id});
-  document.getElementById('eq-inv-sel').value='';
-  document.getElementById('eq-buscar').value='';
-  document.getElementById('eq-sel-label').textContent='';
-  renderEqFormLista();
 }
 
 
