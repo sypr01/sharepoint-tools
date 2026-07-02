@@ -658,10 +658,11 @@ function _docFecha() {
 }
 
 function _docHeader(titulo, colorTitulo) {
+  var logoUrl=window.location.origin+'/log%20PLG.png';
   return '<div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid #1e3a6e;padding-bottom:14px;margin-bottom:18px">'
-    +'<div><div style="font-size:26px;font-weight:700;color:#1e3a6e;letter-spacing:-1px;line-height:1">pl<span style="color:#c0392b">g</span></div>'
-    +'<div style="font-size:9px;color:#888;margin-top:2px">PANAMERICAN LOGISTICS GROUP</div></div>'
+    +'<div><img src="'+logoUrl+'" style="height:56px;width:auto" alt="PLG"></div>'
     +'<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:'+(colorTitulo||'#1e3a6e')+'">'+titulo+'</div>'
+    +'<div style="font-size:10px;color:#888;margin-top:2px">PANAMERICAN LOGISTICS GROUP</div>'
     +'<div style="font-size:10px;color:#888;margin-top:2px">Fecha: '+_docFecha()+'</div></div></div>';
 }
 
