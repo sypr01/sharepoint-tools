@@ -490,8 +490,15 @@ function renderizarUsuarios(lista) {
       return '<span class="chip ok">'+icon+' '+esc((e.modelo||e.tipo||'').split(' ').slice(0,3).join(' '))+'</span>';
     }).join('');
     if(eqArr.length>3) chips+='<span class="chip">+' +(eqArr.length-3)+' más</span>';
-    chips+=(u.microsoftEmail?'<span class="chip mail">✉️ Office 365</span>':'')+
-           (u.gmailEmail    ?'<span class="chip mail">✉️ Gmail</span>':'');
+    var ctas=Array.isArray(u.cuentas)&&u.cuentas.length?u.cuentas:[];
+    if(!ctas.length){
+      if(u.microsoftEmail) ctas.push({sistema:'Office 365'});
+      if(u.gmailEmail)     ctas.push({sistema:'Gmail'});
+      if(u.magayaUser)     ctas.push({sistema:'Magaya'});
+    }
+    var maxCtas=2;
+    chips+=ctas.slice(0,maxCtas).map(function(c){return '<span class="chip mail">✉️ '+esc(c.sistema)+'</span>';}).join('');
+    if(ctas.length>maxCtas) chips+='<span class="chip">+' +(ctas.length-maxCtas)+' más</span>';
     return '<div class="tarjeta" onclick="verDetalle(\''+u.id+'\')">'+
       '<div class="tarjeta-header"><div class="avatar" style="background:'+col+'">'+ini+'</div>'+
       '<div class="user-info"><div class="user-nombre">'+esc(u.nombre)+'</div><div class="user-puesto">'+esc(u.puesto||u.area||'')+'</div></div></div>'+
