@@ -934,34 +934,77 @@ async function guardarEq() {
   if (!serial) { document.getElementById('eq-form-msg').innerHTML='<div class="msg err">El número de serie es obligatorio.</div>'; return; }
   var btn=document.getElementById('eq-btn-save');
   btn.disabled=true;
+
+  var usuarioNuevo=document.getElementById('f-eq-user').value.trim();
+  var estadoSel=document.getElementById('f-eq-estado').value;
+  // auto-ajustar estado según asignación
+  var estadoFinal = estadoSel;
+  if (usuarioNuevo && estadoSel !== 'Baja') estadoFinal = 'Asignado';
+  if (!usuarioNuevo && estadoSel === 'Asignado') estadoFinal = 'Disponible';
+
   var payload={
     tipo:         document.getElementById('f-eq-tipo').value,
     marca:        document.getElementById('f-eq-marca').value.trim(),
     modelo:       document.getElementById('f-eq-modelo').value.trim(),
     serial,
-    estado:       document.getElementById('f-eq-estado').value,
+    estado:       estadoFinal,
     division:     document.getElementById('f-eq-div').value,
-    usuarioActual:document.getElementById('f-eq-user').value.trim(),
+    usuarioActual:usuarioNuevo,
     notas:        document.getElementById('f-eq-notas').value.trim()
   };
   try {
-    var res,item;
+    var res,item,eqId;
     if (_eqEditId) {
+      var usuarioAnterior=(equipos.find(function(x){return x.id===_eqEditId;})||{}).usuarioActual||'';
       payload.id=_eqEditId;
       res=await fetch('/api/inventario?id='+encodeURIComponent(_eqEditId),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
       item=await res.json();
+      if (!res.ok) throw new Error((item||{}).error||'Error');
       var idx=equipos.findIndex(function(x){return x.id===_eqEditId;});
       if (idx!==-1) equipos[idx]=Object.assign({},equipos[idx],payload,{id:_eqEditId});
+      eqId=_eqEditId;
+      await sincronizarFichaUsuario(usuarioAnterior, usuarioNuevo, eqId, payload);
     } else {
       res=await fetch('/api/inventario',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
       item=await res.json();
+      if (!res.ok) throw new Error((item||{}).error||'Error');
       equipos.unshift(item);
+      eqId=item.id;
+      if (usuarioNuevo && eqId) await sincronizarFichaUsuario('', usuarioNuevo, eqId, payload);
     }
-    if (!res.ok) throw new Error((item||{}).error||'Error');
     filtrarEquipos();
     cerrarFormEq();
   } catch(e) { document.getElementById('eq-form-msg').innerHTML='<div class="msg err">'+e.message+'</div>'; }
   btn.disabled=false;
+}
+
+async function sincronizarFichaUsuario(usuarioAnterior, usuarioNuevo, eqId, eq) {
+  var tareas=[];
+  // quitar de ficha del usuario anterior
+  if (usuarioAnterior && usuarioAnterior !== usuarioNuevo) {
+    var uAnt=usuarios.find(function(u){return u.nombre===usuarioAnterior;});
+    if (uAnt) {
+      var eqsFiltrados=(uAnt.equipos||[]).filter(function(e){return e.invId!==eqId;});
+      uAnt.equipos=eqsFiltrados;
+      tareas.push(fetch('/api/usuarios?id='+encodeURIComponent(uAnt.id),{
+        method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({equipos:eqsFiltrados})
+      }));
+    }
+  }
+  // agregar a ficha del usuario nuevo
+  if (usuarioNuevo) {
+    var uNuevo=usuarios.find(function(u){return u.nombre===usuarioNuevo;});
+    if (uNuevo) {
+      var eqsBase=(uNuevo.equipos||[]).filter(function(e){return e.invId!==eqId;}); // evitar duplicados
+      var nuevoItem={tipo:eq.tipo||'', modelo:((eq.marca||'')+' '+(eq.modelo||'')).trim(), serie:eq.serial||'', invId:eqId};
+      eqsBase.push(nuevoItem);
+      uNuevo.equipos=eqsBase;
+      tareas.push(fetch('/api/usuarios?id='+encodeURIComponent(uNuevo.id),{
+        method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({equipos:eqsBase})
+      }));
+    }
+  }
+  await Promise.all(tareas);
 }
 
 function confirmarElimEq(id) { _eqEditId=id; eliminarEq(); }
