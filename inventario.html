@@ -372,12 +372,10 @@
       <!-- Desde inventario -->
       <div class="dir-box" style="margin-bottom:10px">
         <div class="dir-box-label">📦 Agregar del inventario</div>
-        <div style="position:relative">
-          <input type="text" id="eq-buscar" placeholder="🔍 Buscar por tipo, marca, modelo o serial..." autocomplete="off"
-            oninput="filtrarEqSel()" onfocus="abrirEqDrop()" onblur="setTimeout(cerrarEqDrop,200)"
-            style="width:100%;padding:7px 11px;border:1.5px solid #c5cedb;border-radius:6px;font-size:13px;font-family:inherit">
-          <div id="eq-drop" style="display:none;position:absolute;left:0;right:0;top:calc(100% + 2px);background:white;border:1.5px solid #c5cedb;border-radius:6px;max-height:210px;overflow-y:auto;z-index:50;box-shadow:0 4px 14px rgba(27,58,107,.15)"></div>
-        </div>
+        <input type="text" id="eq-buscar" placeholder="🔍 Buscar por tipo, marca, modelo o serial..." autocomplete="off"
+          oninput="filtrarEqSel()" onfocus="abrirEqDrop()" onblur="setTimeout(cerrarEqDrop,200)"
+          style="width:100%;padding:7px 11px;border:1.5px solid #c5cedb;border-radius:6px 6px 0 0;font-size:13px;font-family:inherit">
+        <div id="eq-drop" style="display:none;background:white;border:1.5px solid #c5cedb;border-top:none;border-radius:0 0 6px 6px;max-height:200px;overflow-y:auto;box-shadow:0 4px 10px rgba(27,58,107,.12)"></div>
         <input type="hidden" id="eq-inv-sel">
         <div id="eq-sel-label" style="font-size:12px;color:#2F5AA8;margin:5px 0 6px;min-height:16px;font-weight:600"></div>
         <button type="button" onclick="agregarEqDeInv()" class="btn-save" style="white-space:nowrap;padding:8px 14px;width:100%;margin-top:2px">+ Agregar al usuario</button>
