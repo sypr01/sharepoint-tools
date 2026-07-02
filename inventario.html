@@ -631,6 +631,7 @@ function abrirForm(id) {
   } else {
     _equiposForm=[];
   }
+  _equiposFormOriginal=_equiposForm.map(function(e){ return Object.assign({},e); });
   document.getElementById('eq-buscar').value='';
   document.getElementById('eq-inv-sel').value='';
   poblarEqInvSel();
@@ -676,22 +677,34 @@ async function guardar() {
       usuarios.unshift(item);
     }
     if (!res.ok) throw new Error((item||{}).error||'Error');
-    // actualizar usuarioActual en inventario para cada equipo asignado del inventario
+    // marcar como Asignado los equipos que quedaron
+    var invIds=_equiposForm.filter(function(e){return e.invId;}).map(function(e){return e.invId;});
     var invUpdates=_equiposForm.filter(function(e){return e.invId;});
+    // liberar equipos que fueron quitados de la lista
+    var quitados=_equiposFormOriginal.filter(function(e){
+      return e.invId && invIds.indexOf(e.invId)===-1;
+    });
     await Promise.all(invUpdates.map(function(e){
       var eq=equipos.find(function(x){return x.id===e.invId;});
       if (!eq) return Promise.resolve();
-      var upd=Object.assign({},eq,{usuarioActual:nombre});
-      var upd2=Object.assign({},upd,{estado:'Asignado'});
+      var upd=Object.assign({},eq,{usuarioActual:nombre,estado:'Asignado'});
       return fetch('/api/inventario?id='+encodeURIComponent(e.invId),{
-        method:'PUT',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify(upd2)
+        method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(upd)
       }).then(function(){
         var i=equipos.findIndex(function(x){return x.id===e.invId;});
-        if(i!==-1) equipos[i]=upd2;
+        if(i!==-1) equipos[i]=upd;
       });
-    }));
+    }).concat(quitados.map(function(e){
+      var eq=equipos.find(function(x){return x.id===e.invId;});
+      if (!eq) return Promise.resolve();
+      var upd=Object.assign({},eq,{usuarioActual:'',estado:'Disponible'});
+      return fetch('/api/inventario?id='+encodeURIComponent(e.invId),{
+        method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(upd)
+      }).then(function(){
+        var i=equipos.findIndex(function(x){return x.id===e.invId;});
+        if(i!==-1) equipos[i]=upd;
+      });
+    })));
     filtrarUsuarios();
     cerrarForm();
   } catch(e) { mostrarMsg('err','Error al guardar: '+e.message); }
@@ -773,7 +786,7 @@ function seleccionarColab() {
    EQUIPOS
    ══════════════════════════ */
 var equipos=[], equiposCargados=false, _eqEditId=null, _equiposDatos=false;
-var _equiposForm=[];
+var _equiposForm=[], _equiposFormOriginal=[];
 
 async function cargarEquiposData() {
   if (_equiposDatos) return;
