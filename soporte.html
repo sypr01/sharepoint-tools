@@ -146,12 +146,14 @@
             <label>Categoría *</label>
             <select id="categoria">
               <option value="">— Seleccionar —</option>
-              <option value="Hardware">Hardware (PC, monitor, teclado...)</option>
-              <option value="Software">Software / Aplicaciones</option>
-              <option value="Red">Red / Conectividad / VPN</option>
-              <option value="Accesos">Accesos / Permisos / Cuentas</option>
-              <option value="Impresoras">Impresoras / Escáneres</option>
-              <option value="Correo">Correo / Microsoft 365</option>
+              <option value="Correo">Correo</option>
+              <option value="Computadora">Computadora</option>
+              <option value="Internet/Red">Internet / Red</option>
+              <option value="Impresora/Escáner">Impresora / Escáner</option>
+              <option value="Microsoft 365/Teams">Microsoft 365 / Teams</option>
+              <option value="Accesos a sistemas">Accesos a sistemas</option>
+              <option value="Equipo nuevo">Equipo nuevo</option>
+              <option value="Baja de usuario">Baja de usuario</option>
               <option value="Otro">Otro</option>
             </select>
           </div>
@@ -165,22 +167,20 @@
             </select>
           </div>
           <div class="campo">
-            <label>División *</label>
-            <select id="division">
-              <option value="">— Seleccionar —</option>
-              <option value="PLG de El Salvador">PLG de El Salvador</option>
-              <option value="PLG División Aduanas">PLG División Aduanas</option>
-              <option value="PLG División Terrestre">PLG División Terrestre</option>
-              <option value="PLG Dominicana">PLG Dominicana</option>
-            </select>
-          </div>
-          <div class="campo">
             <label>Tu nombre *</label>
             <input type="text" id="solicitante" placeholder="Nombre completo">
           </div>
           <div class="campo">
             <label>Tu correo *</label>
-            <input type="email" id="email" placeholder="correo@plg.com.sv">
+            <input type="email" id="correo" placeholder="correo@plg.com.sv">
+          </div>
+          <div class="campo">
+            <label>Área / Departamento *</label>
+            <input type="text" id="area" placeholder="Ej: Operaciones, Contabilidad...">
+          </div>
+          <div class="campo">
+            <label>Teléfono / Extensión</label>
+            <input type="text" id="telefono" placeholder="Ej: ext. 234 o 7888-1234">
           </div>
         </div>
 
@@ -196,11 +196,11 @@
     const titulo      = document.getElementById('titulo').value.trim();
     const descripcion = document.getElementById('descripcion').value.trim();
     const categoria   = document.getElementById('categoria').value;
-    const division    = document.getElementById('division').value;
     const solicitante = document.getElementById('solicitante').value.trim();
-    const email       = document.getElementById('email').value.trim();
+    const correo      = document.getElementById('correo').value.trim();
+    const area        = document.getElementById('area').value.trim();
 
-    if (!titulo || !descripcion || !categoria || !division || !solicitante || !email) {
+    if (!titulo || !descripcion || !categoria || !solicitante || !correo || !area) {
       mostrarMensaje('err', 'Completa todos los campos obligatorios marcados con *');
       return;
     }
@@ -210,14 +210,14 @@
     btn.textContent = 'Enviando...';
 
     const payload = {
-      titulo, descripcion, categoria,
-      prioridad:    document.getElementById('prioridad').value,
-      departamento: division,
-      solicitante, email
+      titulo, descripcion, categoria, canal: 'formulario',
+      prioridad:  document.getElementById('prioridad').value,
+      telefono:   document.getElementById('telefono').value.trim(),
+      solicitante, correo, area
     };
 
     try {
-      const res = await fetch('/api/tickets', {
+      const res = await fetch('/api/mesa-ayuda', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -229,7 +229,7 @@
       mostrarMensaje('ok',
         '¡Tu solicitud fue enviada correctamente! El equipo de TI la atenderá pronto.' +
         '<span class="ticket-num">Número de ticket: ' + ticket.id + '</span>' +
-        'Recibirás una confirmación en <strong>' + email + '</strong>.'
+        'Recibirás una confirmación en <strong>' + correo + '</strong>.'
       );
     } catch (e) {
       btn.disabled = false;

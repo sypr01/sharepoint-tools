@@ -138,4 +138,110 @@ async function notificarActualizacion(ticket) {
   });
 }
 
-module.exports = { notificarNuevoTicket, confirmarAlSolicitante, notificarActualizacion };
+// ── Mesa de Ayuda IT — Nuevo ticket (notif IT) ────────────────────
+const CANAL_LABEL = { formulario: '🌐 Formulario web', whatsapp: '💬 WhatsApp', teams: '👥 Microsoft Teams', correo: '📧 Correo electrónico' };
+
+async function notificarTicketMA(ticket) {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) return;
+  const t = crearTransporte();
+  const canal = CANAL_LABEL[ticket.canal] || ticket.canal || 'Formulario';
+  const cuerpo = `
+    <h2 style="color:#1B3A6B;margin:0 0 8px;">Nuevo ticket — ${canal}</h2>
+    <p style="color:#666;font-size:14px;margin:0 0 20px;">Número: <strong>${ticket.id}</strong></p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #edf0f5;border-radius:8px;overflow:hidden;margin-bottom:20px;">
+      ${filaDato('Asunto', ticket.titulo)}
+      ${filaDato('Categoría', ticket.categoria)}
+      ${filaDato('Prioridad', `<span style="color:${colorPrioridad(ticket.prioridad)};font-weight:700">${ticket.prioridad}</span>`)}
+      ${filaDato('Solicitante', ticket.solicitante)}
+      ${filaDato('Área', ticket.area || '-')}
+      ${filaDato('Correo', ticket.correo || '-')}
+      ${filaDato('Teléfono', ticket.telefono || '-')}
+      ${filaDato('Canal', canal)}
+    </table>
+    <div style="background:#F0F4F9;border-radius:8px;padding:16px;">
+      <p style="margin:0 0 6px;font-size:12px;font-weight:700;color:#778;">DESCRIPCIÓN</p>
+      <p style="margin:0;font-size:14px;color:#444;white-space:pre-wrap">${ticket.descripcion || ticket.titulo || ''}</p>
+    </div>`;
+  await t.sendMail({
+    from: `"Soporte IT PLG" <${FROM}>`,
+    to: IT_EMAIL,
+    subject: `[${ticket.prioridad||'Media'}] ${ticket.id} — ${ticket.titulo}`,
+    html: plantillaBase(cuerpo)
+  });
+}
+
+// ── Mesa de Ayuda IT — Confirmación al solicitante ────────────────
+async function confirmarTicketMA(ticket) {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS || !ticket.correo) return;
+  const t = crearTransporte();
+  const canal = CANAL_LABEL[ticket.canal] || ticket.canal || '';
+  const cuerpo = `
+    <h2 style="color:#1B3A6B;margin:0 0 8px;">Tu solicitud fue recibida</h2>
+    <p style="color:#666;font-size:14px;margin:0 0 20px;">Hola <strong>${ticket.solicitante}</strong>, el equipo de TI atenderá tu solicitud.</p>
+    <div style="background:#d1fae5;border:1px solid #6ee7b7;border-radius:8px;padding:14px;margin-bottom:20px;text-align:center;">
+      <strong style="color:#065f46;font-size:18px;">Número de ticket: ${ticket.id}</strong>
+    </div>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #edf0f5;border-radius:8px;overflow:hidden;">
+      ${filaDato('Asunto', ticket.titulo)}
+      ${filaDato('Categoría', ticket.categoria)}
+      ${filaDato('Prioridad', ticket.prioridad)}
+      ${filaDato('Canal de entrada', canal)}
+      ${filaDato('Estado', 'Nuevo')}
+    </table>
+    <p style="color:#666;font-size:13px;margin-top:16px;">Recibirás actualizaciones en este correo cuando haya cambios en tu ticket.</p>`;
+  await t.sendMail({
+    from: `"Soporte IT PLG" <${FROM}>`,
+    to: ticket.correo,
+    subject: `Ticket recibido: ${ticket.id} — ${ticket.titulo}`,
+    html: plantillaBase(cuerpo)
+  });
+}
+
+// ── Mesa de Ayuda IT — Actualización al solicitante ───────────────
+async function notificarActualizacionMA(ticket) {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS || !ticket.correo) return;
+  const t = crearTransporte();
+  const esResuelto = ticket.estado === 'Resuelto' || ticket.estado === 'Cerrado';
+  const cuerpo = `
+    <h2 style="color:#1B3A6B;margin:0 0 8px;">Tu ticket fue actualizado</h2>
+    <p style="color:#666;font-size:14px;margin:0 0 20px;">Hola <strong>${ticket.solicitante}</strong>.</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #edf0f5;border-radius:8px;overflow:hidden;margin-bottom:20px;">
+      ${filaDato('Ticket', ticket.id)}
+      ${filaDato('Asunto', ticket.titulo)}
+      ${filaDato('Nuevo estado', `<span style="color:${colorEstado(ticket.estado)};font-weight:700">${ticket.estado}</span>`)}
+      ${ticket.tecnicoAsignado ? filaDato('Técnico', ticket.tecnicoAsignado) : ''}
+    </table>
+    ${esResuelto ? '<div style="background:#d1fae5;border-radius:8px;padding:12px;text-align:center;"><strong style="color:#065f46;">Tu problema ha sido resuelto. Si persiste, abre un nuevo ticket.</strong></div>' : ''}`;
+  await t.sendMail({
+    from: `"Soporte IT PLG" <${FROM}>`,
+    to: ticket.correo,
+    subject: `Ticket ${ticket.id} actualizado: ${ticket.estado}`,
+    html: plantillaBase(cuerpo)
+  });
+}
+
+// ── Mesa de Ayuda IT — Respuesta del técnico al usuario ──────────
+async function responderPorCorreo(ticket, mensaje, autorNombre) {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS || !ticket.correo) return;
+  const t = crearTransporte();
+  const cuerpo = `
+    <h2 style="color:#1B3A6B;margin:0 0 8px;">Respuesta del equipo de TI</h2>
+    <p style="color:#666;font-size:14px;margin:0 0 4px;">Ticket: <strong>${ticket.id}</strong></p>
+    <p style="color:#666;font-size:14px;margin:0 0 20px;">Técnico: <strong>${autorNombre || 'Soporte IT'}</strong></p>
+    <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:16px;margin-bottom:20px;">
+      <p style="margin:0;font-size:15px;color:#1e40af;white-space:pre-wrap">${mensaje}</p>
+    </div>
+    <p style="color:#888;font-size:12px;">Puedes responder a este correo o contactar directamente a soporte@plg.com.sv</p>`;
+  await t.sendMail({
+    from: `"Soporte IT PLG" <${FROM}>`,
+    to: ticket.correo,
+    replyTo: IT_EMAIL,
+    subject: `Re: Ticket ${ticket.id} — ${ticket.titulo}`,
+    html: plantillaBase(cuerpo)
+  });
+}
+
+module.exports = {
+  notificarNuevoTicket, confirmarAlSolicitante, notificarActualizacion,
+  notificarTicketMA, confirmarTicketMA, notificarActualizacionMA, responderPorCorreo
+};
