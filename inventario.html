@@ -230,6 +230,7 @@
       <option value="PLG GROUP">PLG GROUP</option>
     </select>
     <span class="contador" id="u-contador"></span>
+    <button id="btn-recuperar" class="btn-nuevo" style="display:none;background:#b45309" onclick="recuperarCuentas()">🔄 Recuperar cuentas</button>
     <button class="btn-nuevo" onclick="abrirForm(null)">+ Agregar Usuario</button>
   </div>
   <div class="grid" id="grid">
@@ -548,6 +549,7 @@ async function cargarUsuarios() {
     filtrarUsuarios();
     poblarColabSel();
     sincronizarCelularesDir();
+    verificarBtnRecuperar();
   } catch(e) {
     document.getElementById('grid').innerHTML='<div class="sin-datos">Error al cargar: '+e.message+'</div>';
   }
@@ -1100,6 +1102,91 @@ function mostrarMsg(t,txt) { document.getElementById('form-msg').innerHTML='<div
 
 /* ── Directorio (select) ── */
 var _colabs=[], _colasCargados=false, _celSyncDone=false;
+
+async function recuperarCuentas() {
+  var btn=document.getElementById('btn-recuperar');
+  // Cargar directorio si aún no está listo
+  if (!_colasCargados) {
+    if (btn) { btn.disabled=true; btn.textContent='⏳ Cargando directorio...'; }
+    try {
+      var r=await fetch('/api/colaboradores?nofoto=1');
+      var d=await r.json();
+      _colabs=Array.isArray(d)?d:[];
+      _colasCargados=true;
+    } catch(e) {
+      alert('No se pudo cargar el directorio Microsoft. Intente de nuevo.');
+      if (btn) { btn.disabled=false; btn.textContent='🔄 Recuperar cuentas'; }
+      return;
+    }
+  }
+  // Índice de correo del directorio: nombre normalizado → email
+  var emailIdx={};
+  _colabs.forEach(function(c){ if(c.correo) emailIdx[nombreLimpio(c.nombre).trim().toLowerCase()]=c.correo; });
+
+  // Grupo 1: tienen campos planos viejos → reconstruir con contraseñas
+  var conPlanos=usuarios.filter(function(u){
+    return !(Array.isArray(u.cuentas)&&u.cuentas.length)&&(u.microsoftEmail||u.gmailEmail||u.magayaUser);
+  });
+  // Grupo 2: sin campos planos → recuperar email del directorio
+  var sinDatos=usuarios.filter(function(u){
+    return !(Array.isArray(u.cuentas)&&u.cuentas.length)&&!u.microsoftEmail&&!u.gmailEmail&&!u.magayaUser;
+  });
+  var total=conPlanos.length+sinDatos.length;
+  if (!total) { alert('No hay usuarios que necesiten recuperación.'); return; }
+
+  if (!confirm(total+' usuarios sin cuentas detectados.\n\n'
+    +'✅ '+conPlanos.length+' se recuperarán desde respaldo (con contraseñas).\n'
+    +'📧 '+sinDatos.length+' recibirán el correo corporativo del directorio Microsoft.\n\n¿Continuar?')) return;
+
+  if (btn) { btn.disabled=true; btn.textContent='⏳ Recuperando '+total+'...'; }
+  var ok=0, fallo=0;
+
+  // Grupo 1 — desde campos planos, preserva contraseñas
+  await Promise.all(conPlanos.map(async function(u){
+    var ctas=[];
+    if(u.microsoftEmail) ctas.push({sistema:'Microsoft / Office 365',usuario:u.microsoftEmail,pass:u.microsoftPass||''});
+    if(u.gmailEmail)     ctas.push({sistema:'Gmail',                  usuario:u.gmailEmail,    pass:u.gmailPass||''});
+    if(u.magayaUser)     ctas.push({sistema:'Magaya',                 usuario:u.magayaUser,    pass:u.magayaPass||''});
+    try {
+      var res=await fetch('/api/usuarios?id='+encodeURIComponent(u.id),{
+        method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({cuentas:ctas})
+      });
+      if(res.ok){u.cuentas=ctas;ok++;}else fallo++;
+    } catch(e){fallo++;}
+  }));
+
+  // Grupo 2 — desde directorio Microsoft (sin contraseña)
+  await Promise.all(sinDatos.map(async function(u){
+    var email=emailIdx[(u.nombre||'').trim().toLowerCase()];
+    if(!email){fallo++;return;}
+    var ctas=[{sistema:'Microsoft / Office 365',usuario:email,pass:''}];
+    try {
+      var res=await fetch('/api/usuarios?id='+encodeURIComponent(u.id),{
+        method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({cuentas:ctas})
+      });
+      if(res.ok){u.cuentas=ctas;ok++;}else fallo++;
+    } catch(e){fallo++;}
+  }));
+
+  filtrarUsuarios();
+  verificarBtnRecuperar();
+  var msg='Recuperación completada:\n✅ '+ok+' usuarios recuperados.';
+  if(fallo) msg+='\n⚠️ '+fallo+' sin correo en directorio — ingresar manualmente.';
+  if(sinDatos.length) msg+='\n\nLas contraseñas de los usuarios recuperados del directorio deben re-ingresarse.';
+  alert(msg);
+  if(btn){btn.disabled=false;btn.textContent='🔄 Recuperar cuentas';}
+}
+
+function verificarBtnRecuperar() {
+  var btn=document.getElementById('btn-recuperar');
+  if (!btn) return;
+  var necesitan=usuarios.some(function(u){
+    return !(Array.isArray(u.cuentas)&&u.cuentas.length)&&!u.microsoftEmail&&!u.gmailEmail&&!u.magayaUser;
+  }) || usuarios.some(function(u){
+    return !(Array.isArray(u.cuentas)&&u.cuentas.length)&&(u.microsoftEmail||u.gmailEmail||u.magayaUser);
+  });
+  btn.style.display=necesitan?'':'none';
+}
 
 async function sincronizarCelularesDir() {
   if (_celSyncDone || !_colasCargados || !usuarios.length) return;
