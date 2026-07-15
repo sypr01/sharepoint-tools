@@ -86,12 +86,12 @@ module.exports = async function (context, req) {
       }
       const b   = req.body || {};
       const now = new Date().toISOString();
-      const entity = { partitionKey: PARTITION, rowKey: id, ...b, id: undefined,
+      // cuentas se gestiona exclusivamente desde /api/cuentas-usuario — nunca se toca aquí
+      const { cuentas: _ignorar, ...bSinCuentas } = b;
+      const entity = { partitionKey: PARTITION, rowKey: id, ...bSinCuentas, id: undefined,
         fechaActualizacion: now };
       delete entity.id;
-      // Solo serializar campos JSON cuando vienen en el body — evita sobrescribir con '' en PUTs parciales
       if ('equipos' in b)        entity.equipos        = Array.isArray(b.equipos) ? JSON.stringify(b.equipos) : (b.equipos || '');
-      if ('cuentas' in b)        entity.cuentas        = Array.isArray(b.cuentas) ? JSON.stringify(b.cuentas) : (b.cuentas || '');
       if ('accesosFisicos' in b) entity.accesosFisicos = b.accesosFisicos && typeof b.accesosFisicos==='object' ? JSON.stringify(b.accesosFisicos) : (b.accesosFisicos || '');
       await client.updateEntity(entity, "Merge");
       context.res = { status: 200, headers: CORS, body: JSON.stringify(toUser({ rowKey: id, ...b, fechaActualizacion: now })) };

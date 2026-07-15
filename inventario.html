@@ -1036,8 +1036,7 @@ async function guardar() {
     celular:       document.getElementById('f-cel').value.trim(),
     extension:     document.getElementById('f-ext').value.trim(),
     hostname:      document.getElementById('f-host').value.trim(),
-    anydesk:       document.getElementById('f-anydesk').value.trim(),
-    cuentas:       _cuentasForm
+    anydesk:       document.getElementById('f-anydesk').value.trim()
   };
   try {
     var res, item;
@@ -1054,6 +1053,13 @@ async function guardar() {
     }
     if (!res.ok) throw new Error((item||{}).error||'Error');
     var savedId=_editId||(item&&item.id)||'';
+    // guardar cuentas por endpoint dedicado — completamente separado del perfil de usuario
+    await fetch('/api/cuentas-usuario?id='+encodeURIComponent(savedId),{
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({cuentas:_cuentasForm})
+    });
+    var uLocal=usuarios.find(function(x){return x.id===savedId;});
+    if (uLocal) uLocal.cuentas=_cuentasForm;
     // actualizar inventario: asignados → usuarioActual + usuarioId; quitados → limpiar
     var invIds=_equiposForm.filter(function(e){return e.invId;}).map(function(e){return e.invId;});
     var quitados=_equiposFormOriginal.filter(function(e){
@@ -1148,7 +1154,7 @@ async function recuperarCuentas() {
     if(u.gmailEmail)     ctas.push({sistema:'Gmail',                  usuario:u.gmailEmail,    pass:u.gmailPass||''});
     if(u.magayaUser)     ctas.push({sistema:'Magaya',                 usuario:u.magayaUser,    pass:u.magayaPass||''});
     try {
-      var res=await fetch('/api/usuarios?id='+encodeURIComponent(u.id),{
+      var res=await fetch('/api/cuentas-usuario?id='+encodeURIComponent(u.id),{
         method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({cuentas:ctas})
       });
       if(res.ok){u.cuentas=ctas;ok++;}else fallo++;
@@ -1161,7 +1167,7 @@ async function recuperarCuentas() {
     if(!email){fallo++;return;}
     var ctas=[{sistema:'Microsoft / Office 365',usuario:email,pass:''}];
     try {
-      var res=await fetch('/api/usuarios?id='+encodeURIComponent(u.id),{
+      var res=await fetch('/api/cuentas-usuario?id='+encodeURIComponent(u.id),{
         method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({cuentas:ctas})
       });
       if(res.ok){u.cuentas=ctas;ok++;}else fallo++;
