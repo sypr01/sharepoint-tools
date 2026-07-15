@@ -546,6 +546,7 @@ async function cargarUsuarios() {
     if (!res.ok) throw new Error('Error '+res.status);
     usuarios = await res.json();
     filtrarUsuarios();
+    poblarColabSel();
   } catch(e) {
     document.getElementById('grid').innerHTML='<div class="sin-datos">Error al cargar: '+e.message+'</div>';
   }
@@ -984,7 +985,7 @@ function abrirForm(id) {
   document.getElementById('btn-save').textContent     = u?'Guardar Cambios':'Agregar';
   document.getElementById('form-msg').innerHTML='';
   document.getElementById('dir-wrap').style.display = u?'none':'';
-  if (!u) document.getElementById('f-colab-sel').value='';
+  if (!u) { poblarColabSel(); document.getElementById('f-colab-sel').value=''; }
 
   document.getElementById('f-nombre').value   = u?u.nombre:'';
   document.getElementById('f-division').value = u?u.division:'';
@@ -1079,6 +1080,7 @@ async function guardar() {
       }))
     );
     filtrarUsuarios();
+    poblarColabSel();
     cerrarForm();
   } catch(e) { mostrarMsg('err','Error al guardar: '+e.message); }
   btn.disabled=false;
@@ -1108,6 +1110,21 @@ var DIV_MAP={
 
 function nombreLimpio(n) { return (n||'').split('--')[0].split(' -')[0].trim(); }
 
+function poblarColabSel() {
+  var sel=document.getElementById('f-colab-sel');
+  if (!sel || !_colasCargados) return;
+  var hint=document.getElementById('dir-hint');
+  // nombres ya registrados en inventario (comparación normalizada)
+  var registrados=new Set(usuarios.map(function(u){ return (u.nombre||'').trim().toLowerCase(); }));
+  var disponibles=_colabs.map(function(c,i){ return {c:c,i:i}; })
+    .filter(function(x){ return !registrados.has(nombreLimpio(x.c.nombre).trim().toLowerCase()); });
+  sel.innerHTML='<option value="">— Seleccionar colaborador —</option>'+
+    disponibles.map(function(x){
+      return '<option value="'+x.i+'">'+esc(nombreLimpio(x.c.nombre))+(x.c.cargo?' — '+esc(x.c.cargo):'')+'</option>';
+    }).join('');
+  if (hint) hint.textContent=disponibles.length+' de '+_colabs.length+' colaboradores sin ficha';
+}
+
 async function iniciarBusquedaDir() {
   if (_colasCargados) return;
   var hint=document.getElementById('dir-hint');
@@ -1118,14 +1135,7 @@ async function iniciarBusquedaDir() {
     _colabs=Array.isArray(data) ? data : [];
     _colabs.sort(function(a,b){ return nombreLimpio(a.nombre).localeCompare(nombreLimpio(b.nombre)); });
     _colasCargados=true;
-    var sel=document.getElementById('f-colab-sel');
-    if (sel) {
-      sel.innerHTML='<option value="">— Seleccionar colaborador —</option>'+
-        _colabs.map(function(c,i){
-          return '<option value="'+i+'">'+esc(nombreLimpio(c.nombre))+(c.cargo?' — '+esc(c.cargo):'')+'</option>';
-        }).join('');
-    }
-    if (hint) hint.textContent=_colabs.length ? '✓ '+_colabs.length+' colaboradores' : '⚠️ sin datos';
+    poblarColabSel();
   } catch(e) {
     _colabs=[];
     var sel=document.getElementById('f-colab-sel');
