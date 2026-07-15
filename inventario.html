@@ -547,6 +547,7 @@ async function cargarUsuarios() {
     usuarios = await res.json();
     filtrarUsuarios();
     poblarColabSel();
+    sincronizarCelularesDir();
   } catch(e) {
     document.getElementById('grid').innerHTML='<div class="sin-datos">Error al cargar: '+e.message+'</div>';
   }
@@ -1098,7 +1099,29 @@ async function eliminarUsuario() {
 function mostrarMsg(t,txt) { document.getElementById('form-msg').innerHTML='<div class="msg '+t+'">'+txt+'</div>'; }
 
 /* ── Directorio (select) ── */
-var _colabs=[], _colasCargados=false;
+var _colabs=[], _colasCargados=false, _celSyncDone=false;
+
+async function sincronizarCelularesDir() {
+  if (_celSyncDone || !_colasCargados || !usuarios.length) return;
+  _celSyncDone=true;
+  // índice rápido: nombre normalizado → celular
+  var idx={};
+  _colabs.forEach(function(c){
+    if (c.movil) idx[nombreLimpio(c.nombre).trim().toLowerCase()]=c.movil;
+  });
+  var pendientes=usuarios.filter(function(u){
+    return !u.celular && idx[(u.nombre||'').trim().toLowerCase()];
+  });
+  if (!pendientes.length) return;
+  await Promise.all(pendientes.map(function(u){
+    u.celular=idx[(u.nombre||'').trim().toLowerCase()];
+    return fetch('/api/usuarios?id='+encodeURIComponent(u.id),{
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({celular:u.celular})
+    });
+  }));
+  filtrarUsuarios();
+}
 
 var DIV_MAP={
   'PLG DE EL SALVADOR':'PLG DE EL SALVADOR',
@@ -1136,6 +1159,7 @@ async function iniciarBusquedaDir() {
     _colabs.sort(function(a,b){ return nombreLimpio(a.nombre).localeCompare(nombreLimpio(b.nombre)); });
     _colasCargados=true;
     poblarColabSel();
+    sincronizarCelularesDir();
   } catch(e) {
     _colabs=[];
     var sel=document.getElementById('f-colab-sel');
