@@ -37,8 +37,6 @@
     .sel { padding:7px 10px; border:1px solid #c5cedb; border-radius:6px; font-size:12px; color:#555; background:white; cursor:pointer; }
     .btn-nuevo { padding:8px 17px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
     .btn-nuevo:hover { background:var(--blue); }
-    .btn-mig { padding:8px 13px; background:white; color:#64748b; border:1.5px solid #cbd5e1; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; }
-    .btn-mig:hover { border-color:var(--blue); color:var(--navy); }
     .contador { font-size:12px; color:#778; white-space:nowrap; }
 
     /* User grid (tab Usuarios) */
@@ -232,7 +230,6 @@
       <option value="PLG GROUP">PLG GROUP</option>
     </select>
     <span class="contador" id="u-contador"></span>
-    <button class="btn-mig" onclick="migrarAsignaciones()" title="Vincula equipos del inventario a usuarios por ID">⚙ Migrar asignaciones</button>
     <button class="btn-nuevo" onclick="abrirForm(null)">+ Agregar Usuario</button>
   </div>
   <div class="grid" id="grid">
@@ -306,6 +303,7 @@
         <div class="info-grid">
           <div class="info-item"><label>Área / Departamento</label><div class="valor" id="d-area"></div></div>
           <div class="info-item"><label>Teléfono / Ext.</label><div class="valor" id="d-tel"></div></div>
+          <div class="info-item"><label>Celular / Móvil</label><div class="valor" id="d-cel"></div></div>
           <div class="info-item"><label>Hostname</label><div class="valor mono" id="d-host"></div></div>
           <div class="info-item"><label>AnyDesk ID</label><div class="valor mono" id="d-anydesk"></div></div>
         </div>
@@ -422,6 +420,7 @@
         <div class="campo"><label>Área / Departamento</label><input id="f-area" type="text" placeholder="Ej: Departamento Comercial"></div>
         <div class="campo"><label>Puesto</label><input id="f-puesto" type="text" placeholder="Ej: Gerente de Ventas"></div>
         <div class="campo"><label>Teléfono</label><input id="f-tel" type="text" placeholder="+503 0000 0000"></div>
+        <div class="campo"><label>Celular / Móvil</label><input id="f-cel" type="text" placeholder="+503 7000 0000"></div>
         <div class="campo"><label>Extensión</label><input id="f-ext" type="text" placeholder="Ej: 110"></div>
         <div class="campo"><label>Hostname</label><input id="f-host" type="text" placeholder="Ej: SV-CO002"></div>
         <div class="campo"><label>AnyDesk ID</label><input id="f-anydesk" type="text" placeholder="Ej: 1173414536"></div>
@@ -628,6 +627,7 @@ function verDetalle(id) {
   document.getElementById('d-puesto-div').textContent=[u.puesto,u.division].filter(Boolean).join(' · ');
   document.getElementById('d-area').textContent=[u.area,'—'].filter(Boolean)[0];
   document.getElementById('d-tel').textContent=[u.telefono,u.extension?'Ext. '+u.extension:''].filter(Boolean).join(' / ')||'—';
+  document.getElementById('d-cel').textContent=u.celular||'—';
   document.getElementById('d-host').textContent=u.hostname||'—';
   document.getElementById('d-anydesk').textContent=u.anydesk||'—';
   // render cuentas dinámicas con backward compat
@@ -824,6 +824,7 @@ function generarFichaUsuario() {
   html+='<div class="grid2">'
     +'<div class="field"><label>Área / Departamento</label><div class="val">'+esc(u.area||'—')+'</div></div>'
     +'<div class="field"><label>Teléfono / Ext.</label><div class="val">'+esc([u.telefono,u.extension?'Ext. '+u.extension:''].filter(Boolean).join(' / ')||'—')+'</div></div>'
+    +(u.celular?'<div class="field"><label>Celular / Móvil</label><div class="val">'+esc(u.celular)+'</div></div>':'')
     +'<div class="field"><label>Hostname</label><div class="val" style="font-family:monospace">'+esc(u.hostname||'—')+'</div></div>'
     +'<div class="field"><label>AnyDesk ID</label><div class="val" style="font-family:monospace">'+esc(u.anydesk||'—')+'</div></div>'
     +'</div>';
@@ -990,6 +991,7 @@ function abrirForm(id) {
   document.getElementById('f-area').value     = u?u.area:'';
   document.getElementById('f-puesto').value   = u?u.puesto:'';
   document.getElementById('f-tel').value      = u?u.telefono:'';
+  document.getElementById('f-cel').value      = u?u.celular:'';
   document.getElementById('f-ext').value      = u?u.extension:'';
   document.getElementById('f-host').value     = u?u.hostname:'';
   document.getElementById('f-anydesk').value  = u?u.anydesk:'';
@@ -1027,6 +1029,7 @@ async function guardar() {
     area:          document.getElementById('f-area').value.trim(),
     puesto:        document.getElementById('f-puesto').value.trim(),
     telefono:      document.getElementById('f-tel').value.trim(),
+    celular:       document.getElementById('f-cel').value.trim(),
     extension:     document.getElementById('f-ext').value.trim(),
     hostname:      document.getElementById('f-host').value.trim(),
     anydesk:       document.getElementById('f-anydesk').value.trim(),
@@ -1140,6 +1143,7 @@ function seleccionarColab() {
     document.getElementById('f-area').value='';
     document.getElementById('f-puesto').value='';
     document.getElementById('f-tel').value='';
+  document.getElementById('f-cel').value='';
     _cuentasForm=[];
     renderCuentasFormLista();
     return;
@@ -1387,47 +1391,6 @@ async function eliminarEq() {
   } catch(e) { alert('Error: '+e.message); }
 }
 
-/* ── Migración de asignaciones: escribe usuarioId en inventario ── */
-async function migrarAsignaciones() {
-  if(!_equiposDatos) { alert('Espera a que cargue el inventario antes de migrar.'); return; }
-  if(!usuarios.length) { alert('Espera a que carguen los usuarios antes de migrar.'); return; }
-
-  var pendientes=equipos.filter(function(e){ return e.usuarioActual && !e.usuarioId; });
-  if(!pendientes.length) {
-    alert('✅ Todos los equipos ya tienen usuarioId asignado. No hay nada que migrar.');
-    return;
-  }
-
-  if(!confirm('Se van a vincular '+pendientes.length+' equipo(s) del inventario a sus usuarios por ID. ¿Continuar?')) return;
-
-  var migrados=0, sinMatch=[];
-  var AUTH_HDR={'Content-Type':'application/json','X-PLG-Auth':(JSON.parse(sessionStorage.getItem('plg_session')||'{}')).token||''};
-
-  for(var i=0;i<pendientes.length;i++){
-    var eq=pendientes[i];
-    var nombre=(eq.usuarioActual||'').trim().toLowerCase();
-    var uObj=usuarios.find(function(u){ return (u.nombre||'').trim().toLowerCase()===nombre; });
-    if(!uObj){ sinMatch.push(eq.usuarioActual); continue; }
-    try {
-      var r=await fetch('/api/inventario?id='+encodeURIComponent(eq.id),{
-        method:'PUT', headers:AUTH_HDR,
-        body:JSON.stringify({usuarioId:uObj.id, usuarioActual:eq.usuarioActual})
-      });
-      if(r.ok){
-        eq.usuarioId=uObj.id;
-        migrados++;
-      }
-    } catch(err){ sinMatch.push(eq.usuarioActual+' (error red)'); }
-  }
-
-  // re-renderizar tarjetas con nuevos IDs
-  filtrarUsuarios();
-
-  var msg='✅ Migración completada.\n\n'
-    +'• Migrados: '+migrados+' equipo(s)\n'
-    +'• Sin match de usuario: '+(sinMatch.length?sinMatch.length+'\n  — '+sinMatch.join('\n  — '):'0');
-  alert(msg);
-}
 
 /* ── Init ── */
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){cerrarDetalle();cerrarForm();cerrarFormEq();}});

@@ -26,6 +26,7 @@ function toUser(e) {
     area:            e.area            || "",
     puesto:          e.puesto          || "",
     telefono:        e.telefono        || "",
+    celular:         e.celular         || "",
     extension:       e.extension       || "",
     hostname:        e.hostname        || "",
     anydesk:         e.anydesk         || "",
