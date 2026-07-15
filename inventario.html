@@ -999,8 +999,8 @@ function abrirForm(id) {
   document.getElementById('f-ext').value      = u?u.extension:'';
   document.getElementById('f-host').value     = u?u.hostname:'';
   document.getElementById('f-anydesk').value  = u?u.anydesk:'';
-  // init cuentas con backward compat a campos planos
-  var ctas=Array.isArray(u&&u.cuentas)&&u.cuentas.length?u.cuentas:[];
+  // init cuentas — copia profunda para que mutaciones en el form no afecten u.cuentas
+  var ctas=(Array.isArray(u&&u.cuentas)?u.cuentas:[]).map(function(c){return Object.assign({},c);});
   if (!ctas.length&&u) {
     if (u.microsoftEmail) ctas.push({sistema:'Microsoft / Office 365',usuario:u.microsoftEmail,pass:u.microsoftPass||''});
     if (u.gmailEmail)     ctas.push({sistema:'Gmail',                  usuario:u.gmailEmail,    pass:u.gmailPass||''});
@@ -1059,7 +1059,7 @@ async function guardar() {
       body:JSON.stringify({cuentas:_cuentasForm})
     });
     var uLocal=usuarios.find(function(x){return x.id===savedId;});
-    if (uLocal) uLocal.cuentas=_cuentasForm;
+    if (uLocal) uLocal.cuentas=_cuentasForm.map(function(c){return Object.assign({},c);});
     // actualizar inventario: asignados → usuarioActual + usuarioId; quitados → limpiar
     var invIds=_equiposForm.filter(function(e){return e.invId;}).map(function(e){return e.invId;});
     var quitados=_equiposFormOriginal.filter(function(e){
