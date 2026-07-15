@@ -1007,19 +1007,8 @@ function abrirForm(id) {
   document.getElementById('c-msg').textContent='';
   renderCuentasFormLista();
 
-  // init equipment list
-  if(u){
-    var eq=Array.isArray(u.equipos)&&u.equipos.length?u.equipos:[];
-    if(!eq.length){
-      if(u.laptopModelo)  eq=[{tipo:'Laptop', modelo:u.laptopModelo,  serie:u.laptopSerie||''}];
-      if(u.monitorModelo) eq=eq.concat([{tipo:'Monitor',modelo:u.monitorModelo,serie:u.monitorSerie||''}]);
-      if(u.celularModelo) eq=eq.concat([{tipo:'Celular',modelo:u.celularModelo, serie:u.celularImei||''}]);
-      if(u.tabletModelo)  eq=eq.concat([{tipo:'Tablet', modelo:u.tabletModelo,  serie:u.tabletImei||''}]);
-    }
-    _equiposForm=eq.map(function(e){ return {tipo:e.tipo||'Otro',modelo:e.modelo||'',serie:e.serie||'',invId:e.invId||''}; });
-  } else {
-    _equiposForm=[];
-  }
+  // init equipment list — leer desde inventario (fuente única)
+  _equiposForm=u ? _eqArr(u).map(function(e){ return {tipo:e.tipo||'Otro',modelo:e.modelo||'',serie:e.serie||'',invId:e.invId||''}; }) : [];
   _equiposFormOriginal=_equiposForm.map(function(e){ return Object.assign({},e); });
   renderEqFormLista();
 
@@ -1041,8 +1030,7 @@ async function guardar() {
     extension:     document.getElementById('f-ext').value.trim(),
     hostname:      document.getElementById('f-host').value.trim(),
     anydesk:       document.getElementById('f-anydesk').value.trim(),
-    cuentas:       _cuentasForm,
-    equipos:       _equiposForm
+    cuentas:       _cuentasForm
   };
   try {
     var res, item;
@@ -1058,47 +1046,35 @@ async function guardar() {
       usuarios.unshift(item);
     }
     if (!res.ok) throw new Error((item||{}).error||'Error');
-    // marcar como Asignado los equipos que quedaron
+    var savedId=_editId||(item&&item.id)||'';
+    // actualizar inventario: asignados → usuarioActual + usuarioId; quitados → limpiar
     var invIds=_equiposForm.filter(function(e){return e.invId;}).map(function(e){return e.invId;});
-    var invUpdates=_equiposForm.filter(function(e){return e.invId;});
-    // liberar equipos que fueron quitados de la lista
     var quitados=_equiposFormOriginal.filter(function(e){
       return e.invId && invIds.indexOf(e.invId)===-1;
     });
-    await Promise.all(invUpdates.map(function(e){
-      var eq=equipos.find(function(x){return x.id===e.invId;});
-      if (!eq) return Promise.resolve();
-      var tareas=[];
-      // si estaba asignado a otro usuario, quitar de su ficha
-      if (eq.usuarioActual && eq.usuarioActual!==nombre) {
-        var uAnt=usuarios.find(function(u){return u.nombre===eq.usuarioActual;});
-        if (uAnt) {
-          var eqsFiltrados=(uAnt.equipos||[]).filter(function(x){return x.invId!==e.invId;});
-          uAnt.equipos=eqsFiltrados;
-          tareas.push(fetch('/api/usuarios?id='+encodeURIComponent(uAnt.id),{
-            method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({equipos:eqsFiltrados})
-          }));
-        }
-      }
-      var upd=Object.assign({},eq,{usuarioActual:nombre,estado:'Asignado'});
-      tareas.push(fetch('/api/inventario?id='+encodeURIComponent(e.invId),{
-        method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(upd)
-      }).then(function(){
-        var i=equipos.findIndex(function(x){return x.id===e.invId;});
-        if(i!==-1) equipos[i]=upd;
-      }));
-      return Promise.all(tareas);
-    }).concat(quitados.map(function(e){
-      var eq=equipos.find(function(x){return x.id===e.invId;});
-      if (!eq) return Promise.resolve();
-      var upd=Object.assign({},eq,{usuarioActual:'',estado:'Disponible'});
-      return fetch('/api/inventario?id='+encodeURIComponent(e.invId),{
-        method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(upd)
-      }).then(function(){
-        var i=equipos.findIndex(function(x){return x.id===e.invId;});
-        if(i!==-1) equipos[i]=upd;
-      });
-    })));
+    await Promise.all(
+      _equiposForm.filter(function(e){return e.invId;}).map(function(e){
+        var eq=equipos.find(function(x){return x.id===e.invId;});
+        if (!eq) return Promise.resolve();
+        var upd=Object.assign({},eq,{usuarioActual:nombre, usuarioId:savedId, estado:'Asignado'});
+        return fetch('/api/inventario?id='+encodeURIComponent(e.invId),{
+          method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(upd)
+        }).then(function(){
+          var i=equipos.findIndex(function(x){return x.id===e.invId;});
+          if(i!==-1) equipos[i]=upd;
+        });
+      }).concat(quitados.map(function(e){
+        var eq=equipos.find(function(x){return x.id===e.invId;});
+        if (!eq) return Promise.resolve();
+        var upd=Object.assign({},eq,{usuarioActual:'', usuarioId:'', estado:'Disponible'});
+        return fetch('/api/inventario?id='+encodeURIComponent(e.invId),{
+          method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(upd)
+        }).then(function(){
+          var i=equipos.findIndex(function(x){return x.id===e.invId;});
+          if(i!==-1) equipos[i]=upd;
+        });
+      }))
+    );
     filtrarUsuarios();
     cerrarForm();
   } catch(e) { mostrarMsg('err','Error al guardar: '+e.message); }
@@ -1385,14 +1361,12 @@ async function guardarEq() {
       var idx=equipos.findIndex(function(x){return x.id===_eqEditId;});
       if (idx!==-1) equipos[idx]=Object.assign({},equipos[idx],payload,{id:_eqEditId});
       eqId=_eqEditId;
-      await sincronizarFichaUsuario(usuarioAnterior, usuarioNuevo, eqId, payload);
     } else {
       res=await fetch('/api/inventario',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
       item=await res.json();
       if (!res.ok) throw new Error((item||{}).error||'Error');
       equipos.unshift(item);
       eqId=item.id;
-      if (usuarioNuevo && eqId) await sincronizarFichaUsuario('', usuarioNuevo, eqId, payload);
     }
     filtrarEquipos();
     cerrarFormEq();
@@ -1400,34 +1374,6 @@ async function guardarEq() {
   btn.disabled=false;
 }
 
-async function sincronizarFichaUsuario(usuarioAnterior, usuarioNuevo, eqId, eq) {
-  var tareas=[];
-  // quitar de ficha del usuario anterior
-  if (usuarioAnterior && usuarioAnterior !== usuarioNuevo) {
-    var uAnt=usuarios.find(function(u){return u.nombre===usuarioAnterior;});
-    if (uAnt) {
-      var eqsFiltrados=(uAnt.equipos||[]).filter(function(e){return e.invId!==eqId;});
-      uAnt.equipos=eqsFiltrados;
-      tareas.push(fetch('/api/usuarios?id='+encodeURIComponent(uAnt.id),{
-        method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({equipos:eqsFiltrados})
-      }));
-    }
-  }
-  // agregar a ficha del usuario nuevo
-  if (usuarioNuevo) {
-    var uNuevo=usuarios.find(function(u){return u.nombre===usuarioNuevo;});
-    if (uNuevo) {
-      var eqsBase=(uNuevo.equipos||[]).filter(function(e){return e.invId!==eqId;}); // evitar duplicados
-      var nuevoItem={tipo:eq.tipo||'', modelo:((eq.marca||'')+' '+(eq.modelo||'')).trim(), serie:eq.serial||'', invId:eqId};
-      eqsBase.push(nuevoItem);
-      uNuevo.equipos=eqsBase;
-      tareas.push(fetch('/api/usuarios?id='+encodeURIComponent(uNuevo.id),{
-        method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({equipos:eqsBase})
-      }));
-    }
-  }
-  await Promise.all(tareas);
-}
 
 function confirmarElimEq(id) { _eqEditId=id; eliminarEq(); }
 
