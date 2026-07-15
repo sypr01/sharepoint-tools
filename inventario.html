@@ -569,7 +569,12 @@ function renderizarUsuarios(lista) {
     var col=colorAvatar(u.nombre||'?'), ini=iniciales(u.nombre||'?');
     var divCorto=(u.division||'').replace('PLG ','').replace('DIVISION ','DIV. ');
     var eqArr=Array.isArray(u.equipos)&&u.equipos.length?u.equipos:[];
-    // backward compat with old flat fields
+    // fallback: buscar en inventario cargado por nombre de usuario
+    if(!eqArr.length){
+      eqArr=equipos.filter(function(e){return e.usuarioActual&&e.usuarioActual===u.nombre;})
+        .map(function(e){return{tipo:e.tipo||'',modelo:((e.marca||'')+' '+(e.modelo||'')).trim(),serie:e.serial||'',invId:e.id};});
+    }
+    // backward compat: campos planos legacy
     if(!eqArr.length){
       if(u.laptopModelo)  eqArr=[{tipo:'Laptop', modelo:u.laptopModelo, serie:u.laptopSerie}];
       if(u.celularModelo) eqArr=eqArr.concat([{tipo:'Celular',modelo:u.celularModelo,serie:u.celularImei}]);
@@ -626,6 +631,10 @@ function verDetalle(id) {
   }).join(''):'<span style="color:#aaa;font-size:13px">Sin cuentas registradas.</span>';
   // render dynamic equipment list
   var eqArr=Array.isArray(u.equipos)&&u.equipos.length?u.equipos:[];
+  if(!eqArr.length){
+    eqArr=equipos.filter(function(e){return e.usuarioActual&&e.usuarioActual===u.nombre;})
+      .map(function(e){return{tipo:e.tipo||'',modelo:((e.marca||'')+' '+(e.modelo||'')).trim(),serie:e.serial||'',invId:e.id};});
+  }
   if(!eqArr.length){
     if(u.laptopModelo)  eqArr=[{tipo:'Laptop', modelo:u.laptopModelo,  serie:u.laptopSerie}];
     if(u.monitorModelo) eqArr=eqArr.concat([{tipo:'Monitor',modelo:u.monitorModelo,serie:u.monitorSerie}]);
@@ -757,6 +766,10 @@ function _docUsuario() {
     if(u.magayaUser)     ctas.push({sistema:'Magaya',                 usuario:u.magayaUser,    pass:u.magayaPass||''});
   }
   var eqArr=Array.isArray(u.equipos)&&u.equipos.length?u.equipos:[];
+  if(!eqArr.length){
+    eqArr=equipos.filter(function(e){return e.usuarioActual&&e.usuarioActual===u.nombre;})
+      .map(function(e){return{tipo:e.tipo||'',modelo:((e.marca||'')+' '+(e.modelo||'')).trim(),serie:e.serial||'',invId:e.id};});
+  }
   if(!eqArr.length){
     if(u.laptopModelo)  eqArr.push({tipo:'Laptop', modelo:u.laptopModelo, serie:u.laptopSerie||''});
     if(u.monitorModelo) eqArr.push({tipo:'Monitor',modelo:u.monitorModelo,serie:u.monitorSerie||''});
@@ -1184,8 +1197,11 @@ async function cargarEquiposData() {
   try {
     var res=await fetch('/api/inventario');
     equipos=await res.json();
+    if(!Array.isArray(equipos)) equipos=[];
     _equiposDatos=true;
     poblarEqInvSel();
+    // Re-renderizar tarjetas de usuario para mostrar equipos desde inventario
+    filtrarUsuarios();
   } catch(e) { /* will retry when tab opens */ }
 }
 
