@@ -546,10 +546,12 @@ async function cargarUsuarios() {
     var res = await fetch('/api/usuarios');
     if (!res.ok) throw new Error('Error '+res.status);
     usuarios = await res.json();
+    _usuariosListos = true;
     filtrarUsuarios();
     poblarColabSel();
     sincronizarCelularesDir();
     verificarBtnRecuperar();
+    enlazarEquiposLegacy();
   } catch(e) {
     document.getElementById('grid').innerHTML='<div class="sin-datos">Error al cargar: '+e.message+'</div>';
   }
@@ -1295,6 +1297,37 @@ function seleccionarColab() {
    ══════════════════════════ */
 var equipos=[], equiposCargados=false, _eqEditId=null, _equiposDatos=false;
 var _equiposForm=[], _equiposFormOriginal=[], _cuentasForm=[];
+var _usuariosListos=false, _enlaceEjecutado=false;
+
+// Normaliza nombre para comparación tolerante a acentos y mayúsculas
+function _normNombre(n) {
+  return (n||'').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+}
+
+// Corre una vez cuando AMBOS loaders terminaron.
+// Enlaza ítems de inventario que tienen usuarioActual pero NO usuarioId
+// → actualiza localmente (muestra inmediato) + guarda en servidor (fix permanente).
+async function enlazarEquiposLegacy() {
+  if (_enlaceEjecutado || !_usuariosListos || !_equiposDatos) return;
+  if (!equipos.length || !usuarios.length) return;
+  _enlaceEjecutado=true;
+  var sinId=equipos.filter(function(e){ return e.usuarioActual && !e.usuarioId; });
+  if (!sinId.length) return;
+  var idx={};
+  usuarios.forEach(function(u){ idx[_normNombre(u.nombre)]=u.id; });
+  var parches=sinId.filter(function(e){ return idx[_normNombre(e.usuarioActual)]; });
+  if (!parches.length) return;
+  // Actualizar localmente → display inmediato sin esperar al servidor
+  parches.forEach(function(e){ e.usuarioId=idx[_normNombre(e.usuarioActual)]; });
+  filtrarUsuarios();
+  // Guardar en servidor en background → próximos refrescos usarán usuarioId (prioridad 1)
+  parches.forEach(function(e){
+    fetch('/api/inventario?id='+encodeURIComponent(e.id),{
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({usuarioId:e.usuarioId})
+    }).catch(function(){});
+  });
+}
 
 async function cargarEquiposData() {
   if (_equiposDatos) return;
@@ -1304,8 +1337,8 @@ async function cargarEquiposData() {
     if(!Array.isArray(equipos)) equipos=[];
     _equiposDatos=true;
     poblarEqInvSel();
-    // Re-renderizar tarjetas de usuario para mostrar equipos desde inventario
     filtrarUsuarios();
+    enlazarEquiposLegacy();
   } catch(e) {
     console.error('cargarEquiposData:', e.message);
   }
