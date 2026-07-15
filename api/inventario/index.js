@@ -31,6 +31,7 @@ function entityToItem(e) {
     division:         e.division         || "",
     usuarioAnterior:  e.usuarioAnterior  || "",
     usuarioActual:    e.usuarioActual    || "",
+    usuarioId:        e.usuarioId        || "",
     notas:            e.notas            || "",
     fechaIngreso:     e.fechaIngreso     || "",
     fechaActualizacion: e.fechaActualizacion || ""
@@ -69,6 +70,7 @@ module.exports = async function (context, req) {
         division:           body.division          || "",
         usuarioAnterior:    body.usuarioAnterior   || "",
         usuarioActual:      body.usuarioActual     || "",
+        usuarioId:          body.usuarioId         || "",
         notas:              body.notas             || "",
         fechaIngreso:       now,
         fechaActualizacion: now
@@ -96,6 +98,7 @@ module.exports = async function (context, req) {
         division:           body.division         ?? existing.division         ?? "",
         usuarioAnterior:    body.usuarioAnterior  ?? existing.usuarioAnterior  ?? "",
         usuarioActual:      body.usuarioActual    ?? existing.usuarioActual    ?? "",
+        usuarioId:          body.usuarioId        ?? existing.usuarioId        ?? "",
         notas:              body.notas            ?? existing.notas            ?? "",
         fechaIngreso:       existing.fechaIngreso || now,
         fechaActualizacion: now

@@ -37,6 +37,8 @@
     .sel { padding:7px 10px; border:1px solid #c5cedb; border-radius:6px; font-size:12px; color:#555; background:white; cursor:pointer; }
     .btn-nuevo { padding:8px 17px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
     .btn-nuevo:hover { background:var(--blue); }
+    .btn-mig { padding:8px 13px; background:white; color:#64748b; border:1.5px solid #cbd5e1; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; }
+    .btn-mig:hover { border-color:var(--blue); color:var(--navy); }
     .contador { font-size:12px; color:#778; white-space:nowrap; }
 
     /* User grid (tab Usuarios) */
@@ -230,6 +232,7 @@
       <option value="PLG GROUP">PLG GROUP</option>
     </select>
     <span class="contador" id="u-contador"></span>
+    <button class="btn-mig" onclick="migrarAsignaciones()" title="Vincula equipos del inventario a usuarios por ID">⚙ Migrar asignaciones</button>
     <button class="btn-nuevo" onclick="abrirForm(null)">+ Agregar Usuario</button>
   </div>
   <div class="grid" id="grid">
@@ -562,23 +565,36 @@ function filtrarUsuarios() {
   renderizarUsuarios(res);
 }
 
+// Fuente única de consulta de equipos por usuario.
+// Prioridad: 1) inventario por ID, 2) inventario por nombre (legacy), 3) u.equipos[], 4) campos planos.
+function _eqArr(u) {
+  // 1. Join por usuarioId (robusto, post-migración)
+  var byId=equipos.filter(function(e){return e.usuarioId&&e.usuarioId===u.id;})
+    .map(function(e){return{tipo:e.tipo||'',modelo:((e.marca||'')+' '+(e.modelo||'')).trim(),serie:e.serial||'',invId:e.id};});
+  if(byId.length) return byId;
+  // 2. Join por nombre (sin usuarioId aún, pre-migración) — trim + lowercase para resistir espacios
+  var nom=(u.nombre||'').trim().toLowerCase();
+  var byNom=equipos.filter(function(e){return !e.usuarioId&&e.usuarioActual&&e.usuarioActual.trim().toLowerCase()===nom;})
+    .map(function(e){return{tipo:e.tipo||'',modelo:((e.marca||'')+' '+(e.modelo||'')).trim(),serie:e.serial||'',invId:e.id};});
+  if(byNom.length) return byNom;
+  // 3. u.equipos[] (array embebido en el usuario, pre-inventario)
+  if(Array.isArray(u.equipos)&&u.equipos.length) return u.equipos;
+  // 4. Campos planos legacy (más antiguos)
+  var flat=[];
+  if(u.laptopModelo)  flat.push({tipo:'Laptop', modelo:u.laptopModelo,  serie:u.laptopSerie||''});
+  if(u.monitorModelo) flat.push({tipo:'Monitor',modelo:u.monitorModelo, serie:u.monitorSerie||''});
+  if(u.celularModelo) flat.push({tipo:'Celular',modelo:u.celularModelo, serie:u.celularImei||''});
+  if(u.tabletModelo)  flat.push({tipo:'Tablet', modelo:u.tabletModelo,  serie:u.tabletImei||''});
+  return flat;
+}
+
 function renderizarUsuarios(lista) {
   document.getElementById('u-contador').textContent = lista.length+' usuario'+(lista.length!==1?'s':'');
   if (!lista.length) { document.getElementById('grid').innerHTML='<div class="sin-datos">No se encontraron usuarios.</div>'; return; }
   document.getElementById('grid').innerHTML = lista.map(function(u){
     var col=colorAvatar(u.nombre||'?'), ini=iniciales(u.nombre||'?');
     var divCorto=(u.division||'').replace('PLG ','').replace('DIVISION ','DIV. ');
-    var eqArr=Array.isArray(u.equipos)&&u.equipos.length?u.equipos:[];
-    // fallback: buscar en inventario cargado por nombre de usuario
-    if(!eqArr.length){
-      eqArr=equipos.filter(function(e){return e.usuarioActual&&e.usuarioActual===u.nombre;})
-        .map(function(e){return{tipo:e.tipo||'',modelo:((e.marca||'')+' '+(e.modelo||'')).trim(),serie:e.serial||'',invId:e.id};});
-    }
-    // backward compat: campos planos legacy
-    if(!eqArr.length){
-      if(u.laptopModelo)  eqArr=[{tipo:'Laptop', modelo:u.laptopModelo, serie:u.laptopSerie}];
-      if(u.celularModelo) eqArr=eqArr.concat([{tipo:'Celular',modelo:u.celularModelo,serie:u.celularImei}]);
-    }
+    var eqArr=_eqArr(u);
     var chips=eqArr.slice(0,3).map(function(e){
       var icon=({Laptop:'💻',Monitor:'🖥️',Celular:'📱',Tablet:'📲',Teclado:'⌨️',Mouse:'🖱️',Impresora:'🖨️'})[e.tipo]||'🔧';
       return '<span class="chip ok">'+icon+' '+esc((e.modelo||e.tipo||'').split(' ').slice(0,3).join(' '))+'</span>';
@@ -629,18 +645,7 @@ function verDetalle(id) {
       +(c.pass?'<button class="btn-eye" onclick="togglePass(\''+pid+'\',\''+rid+'\')">👁</button>':'')+'</div>'
       +'<span id="'+rid+'" style="display:none">'+esc(c.pass||'')+'</span></div>';
   }).join(''):'<span style="color:#aaa;font-size:13px">Sin cuentas registradas.</span>';
-  // render dynamic equipment list
-  var eqArr=Array.isArray(u.equipos)&&u.equipos.length?u.equipos:[];
-  if(!eqArr.length){
-    eqArr=equipos.filter(function(e){return e.usuarioActual&&e.usuarioActual===u.nombre;})
-      .map(function(e){return{tipo:e.tipo||'',modelo:((e.marca||'')+' '+(e.modelo||'')).trim(),serie:e.serial||'',invId:e.id};});
-  }
-  if(!eqArr.length){
-    if(u.laptopModelo)  eqArr=[{tipo:'Laptop', modelo:u.laptopModelo,  serie:u.laptopSerie}];
-    if(u.monitorModelo) eqArr=eqArr.concat([{tipo:'Monitor',modelo:u.monitorModelo,serie:u.monitorSerie}]);
-    if(u.celularModelo) eqArr=eqArr.concat([{tipo:'Celular',modelo:u.celularModelo, serie:u.celularImei}]);
-    if(u.tabletModelo)  eqArr=eqArr.concat([{tipo:'Tablet', modelo:u.tabletModelo,  serie:u.tabletImei}]);
-  }
+  var eqArr=_eqArr(u);
   var eqIcons={Laptop:'💻',Monitor:'🖥️',Celular:'📱',Tablet:'📲',Teclado:'⌨️',Mouse:'🖱️',Impresora:'🖨️',Otro:'🔧'};
   var el=document.getElementById('eq-detalle-lista');
   if(!eqArr.length){
@@ -765,17 +770,7 @@ function _docUsuario() {
     if(u.gmailEmail)     ctas.push({sistema:'Gmail',                  usuario:u.gmailEmail,    pass:u.gmailPass||''});
     if(u.magayaUser)     ctas.push({sistema:'Magaya',                 usuario:u.magayaUser,    pass:u.magayaPass||''});
   }
-  var eqArr=Array.isArray(u.equipos)&&u.equipos.length?u.equipos:[];
-  if(!eqArr.length){
-    eqArr=equipos.filter(function(e){return e.usuarioActual&&e.usuarioActual===u.nombre;})
-      .map(function(e){return{tipo:e.tipo||'',modelo:((e.marca||'')+' '+(e.modelo||'')).trim(),serie:e.serial||'',invId:e.id};});
-  }
-  if(!eqArr.length){
-    if(u.laptopModelo)  eqArr.push({tipo:'Laptop', modelo:u.laptopModelo, serie:u.laptopSerie||''});
-    if(u.monitorModelo) eqArr.push({tipo:'Monitor',modelo:u.monitorModelo,serie:u.monitorSerie||''});
-    if(u.celularModelo) eqArr.push({tipo:'Celular',modelo:u.celularModelo,serie:u.celularImei||''});
-    if(u.tabletModelo)  eqArr.push({tipo:'Tablet', modelo:u.tabletModelo, serie:u.tabletImei||''});
-  }
+  var eqArr=_eqArr(u);
   var af=u.accesosFisicos||null;
   return {u:u, ctas:ctas, eqArr:eqArr, af:af};
 }
@@ -1367,6 +1362,7 @@ async function guardarEq() {
   if (usuarioNuevo && estadoSel !== 'Baja') estadoFinal = 'Asignado';
   if (!usuarioNuevo && estadoSel === 'Asignado') estadoFinal = 'Disponible';
 
+  var uObj=usuarios.find(function(x){return x.nombre===usuarioNuevo;});
   var payload={
     tipo:         document.getElementById('f-eq-tipo').value,
     marca:        document.getElementById('f-eq-marca').value.trim(),
@@ -1375,6 +1371,7 @@ async function guardarEq() {
     estado:       estadoFinal,
     division:     document.getElementById('f-eq-div').value,
     usuarioActual:usuarioNuevo,
+    usuarioId:    uObj ? uObj.id : '',
     notas:        document.getElementById('f-eq-notas').value.trim()
   };
   try {
@@ -1442,6 +1439,48 @@ async function eliminarEq() {
     filtrarEquipos();
     cerrarFormEq();
   } catch(e) { alert('Error: '+e.message); }
+}
+
+/* ── Migración de asignaciones: escribe usuarioId en inventario ── */
+async function migrarAsignaciones() {
+  if(!_equiposDatos) { alert('Espera a que cargue el inventario antes de migrar.'); return; }
+  if(!usuarios.length) { alert('Espera a que carguen los usuarios antes de migrar.'); return; }
+
+  var pendientes=equipos.filter(function(e){ return e.usuarioActual && !e.usuarioId; });
+  if(!pendientes.length) {
+    alert('✅ Todos los equipos ya tienen usuarioId asignado. No hay nada que migrar.');
+    return;
+  }
+
+  if(!confirm('Se van a vincular '+pendientes.length+' equipo(s) del inventario a sus usuarios por ID. ¿Continuar?')) return;
+
+  var migrados=0, sinMatch=[];
+  var AUTH_HDR={'Content-Type':'application/json','X-PLG-Auth':(JSON.parse(sessionStorage.getItem('plg_session')||'{}')).token||''};
+
+  for(var i=0;i<pendientes.length;i++){
+    var eq=pendientes[i];
+    var nombre=(eq.usuarioActual||'').trim().toLowerCase();
+    var uObj=usuarios.find(function(u){ return (u.nombre||'').trim().toLowerCase()===nombre; });
+    if(!uObj){ sinMatch.push(eq.usuarioActual); continue; }
+    try {
+      var r=await fetch('/api/inventario?id='+encodeURIComponent(eq.id),{
+        method:'PUT', headers:AUTH_HDR,
+        body:JSON.stringify({usuarioId:uObj.id, usuarioActual:eq.usuarioActual})
+      });
+      if(r.ok){
+        eq.usuarioId=uObj.id;
+        migrados++;
+      }
+    } catch(err){ sinMatch.push(eq.usuarioActual+' (error red)'); }
+  }
+
+  // re-renderizar tarjetas con nuevos IDs
+  filtrarUsuarios();
+
+  var msg='✅ Migración completada.\n\n'
+    +'• Migrados: '+migrados+' equipo(s)\n'
+    +'• Sin match de usuario: '+(sinMatch.length?sinMatch.length+'\n  — '+sinMatch.join('\n  — '):'0');
+  alert(msg);
 }
 
 /* ── Init ── */
