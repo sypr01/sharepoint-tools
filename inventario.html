@@ -1306,7 +1306,9 @@ async function cargarEquiposData() {
     poblarEqInvSel();
     // Re-renderizar tarjetas de usuario para mostrar equipos desde inventario
     filtrarUsuarios();
-  } catch(e) { /* will retry when tab opens */ }
+  } catch(e) {
+    console.error('cargarEquiposData:', e.message);
+  }
 }
 
 function irAInventario() {
