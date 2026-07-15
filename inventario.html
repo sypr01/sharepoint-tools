@@ -1164,6 +1164,7 @@ function seleccionarColab() {
   document.getElementById('f-area').value     = c.departamento||'';
   document.getElementById('f-puesto').value   = c.cargo||'';
   document.getElementById('f-tel').value      = c.telefono||'';
+  document.getElementById('f-cel').value      = c.movil||'';
   // pre-cargar correo corporativo como cuenta Microsoft
   if (c.correo) {
     _cuentasForm=[{sistema:'Microsoft / Office 365', usuario:c.correo, pass:''}];
