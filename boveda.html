@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <script>(function(){if(!sessionStorage.getItem('plg_session'))location.replace('/login.html');})()</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bóveda de Accesos IT - PLG</title>
+  <style>
+    :root {
+      --navy:#1B3A6B; --blue:#2F5AA8; --red:#CC1F2A;
+      --bg:#EDF1F7;
+      --surface:#ffffff;
+      --border:#dde3ed;
+      --text:#1e293b;
+      --text2:#64748b;
+      --text3:#94a3b8;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Segoe UI',sans-serif; background:var(--bg); color:var(--text); }
+
+    /* ── Header ── */
+    header { background:linear-gradient(135deg,var(--navy),var(--blue)); color:white; border-bottom:4px solid var(--red); }
+    .header-inner { display:flex; align-items:center; gap:20px; padding:14px 32px; }
+    .header-logo-wrap { background:white; border-radius:8px; padding:6px 12px; display:flex; align-items:center; }
+    .header-logo { height:52px; width:auto; display:block; }
+    .header-divider { width:1px; height:40px; background:rgba(255,255,255,.25); }
+    header h1 { font-size:20px; font-weight:700; }
+    header p  { font-size:12px; opacity:.7; margin-top:3px; }
+    .nav-tabs { background:var(--navy); display:flex; align-items:center; padding:0 32px; }
+    .nav-tab { padding:10px 22px; color:rgba(255,255,255,.65); font-size:13px; font-weight:600; cursor:pointer; border:none; background:none; border-bottom:3px solid transparent; transition:all .2s; text-decoration:none; display:inline-flex; align-items:center; }
+    .nav-tab:hover { color:white; }
+    .nav-tab.activo { color:white; border-bottom-color:var(--red); }
+    .nav-user { margin-left:auto; color:rgba(255,255,255,.55); font-size:12px; padding:0 12px; display:flex; align-items:center; }
+
+    /* ── Page tabs ── */
+    .page-tab-bar { background:var(--surface); border-bottom:2px solid var(--border); display:flex; padding:0 32px; box-shadow:0 1px 4px rgba(27,58,107,.05); }
+    .ptab { padding:12px 22px; font-size:14px; font-weight:600; color:#778899; border:none; background:none; cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; transition:all .2s; display:flex; align-items:center; gap:6px; }
+    .ptab.activo { color:var(--navy); border-bottom-color:var(--red); }
+    .ptab:hover:not(.activo) { color:var(--blue); }
+
+    /* ── Controls bar ── */
+    .controles { background:var(--surface); padding:12px 32px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:10; box-shadow:0 2px 8px rgba(27,58,107,.06); }
+    .buscar { flex:1; min-width:220px; padding:8px 14px; border:1px solid #c5cedb; border-radius:6px; font-size:13px; font-family:inherit; }
+    .buscar:focus { outline:none; border-color:var(--blue); }
+    .sel { padding:7px 10px; border:1px solid #c5cedb; border-radius:6px; font-size:12px; color:#555; background:var(--surface); cursor:pointer; font-family:inherit; }
+    .contador { font-size:12px; color:var(--text2); white-space:nowrap; }
+    .btn-nuevo { padding:8px 17px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; transition:background .15s; display:flex; align-items:center; gap:6px; }
+    .btn-nuevo:hover { background:var(--blue); }
+
+    /* ── Systems grid ── */
+    .sistemas-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:16px; padding:24px 32px; }
+
+    /* ── System card ── */
+    .sistema-card {
+      background:var(--surface); border-radius:10px;
+      box-shadow:0 1px 4px rgba(27,58,107,.08); border:1px solid var(--border);
+      border-left:4px solid var(--navy);
+      transition:box-shadow .2s, transform .1s;
+      overflow:hidden; display:flex; flex-direction:column;
+    }
+    .sistema-card:hover { box-shadow:0 6px 20px rgba(27,58,107,.13); }
+
+    .sc-head { padding:16px 18px 12px; display:flex; align-items:flex-start; gap:12px; }
+    .sc-icon { font-size:24px; flex-shrink:0; line-height:1; padding-top:2px; }
+    .sc-info { flex:1; min-width:0; }
+    .sc-nombre { font-size:15px; font-weight:700; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .sc-cat { display:inline-flex; align-items:center; margin-top:4px; font-size:11px; font-weight:600; padding:2px 8px; border-radius:10px; background:#e4ecf7; color:var(--navy); }
+    .sc-div { margin-left:6px; font-size:10px; padding:2px 7px; border-radius:10px; background:#f1f5f9; color:var(--text2); font-weight:600; }
+
+    .sc-body { padding:0 18px 16px; flex:1; display:flex; flex-direction:column; gap:8px; }
+    .sc-row { display:flex; align-items:center; gap:8px; font-size:13px; }
+    .sc-label { font-size:11px; color:var(--text3); width:16px; flex-shrink:0; text-align:center; }
+    .sc-value { color:var(--text); flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .sc-link { color:var(--blue); text-decoration:none; }
+    .sc-link:hover { text-decoration:underline; }
+    .sc-pass { display:flex; align-items:center; gap:8px; flex:1; }
+    .sc-dots { letter-spacing:3px; color:var(--text3); font-size:12px; flex:1; }
+    .btn-revelar { padding:4px 10px; background:#f0f4f9; border:1px solid #c5cedb; border-radius:5px; font-size:11px; font-weight:600; color:var(--navy); cursor:pointer; white-space:nowrap; transition:all .15s; display:flex; align-items:center; gap:4px; }
+    .btn-revelar:hover { background:#e4ecf7; border-color:var(--blue); }
+    .sin-pass { font-size:12px; color:var(--text3); font-style:italic; }
+
+    .sc-footer { padding:10px 18px; border-top:1px solid var(--border); display:flex; align-items:center; gap:8px; background:#fafbfd; }
+    .sc-meta { font-size:11px; color:var(--text3); flex:1; }
+    .btn-sm { padding:4px 10px; border-radius:5px; font-size:11px; font-weight:600; cursor:pointer; border:none; transition:all .15s; }
+    .btn-edit { background:#e4ecf7; color:var(--navy); }
+    .btn-edit:hover { background:#c7d9f0; }
+    .btn-del  { background:#fee2e2; color:#991b1b; }
+    .btn-del:hover  { background:#fecaca; }
+
+    /* ── Sin datos ── */
+    .sin-datos { text-align:center; padding:60px 20px; color:var(--text3); grid-column:1/-1; }
+    .sin-datos-icon { font-size:48px; margin-bottom:12px; }
+    .sin-datos p { font-size:14px; }
+    .cargando { text-align:center; padding:60px 20px; color:var(--text3); grid-column:1/-1; display:flex; flex-direction:column; align-items:center; gap:12px; }
+    .spinner { width:32px; height:32px; border:3px solid #e0e7ef; border-top-color:var(--blue); border-radius:50%; animation:spin .7s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* ── Audit table ── */
+    .audit-wrap { margin:20px 32px; background:var(--surface); border-radius:10px; box-shadow:0 1px 4px rgba(27,58,107,.07); overflow:hidden; border:1px solid var(--border); }
+    .audit-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .audit-table th { background:var(--navy); color:white; padding:10px 14px; text-align:left; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; white-space:nowrap; }
+    .audit-table td { padding:9px 14px; border-bottom:1px solid #eef1f6; }
+    .audit-table tr:last-child td { border-bottom:none; }
+    .audit-table tr:hover td { background:#f8fafc; }
+    .accion-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:700; }
+    .ab-crear   { background:#d1fae5; color:#065f46; }
+    .ab-editar  { background:#dbeafe; color:#1e40af; }
+    .ab-revelar { background:#fef9c3; color:#854d0e; }
+    .ab-fallido { background:#fee2e2; color:#991b1b; }
+    .ab-eliminar{ background:#f3e8ff; color:#7e22ce; }
+
+    /* ── Overlay / Modals ── */
+    .overlay { position:fixed; inset:0; background:rgba(15,23,42,.55); display:flex; align-items:center; justify-content:center; z-index:1000; opacity:0; pointer-events:none; transition:opacity .2s; }
+    .overlay.activo { opacity:1; pointer-events:all; }
+    .modal { background:var(--surface); border-radius:14px; box-shadow:0 20px 60px rgba(15,23,42,.25); width:min(520px,95vw); max-height:90vh; overflow-y:auto; transform:translateY(12px); transition:transform .2s; }
+    .overlay.activo .modal { transform:translateY(0); }
+    .modal-head { padding:22px 26px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; }
+    .modal-title { font-size:17px; font-weight:700; color:var(--navy); flex:1; }
+    .btn-close { background:none; border:none; font-size:20px; cursor:pointer; color:var(--text2); padding:2px 6px; border-radius:4px; line-height:1; }
+    .btn-close:hover { background:#f1f5f9; color:var(--text); }
+    .modal-body { padding:20px 26px; display:flex; flex-direction:column; gap:16px; }
+    .modal-foot { padding:16px 26px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; }
+
+    /* ── Form fields ── */
+    .f-group { display:flex; flex-direction:column; gap:5px; }
+    .f-group label { font-size:12px; font-weight:600; color:var(--text2); }
+    .f-input { padding:8px 12px; border:1px solid #c5cedb; border-radius:7px; font-size:13px; font-family:inherit; width:100%; transition:border-color .15s; background:var(--surface); color:var(--text); }
+    .f-input:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(47,90,168,.1); }
+    .f-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .f-pass-wrap { position:relative; }
+    .f-pass-wrap .f-input { padding-right:42px; font-family:'Courier New',monospace; letter-spacing:1px; }
+    .btn-eye { position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:16px; color:var(--text2); padding:2px; line-height:1; }
+    .btn-eye:hover { color:var(--navy); }
+    .f-hint { font-size:11px; color:var(--text3); margin-top:2px; }
+    .f-msg { font-size:13px; padding:8px 12px; border-radius:7px; }
+    .f-msg.err { background:#fee2e2; color:#991b1b; }
+    .f-msg.ok  { background:#d1fae5; color:#065f46; }
+
+    .btn-cancel { padding:8px 18px; background:#f1f5f9; border:1px solid #c5cedb; border-radius:7px; font-size:13px; font-weight:600; color:var(--text2); cursor:pointer; transition:all .15s; }
+    .btn-cancel:hover { background:#e2e8f0; }
+    .btn-primary { padding:8px 20px; background:var(--navy); color:white; border:none; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer; transition:background .15s; display:flex; align-items:center; gap:6px; }
+    .btn-primary:hover:not(:disabled) { background:var(--blue); }
+    .btn-primary:disabled { opacity:.6; cursor:not-allowed; }
+    .btn-danger { padding:8px 18px; background:var(--red); color:white; border:none; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer; transition:opacity .15s; }
+    .btn-danger:hover { opacity:.85; }
+
+    /* ── Reveal modal special ── */
+    .reauth-step { display:flex; flex-direction:column; gap:14px; }
+    .reauth-desc { font-size:13px; color:var(--text2); line-height:1.5; }
+    .reauth-sistema { font-weight:700; color:var(--navy); }
+    .reveal-result { display:none; flex-direction:column; gap:14px; }
+    .reveal-pass-box { background:#f8fafc; border:2px solid var(--border); border-radius:8px; padding:16px 18px; display:flex; align-items:center; gap:12px; }
+    .reveal-pass-text { font-family:'Courier New',monospace; font-size:18px; font-weight:700; color:var(--navy); flex:1; word-break:break-all; letter-spacing:1px; }
+    .btn-copy { padding:6px 12px; background:var(--navy); color:white; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; }
+    .btn-copy:hover { background:var(--blue); }
+    .btn-copy.copiado { background:#065f46; }
+    .timer-wrap { display:flex; flex-direction:column; gap:6px; }
+    .timer-label { font-size:12px; color:var(--text2); display:flex; justify-content:space-between; }
+    .timer-bar-bg { height:6px; background:#e2e8f0; border-radius:3px; overflow:hidden; }
+    .timer-bar { height:6px; background:var(--blue); border-radius:3px; transition:width 1s linear; }
+    .timer-bar.urgente { background:var(--red); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-logo-wrap"><img src="log PLG.png" alt="PLG" class="header-logo"></div>
+    <div class="header-divider"></div>
+    <div><h1>🔐 Bóveda de Accesos IT</h1><p>PANAMERICAN LOGISTICS GROUP</p></div>
+  </div>
+  <nav class="nav-tabs">
+    <a href="index.html"         class="nav-tab">🏠 Portal Principal</a>
+    <a href="inventario.html"    class="nav-tab">💻 Inventario IT</a>
+    <a href="tickets.html"       class="nav-tab">🎫 Tickets IT</a>
+    <a href="boveda.html"        class="nav-tab activo">🔐 Bóveda IT</a>
+    <a href="admin-usuarios.html"class="nav-tab" id="nav-admin" style="display:none">⚙️ Admin</a>
+    <span id="nav-nombre" class="nav-user"></span>
+    <button class="nav-tab" style="color:rgba(255,255,255,.55);" onclick="sessionStorage.clear();location.href='/login.html'">🔒 Cerrar sesión</button>
+  </nav>
+  <script>
+    (function(){
+      var n=sessionStorage.getItem('plg_nombre'); if(n) document.getElementById('nav-nombre').textContent='👤 '+n;
+      var r=sessionStorage.getItem('plg_rol');
+      if(r==='admin'||r==='it_admin') document.getElementById('nav-admin').style.display='';
+    })();
+  </script>
+</header>
+
+<!-- Page tabs -->
+<div class="page-tab-bar">
+  <button class="ptab activo" id="ptab-sistemas" onclick="cambiarTab('sistemas')">🔐 Sistemas y Accesos</button>
+  <button class="ptab" id="ptab-auditoria" onclick="cambiarTab('auditoria')" style="display:none">📋 Auditoría</button>
+</div>
+
+<!-- Controls -->
+<div class="controles">
+  <input class="buscar" id="b-buscar" type="text" placeholder="Buscar sistema, URL, usuario..." oninput="filtrar()">
+  <select class="sel" id="b-cat" onchange="filtrar()">
+    <option value="">Todas las categorías</option>
+    <option>ERP / Logística</option>
+    <option>Email / Comunicación</option>
+    <option>Redes / Infraestructura</option>
+    <option>Seguridad</option>
+    <option>Cloud / Hosting</option>
+    <option>Base de datos</option>
+    <option>Accesos físicos</option>
+    <option>Herramientas IT</option>
+    <option>Otro</option>
+  </select>
+  <select class="sel" id="b-div" onchange="filtrar()">
+    <option value="">Todas las divisiones</option>
+    <option value="PLG DIVISION ADUANAS">PLG DIVISION ADUANAS</option>
+    <option value="PLG DE EL SALVADOR">PLG DE EL SALVADOR</option>
+    <option value="PLG DIVISION TERRESTRE">PLG DIVISION TERRESTRE</option>
+    <option value="PLG DOMINICANA">PLG DOMINICANA</option>
+    <option value="PLG GROUP">PLG GROUP</option>
+    <option value="Todas">Todas</option>
+  </select>
+  <span class="contador" id="b-count"></span>
+  <button class="btn-nuevo" id="btn-agregar" style="display:none" onclick="abrirForm(null)">＋ Agregar sistema</button>
+</div>
+
+<!-- Tab: Sistemas -->
+<div id="tab-sistemas">
+  <div class="sistemas-grid" id="grid">
+    <div class="cargando"><div class="spinner"></div><p>Cargando bóveda...</p></div>
+  </div>
+</div>
+
+<!-- Tab: Auditoría -->
+<div id="tab-auditoria" style="display:none">
+  <div class="audit-wrap">
+    <table class="audit-table">
+      <thead>
+        <tr>
+          <th>Fecha / Hora</th>
+          <th>Acción</th>
+          <th>Sistema</th>
+          <th>Usuario</th>
+        </tr>
+      </thead>
+      <tbody id="audit-body">
+        <tr><td colspan="4" style="text-align:center;color:#aaa;padding:24px">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── Modal: Add / Edit ── -->
+<div class="overlay" id="overlayForm">
+  <div class="modal">
+    <div class="modal-head">
+      <span id="form-title-icon">🔐</span>
+      <span class="modal-title" id="form-title">Agregar sistema</span>
+      <button class="btn-close" onclick="cerrarForm()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="f-row">
+        <div class="f-group" style="grid-column:1/-1">
+          <label>Nombre del sistema *</label>
+          <input class="f-input" id="f-nombre" type="text" placeholder="Ej: Magaya Supply Chain">
+        </div>
+      </div>
+      <div class="f-row">
+        <div class="f-group">
+          <label>Categoría</label>
+          <select class="f-input" id="f-cat">
+            <option value="">Seleccionar...</option>
+            <option>ERP / Logística</option>
+            <option>Email / Comunicación</option>
+            <option>Redes / Infraestructura</option>
+            <option>Seguridad</option>
+            <option>Cloud / Hosting</option>
+            <option>Base de datos</option>
+            <option>Accesos físicos</option>
+            <option>Herramientas IT</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="f-group">
+          <label>División</label>
+          <select class="f-input" id="f-div">
+            <option value="Todas">Todas las divisiones</option>
+            <option value="PLG DE EL SALVADOR">PLG DE EL SALVADOR</option>
+            <option value="PLG DIVISION ADUANAS">PLG DIVISION ADUANAS</option>
+            <option value="PLG DIVISION TERRESTRE">PLG DIVISION TERRESTRE</option>
+            <option value="PLG DOMINICANA">PLG DOMINICANA</option>
+            <option value="PLG GROUP">PLG GROUP</option>
+          </select>
+        </div>
+      </div>
+      <div class="f-group">
+        <label>URL / Enlace</label>
+        <input class="f-input" id="f-url" type="url" placeholder="https://...">
+      </div>
+      <div class="f-row">
+        <div class="f-group">
+          <label>Usuario / Correo</label>
+          <input class="f-input" id="f-usuario" type="text" placeholder="usuario@dominio.com">
+        </div>
+        <div class="f-group">
+          <label id="f-pass-label">Contraseña</label>
+          <div class="f-pass-wrap">
+            <input class="f-input" id="f-pass" type="password" placeholder="Nueva contraseña (opcional si edita)">
+            <button class="btn-eye" type="button" onclick="togglePassField()" id="btn-eye-form">👁</button>
+          </div>
+          <span class="f-hint" id="f-pass-hint"></span>
+        </div>
+      </div>
+      <div class="f-group">
+        <label>Notas internas</label>
+        <textarea class="f-input" id="f-notas" rows="3" placeholder="Información adicional, contexto, instrucciones..."></textarea>
+      </div>
+      <div id="form-msg"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="cerrarForm()">Cancelar</button>
+      <button class="btn-primary" id="btn-save" onclick="guardar()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Revelar contraseña ── -->
+<div class="overlay" id="overlayReveal">
+  <div class="modal">
+    <div class="modal-head">
+      <span>🔓</span>
+      <span class="modal-title" id="reveal-title">Ver contraseña</span>
+      <button class="btn-close" onclick="cerrarReveal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Paso 1: pedir contraseña -->
+      <div class="reauth-step" id="reauth-step">
+        <p class="reauth-desc">Para ver la contraseña de <span class="reauth-sistema" id="reveal-sistema-name"></span>, confirma tu contraseña del portal PLG:</p>
+        <div class="f-group">
+          <label>Tu contraseña del portal</label>
+          <div class="f-pass-wrap">
+            <input class="f-input" id="reauth-pass" type="password" placeholder="Contraseña de tu usuario" onkeydown="if(event.key==='Enter')confirmarReauth()">
+            <button class="btn-eye" type="button" onclick="toggleRevealPassField()">👁</button>
+          </div>
+        </div>
+        <div id="reauth-msg"></div>
+      </div>
+      <!-- Paso 2: mostrar contraseña con timer -->
+      <div class="reveal-result" id="reveal-result">
+        <p class="reauth-desc">Contraseña de <span class="reauth-sistema" id="reveal-sistema-name2"></span>:</p>
+        <div class="reveal-pass-box">
+          <span class="reveal-pass-text" id="reveal-pass-text"></span>
+          <button class="btn-copy" id="btn-copy" onclick="copiarPass()">📋 Copiar</button>
+        </div>
+        <div class="timer-wrap">
+          <div class="timer-label">
+            <span>Se ocultará automáticamente</span>
+            <span id="timer-count">30s</span>
+          </div>
+          <div class="timer-bar-bg"><div class="timer-bar" id="timer-bar" style="width:100%"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot" id="reveal-foot">
+      <button class="btn-cancel" onclick="cerrarReveal()">Cancelar</button>
+      <button class="btn-primary" id="btn-reauth" onclick="confirmarReauth()">🔓 Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Constants ── */
+var CAT_COLORS = {
+  'ERP / Logística':        '#5b21b6',
+  'Email / Comunicación':   '#0369a1',
+  'Redes / Infraestructura':'#065f46',
+  'Seguridad':              '#92400e',
+  'Cloud / Hosting':        '#1d4ed8',
+  'Base de datos':          '#7c3aed',
+  'Accesos físicos':        '#9d174d',
+  'Herramientas IT':        '#1B3A6B',
+  'Otro':                   '#6b7280'
+};
+var CAT_ICONS = {
+  'ERP / Logística':        '⚙️',
+  'Email / Comunicación':   '✉️',
+  'Redes / Infraestructura':'🌐',
+  'Seguridad':              '🛡️',
+  'Cloud / Hosting':        '☁️',
+  'Base de datos':          '🗄️',
+  'Accesos físicos':        '🔑',
+  'Herramientas IT':        '🔧',
+  'Otro':                   '📋'
+};
+var ACCION_CSS = {
+  'CREAR':          'ab-crear',
+  'EDITAR':         'ab-editar',
+  'REVELAR':        'ab-revelar',
+  'REVELAR_FALLIDO':'ab-fallido',
+  'ELIMINAR':       'ab-eliminar'
+};
+
+/* ── Role helpers ── */
+var _rol = sessionStorage.getItem('plg_rol') || '';
+function canWrite()  { return _rol==='admin'||_rol==='it_admin'||_rol==='it_soporte'; }
+function canDelete() { return _rol==='admin'||_rol==='it_admin'; }
+function canAudit()  { return _rol==='admin'||_rol==='it_admin'; }
+function canReveal() { return _rol==='admin'||_rol==='it_admin'||_rol==='it_soporte'; }
+
+/* ── Auth header ── */
+function authH() {
+  return { 'Content-Type':'application/json', 'X-PLG-Auth': sessionStorage.getItem('plg_session')||'' };
+}
+function esc(s) { var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+
+/* ── State ── */
+var sistemas = [], _editId = null;
+
+/* ── Init ── */
+(function init(){
+  if (canWrite()) document.getElementById('btn-agregar').style.display='';
+  if (canAudit()) document.getElementById('ptab-auditoria').style.display='';
+  cargar();
+})();
+
+async function cargar() {
+  try {
+    var res = await fetch('/api/boveda', { headers: authH() });
+    if (res.status === 403) {
+      document.getElementById('grid').innerHTML='<div class="sin-datos"><div class="sin-datos-icon">🚫</div><p>No tienes acceso a la bóveda IT.</p></div>';
+      return;
+    }
+    sistemas = await res.json();
+    filtrar();
+  } catch(e) {
+    document.getElementById('grid').innerHTML='<div class="sin-datos"><div class="sin-datos-icon">⚠️</div><p>Error al cargar: '+esc(e.message)+'</p></div>';
+  }
+}
+
+function filtrar() {
+  var q   = document.getElementById('b-buscar').value.toLowerCase();
+  var cat = document.getElementById('b-cat').value;
+  var div = document.getElementById('b-div').value;
+  var res = sistemas.filter(function(s){
+    var mQ  = !q  || [s.nombre,s.url,s.usuario,s.notas,s.categoria].some(function(v){return v&&v.toLowerCase().includes(q);});
+    var mC  = !cat || s.categoria===cat;
+    var mD  = !div || s.division===div || s.division==='Todas';
+    return mQ && mC && mD;
+  });
+  document.getElementById('b-count').textContent = res.length+' sistema'+(res.length!==1?'s':'');
+  renderizarSistemas(res);
+}
+
+function renderizarSistemas(lista) {
+  var grid = document.getElementById('grid');
+  if (!lista.length) {
+    grid.innerHTML = '<div class="sin-datos"><div class="sin-datos-icon">🔐</div><p>No se encontraron sistemas.</p></div>';
+    return;
+  }
+  grid.innerHTML = lista.map(function(s){
+    var color  = CAT_COLORS[s.categoria] || '#6b7280';
+    var icon   = CAT_ICONS[s.categoria]  || '📋';
+    var divCorto = (s.division||'').replace('PLG ','').replace('DIVISION ','DIV.');
+    var urlHtml = s.url
+      ? '<div class="sc-row"><span class="sc-label">🌐</span><a class="sc-value sc-link" href="'+esc(s.url)+'" target="_blank" rel="noopener noreferrer">'+esc(s.url)+'</a></div>'
+      : '';
+    var userHtml = s.usuario
+      ? '<div class="sc-row"><span class="sc-label">👤</span><span class="sc-value">'+esc(s.usuario)+'</span></div>'
+      : '';
+    var passHtml = s.tienePass
+      ? '<div class="sc-row"><span class="sc-label">🔑</span><div class="sc-pass"><span class="sc-dots">••••••••</span>'
+        +(canReveal() ? '<button class="btn-revelar" onclick="event.stopPropagation();abrirReveal(\''+esc(s.id)+'\',\''+esc(s.nombre)+'\')">🔓 Ver</button>' : '')
+        +'</div></div>'
+      : (s.usuario ? '<div class="sc-row"><span class="sc-label">🔑</span><span class="sin-pass">Sin contraseña registrada</span></div>' : '');
+    var notasHtml = s.notas
+      ? '<div class="sc-row" style="align-items:flex-start"><span class="sc-label" style="padding-top:2px">📝</span><span class="sc-value" style="white-space:normal;line-height:1.4;font-size:12px;color:#64748b">'+esc(s.notas)+'</span></div>'
+      : '';
+    var editBtn  = canWrite()  ? '<button class="btn-sm btn-edit" onclick="abrirForm(\''+s.id+'\')">✏️ Editar</button>' : '';
+    var delBtn   = canDelete() ? '<button class="btn-sm btn-del"  onclick="eliminar(\''+s.id+'\',\''+esc(s.nombre)+'\')">🗑</button>'  : '';
+    var meta = s.fechaActualizacion
+      ? 'Act. '+s.fechaActualizacion.slice(0,10)+(s.creadoPor?' · '+esc(s.creadoPor):'')
+      : (s.creadoPor ? 'Por '+esc(s.creadoPor) : '');
+
+    return '<div class="sistema-card" style="border-left-color:'+color+'">'
+      +'<div class="sc-head">'
+        +'<div class="sc-icon">'+icon+'</div>'
+        +'<div class="sc-info">'
+          +'<div class="sc-nombre">'+esc(s.nombre)+'</div>'
+          +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:4px">'
+            +(s.categoria?'<span class="sc-cat" style="background:'+color+'22;color:'+color+'">'+esc(s.categoria)+'</span>':'')
+            +(divCorto?'<span class="sc-div">'+esc(divCorto)+'</span>':'')
+          +'</div>'
+        +'</div>'
+      +'</div>'
+      +'<div class="sc-body">'
+        +urlHtml+userHtml+passHtml+notasHtml
+      +'</div>'
+      +'<div class="sc-footer">'
+        +'<span class="sc-meta">'+meta+'</span>'
+        +editBtn+delBtn
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+/* ── Tab ── */
+function cambiarTab(t) {
+  document.getElementById('tab-sistemas').style.display  = t==='sistemas'   ? '' : 'none';
+  document.getElementById('tab-auditoria').style.display = t==='auditoria'  ? '' : 'none';
+  document.getElementById('ptab-sistemas').classList.toggle('activo',  t==='sistemas');
+  document.getElementById('ptab-auditoria').classList.toggle('activo', t==='auditoria');
+  if (t==='auditoria') cargarAuditoria();
+}
+
+/* ── Audit ── */
+async function cargarAuditoria() {
+  var tbody = document.getElementById('audit-body');
+  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa;padding:20px">Cargando...</td></tr>';
+  try {
+    var res = await fetch('/api/boveda-audit', { headers: authH() });
+    var logs = await res.json();
+    if (!logs.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa;padding:24px">Sin registros de auditoría.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = logs.map(function(l){
+      var css = ACCION_CSS[l.accion] || '';
+      var fecha = l.fecha ? l.fecha.replace('T',' ').slice(0,19) : '—';
+      return '<tr>'
+        +'<td style="font-size:12px;color:#64748b;font-variant-numeric:tabular-nums">'+esc(fecha)+'</td>'
+        +'<td><span class="accion-badge '+css+'">'+esc(l.accion)+'</span></td>'
+        +'<td>'+esc(l.sistemaNombre||l.sistemaId)+'</td>'
+        +'<td>'+esc(l.usuarioNombre)+'</td>'
+      +'</tr>';
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#c00;padding:20px">Error: '+esc(e.message)+'</td></tr>';
+  }
+}
+
+/* ── Form add/edit ── */
+function abrirForm(id) {
+  _editId = id;
+  var s = id ? sistemas.find(function(x){return x.id===id;}) : null;
+  document.getElementById('form-title').textContent = s ? 'Editar sistema' : 'Agregar sistema';
+  document.getElementById('f-nombre').value  = s ? s.nombre    : '';
+  document.getElementById('f-cat').value     = s ? s.categoria : '';
+  document.getElementById('f-div').value     = s ? s.division  : 'Todas';
+  document.getElementById('f-url').value     = s ? s.url       : '';
+  document.getElementById('f-usuario').value = s ? s.usuario   : '';
+  document.getElementById('f-pass').value    = '';
+  document.getElementById('f-notas').value   = s ? s.notas     : '';
+  document.getElementById('f-pass-hint').textContent = s && s.tienePass ? 'Dejar vacío para no cambiar la contraseña actual.' : '';
+  document.getElementById('form-msg').innerHTML = '';
+  // Restore password field to hidden
+  document.getElementById('f-pass').type = 'password';
+  document.getElementById('btn-eye-form').textContent = '👁';
+  document.getElementById('overlayForm').classList.add('activo');
+  setTimeout(function(){ document.getElementById('f-nombre').focus(); }, 100);
+}
+
+function cerrarForm() { document.getElementById('overlayForm').classList.remove('activo'); }
+
+function togglePassField() {
+  var f = document.getElementById('f-pass');
+  var btn = document.getElementById('btn-eye-form');
+  if (f.type==='password') { f.type='text'; btn.textContent='🙈'; }
+  else { f.type='password'; btn.textContent='👁'; }
+}
+
+async function guardar() {
+  var nombre = document.getElementById('f-nombre').value.trim();
+  if (!nombre) { showMsg('form-msg','err','El nombre del sistema es obligatorio.'); return; }
+  var btn = document.getElementById('btn-save');
+  btn.disabled = true; btn.textContent = '⏳ Guardando...';
+  var payload = {
+    nombre,
+    categoria: document.getElementById('f-cat').value,
+    division:  document.getElementById('f-div').value,
+    url:       document.getElementById('f-url').value.trim(),
+    usuario:   document.getElementById('f-usuario').value.trim(),
+    notas:     document.getElementById('f-notas').value.trim()
+  };
+  var passVal = document.getElementById('f-pass').value;
+  if (passVal) payload.pass = passVal;
+  try {
+    var res, data;
+    if (_editId) {
+      res  = await fetch('/api/boveda?id='+encodeURIComponent(_editId), { method:'PUT',  headers:authH(), body:JSON.stringify(payload) });
+    } else {
+      res  = await fetch('/api/boveda',                                  { method:'POST', headers:authH(), body:JSON.stringify(payload) });
+    }
+    data = await res.json();
+    if (!res.ok) { showMsg('form-msg','err', data.error||'Error al guardar.'); return; }
+    if (_editId) {
+      var idx = sistemas.findIndex(function(x){return x.id===_editId;});
+      if (idx!==-1) sistemas[idx] = data;
+    } else {
+      sistemas.push(data);
+    }
+    filtrar();
+    cerrarForm();
+  } catch(e) {
+    showMsg('form-msg','err','Error: '+e.message);
+  } finally {
+    btn.disabled=false; btn.textContent='💾 Guardar';
+  }
+}
+
+async function eliminar(id, nombre) {
+  if (!confirm('¿Eliminar el sistema "'+nombre+'"?\n\nEsta acción no se puede deshacer.')) return;
+  try {
+    var res = await fetch('/api/boveda?id='+encodeURIComponent(id), { method:'DELETE', headers:authH() });
+    if (!res.ok) { var d=await res.json(); alert(d.error||'Error al eliminar.'); return; }
+    sistemas = sistemas.filter(function(x){return x.id!==id;});
+    filtrar();
+  } catch(e) { alert('Error: '+e.message); }
+}
+
+/* ── Reveal password ── */
+var _revealId = null, _timerInt = null;
+
+function abrirReveal(id, nombre) {
+  _revealId = id;
+  document.getElementById('reveal-title').textContent = 'Ver contraseña';
+  document.getElementById('reveal-sistema-name').textContent  = nombre;
+  document.getElementById('reveal-sistema-name2').textContent = nombre;
+  document.getElementById('reauth-pass').value = '';
+  document.getElementById('reauth-msg').innerHTML = '';
+  document.getElementById('reauth-step').style.display  = '';
+  document.getElementById('reveal-result').style.display = 'none';
+  document.getElementById('reveal-foot').style.display   = '';
+  document.getElementById('btn-reauth').style.display    = '';
+  document.getElementById('reauth-pass').type = 'password';
+  if (_timerInt) { clearInterval(_timerInt); _timerInt = null; }
+  document.getElementById('overlayReveal').classList.add('activo');
+  setTimeout(function(){ document.getElementById('reauth-pass').focus(); }, 150);
+}
+
+function cerrarReveal() {
+  document.getElementById('overlayReveal').classList.remove('activo');
+  document.getElementById('reveal-pass-text').textContent = '';
+  if (_timerInt) { clearInterval(_timerInt); _timerInt = null; }
+}
+
+function toggleRevealPassField() {
+  var f = document.getElementById('reauth-pass');
+  f.type = f.type==='password' ? 'text' : 'password';
+}
+
+async function confirmarReauth() {
+  var pass = document.getElementById('reauth-pass').value;
+  if (!pass) { showMsg('reauth-msg','err','Ingresa tu contraseña.'); return; }
+  var btn = document.getElementById('btn-reauth');
+  btn.disabled=true; btn.textContent='⏳ Verificando...';
+  document.getElementById('reauth-msg').innerHTML='';
+  try {
+    var res = await fetch('/api/boveda-reauth', {
+      method:'POST', headers:authH(),
+      body:JSON.stringify({ sistemaId:_revealId, password:pass })
+    });
+    var data = await res.json();
+    if (!res.ok) {
+      showMsg('reauth-msg','err', data.error||'Contraseña incorrecta.');
+      document.getElementById('reauth-pass').value='';
+      document.getElementById('reauth-pass').focus();
+      return;
+    }
+    mostrarPasswordRevelada(data.pass);
+  } catch(e) {
+    showMsg('reauth-msg','err','Error de conexión: '+e.message);
+  } finally {
+    btn.disabled=false; btn.textContent='🔓 Confirmar';
+  }
+}
+
+function mostrarPasswordRevelada(pass) {
+  document.getElementById('reauth-step').style.display   = 'none';
+  document.getElementById('reveal-result').style.display = 'flex';
+  document.getElementById('reveal-foot').style.display   = 'none';
+  document.getElementById('reveal-pass-text').textContent = pass;
+  document.getElementById('btn-copy').className = 'btn-copy';
+  document.getElementById('btn-copy').textContent = '📋 Copiar';
+  // 30-second countdown
+  var secs = 30;
+  var bar  = document.getElementById('timer-bar');
+  var cnt  = document.getElementById('timer-count');
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+  bar.className   = 'timer-bar';
+  cnt.textContent = secs + 's';
+  setTimeout(function(){
+    bar.style.transition = 'width 1s linear';
+    bar.style.width = ((secs-1)/secs*100)+'%';
+  }, 50);
+  _timerInt = setInterval(function(){
+    secs--;
+    cnt.textContent = secs + 's';
+    bar.style.width = (secs/30*100)+'%';
+    if (secs <= 10) bar.className = 'timer-bar urgente';
+    if (secs <= 0) { clearInterval(_timerInt); _timerInt=null; cerrarReveal(); }
+  }, 1000);
+}
+
+function copiarPass() {
+  var text = document.getElementById('reveal-pass-text').textContent;
+  navigator.clipboard.writeText(text).then(function(){
+    var btn = document.getElementById('btn-copy');
+    btn.className = 'btn-copy copiado';
+    btn.textContent = '✓ Copiada';
+    setTimeout(function(){ btn.className='btn-copy'; btn.textContent='📋 Copiar'; }, 2000);
+  }).catch(function(){
+    alert('No se pudo copiar. Selecciona el texto manualmente.');
+  });
+}
+
+/* ── Util ── */
+function showMsg(elId, type, text) {
+  document.getElementById(elId).innerHTML = '<div class="f-msg '+type+'">'+esc(text)+'</div>';
+}
+
+// Close modals on overlay click
+document.getElementById('overlayForm').addEventListener('click', function(e){
+  if(e.target===this) cerrarForm();
+});
+document.getElementById('overlayReveal').addEventListener('click', function(e){
+  if(e.target===this) cerrarReveal();
+});
+document.addEventListener('keydown', function(e){
+  if(e.key==='Escape'){ cerrarForm(); cerrarReveal(); }
+});
+</script>
+</body>
+</html>

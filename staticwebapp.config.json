@@ -31,6 +31,10 @@
     {
       "route": "/admin-usuarios",
       "rewrite": "/admin-usuarios.html"
+    },
+    {
+      "route": "/boveda",
+      "rewrite": "/boveda.html"
     }
   ],
   "navigationFallback": {
